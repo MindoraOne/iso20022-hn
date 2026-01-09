@@ -25,7 +25,7 @@ jobs:
       - name: ❯ Get version number from setup.cfg
         id: set-version
         run: |
-          echo "::set-output name=version::$(python -c 'import configparser; cfg = configparser.ConfigParser(); cfg.read("setup.cfg"); print(cfg.get("metadata", "version"))')"
+          echo "version=$(python -c 'import configparser; cfg = configparser.ConfigParser(); cfg.read("setup.cfg"); print(cfg.get("metadata", "version"))')" >> $GITHUB_OUTPUT
 
   # This job runs unit tests using pytest
   pytest:
