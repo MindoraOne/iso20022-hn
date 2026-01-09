@@ -15,7 +15,7 @@
 
 """Universal data loader supporting multiple input sources."""
 
-from typing import Union, List, Dict, Any
+from typing import Any, Dict, List, Union
 
 from pain001.csv.load_csv_data import load_csv_data
 from pain001.csv.validate_csv_data import validate_csv_data
@@ -86,16 +86,18 @@ def _load_from_file(file_path: str) -> List[Dict[str, Any]]:
 
     This preserves the existing behavior for backward compatibility.
     """
-    if file_path.endswith('.csv'):
+    if file_path.endswith(".csv"):
         data = load_csv_data(file_path)
         if not validate_csv_data(data):
             raise ValueError(f"CSV data validation failed for {file_path}")
         return data
 
-    elif file_path.endswith('.db'):
-        data = load_db_data(file_path, table_name='pain001')
+    elif file_path.endswith(".db"):
+        data = load_db_data(file_path, table_name="pain001")
         if not validate_db_data(data):
-            raise ValueError(f"Database data validation failed for {file_path}")
+            raise ValueError(
+                f"Database data validation failed for {file_path}"
+            )
         return data
 
     else:

@@ -19,7 +19,7 @@ The XML content is pretty-formatted with proper indentation for better
 readability.
 """
 
-import xml.etree.ElementTree as et
+import xml.etree.ElementTree as et  # nosec B405 - Only used for tostring(), not parsing untrusted XML
 
 from defusedxml.minidom import parseString
 

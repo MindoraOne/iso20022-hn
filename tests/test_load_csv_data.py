@@ -501,17 +501,19 @@ class TestLoadCsvData(unittest.TestCase):
     def test_load_csv_io_error(self):
         """Test handling of IOError (permission denied)."""
         import tempfile
-        
+
         # Create a file with no read permissions
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.csv') as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", delete=False, suffix=".csv"
+        ) as f:
             temp_file = f.name
             f.write("header1,header2\n")
             f.write("value1,value2\n")
-        
+
         try:
             # Remove read permissions
             os.chmod(temp_file, 0o000)
-            
+
             # This should raise IOError/PermissionError
             with self.assertRaises((IOError, PermissionError)):
                 load_csv_data(temp_file)
@@ -526,14 +528,16 @@ class TestLoadCsvData(unittest.TestCase):
     def test_load_csv_unicode_decode_error(self):
         """Test handling of UnicodeDecodeError."""
         import tempfile
-        
+
         # Create a file with invalid UTF-8 bytes
-        with tempfile.NamedTemporaryFile(mode='wb', delete=False, suffix='.csv') as f:
+        with tempfile.NamedTemporaryFile(
+            mode="wb", delete=False, suffix=".csv"
+        ) as f:
             temp_file = f.name
             # Write invalid UTF-8 sequence
             f.write(b"header1,header2\n")
             f.write(b"value1,\xff\xfe\n")  # Invalid UTF-8
-        
+
         try:
             with self.assertRaises(UnicodeDecodeError):
                 load_csv_data(temp_file)

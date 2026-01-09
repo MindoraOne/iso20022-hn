@@ -36,9 +36,7 @@ class TestCoverageComplete:
         with patch.object(sys, "argv", ["pain001"]):
             with pytest.raises(SystemExit):
                 exec(
-                    open(
-                        "pain001/__main__.py"
-                    ).read(),
+                    open("pain001/__main__.py").read(),
                     {"__name__": "__main__"},
                 )
 
@@ -80,8 +78,9 @@ class TestCoverageComplete:
     def test_context_logger_with_existing_handlers(self):
         """Test context logger when handlers already exist."""
         # Create a fresh context instance for testing
-        from pain001.context.context import Context
         import logging
+
+        from pain001.context.context import Context
 
         # Reset the singleton for this test
         Context._instance = None
@@ -93,7 +92,9 @@ class TestCoverageComplete:
         ctx.logger.addHandler(handler)
 
         # Try to initialize - should raise exception because logger exists
-        with pytest.raises(Exception, match="Logger has already been initialized"):
+        with pytest.raises(
+            Exception, match="Logger has already been initialized"
+        ):
             ctx.init_logger()
 
     def test_process_files_with_failed_xml_generation(self):
@@ -289,7 +290,9 @@ class TestCoverageComplete:
         with tempfile.NamedTemporaryFile(
             mode="w", delete=False, suffix=".xml"
         ) as xml_file:
-            xml_file.write('<?xml version="1.0"?><root><child>test</child></root>')
+            xml_file.write(
+                '<?xml version="1.0"?><root><child>test</child></root>'
+            )
             xml_path = xml_file.name
 
         # Create a corrupt XSD file

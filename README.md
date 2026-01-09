@@ -6,6 +6,8 @@
 
 [![PyPI][pypi-badge]][03] [![PyPI Downloads][pypi-downloads-badge]][07] [![License][license-badge]][01] [![Codecov][codecov-badge]][06]
 
+> **Latest Release: v0.0.31** - Code quality and reliability improvements with enhanced type safety, better error handling, and critical bug fixes. [See what's new →](releases/v0.0.31.md)
+
 ## Overview
 
 **Pain001** is an open-source Python library that you can use to create **ISO
@@ -25,8 +27,10 @@ that initiates a customer payment.
 - **Mandatory Data Validation:** Ensures all payment files are ISO 20022-compliant before creation
 - **Multi-source Support:** Works with CSV files, SQLite databases, and Python data structures
 - **Automatic XSD Validation:** Validates generated XML against ISO 20022 schemas
-- **Comprehensive Testing:** 97% test coverage with 150 tests ensuring reliability
+- **Comprehensive Testing:** 97% test coverage with 150+ tests ensuring reliability
 - **Secure by Design:** Uses `defusedxml` to prevent XXE attacks and implements SQL injection protection
+- **Type-Safe:** Full type hints for better IDE support and type checking with mypy
+- **Robust Error Handling:** Specific exception types for precise error handling and debugging
 
 As of today, the library is designed to be compatible with the:
 

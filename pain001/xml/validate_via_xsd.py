@@ -1,7 +1,6 @@
-import xml.etree.ElementTree as et
-
 import xmlschema
 from defusedxml import ElementTree as defused_et
+from defusedxml.ElementTree import ParseError
 
 # Copyright (C) 2023-2026 Sebastien Rousseau.
 #
@@ -19,7 +18,7 @@ from defusedxml import ElementTree as defused_et
 # limitations under the License.
 
 
-def validate_via_xsd(xml_file_path, xsd_file_path):
+def validate_via_xsd(xml_file_path: str, xsd_file_path: str) -> bool:
     """
     Validates an XML file against an XSD schema.
 
@@ -34,21 +33,21 @@ def validate_via_xsd(xml_file_path, xsd_file_path):
     # Load XML file into an ElementTree object using defusedxml for security.
     try:
         xml_tree = defused_et.parse(xml_file_path)
-    except Exception as e:
+    except (ParseError, OSError, IOError) as e:
         print(f"Error parsing XML file: {e}")
         return False
 
     # Load XSD schema into an XMLSchema object.
     try:
         xsd = xmlschema.XMLSchema(xsd_file_path)
-    except Exception as e:
+    except (xmlschema.XMLSchemaException, ParseError, OSError, IOError) as e:
         print(f"Error loading XSD schema: {e}")
         return False
 
     # Validate XML file against XSD schema.
     try:
         is_valid = xsd.is_valid(xml_tree)
-    except Exception as e:
+    except xmlschema.XMLSchemaException as e:
         print(f"Error validating XML: {e}")
         return False
 

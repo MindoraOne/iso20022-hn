@@ -18,7 +18,7 @@ import os
 
 # Import the standard libraries
 import sys
-from typing import Union, List, Dict, Any
+from typing import Any, Dict, List, Union
 
 # Import the pain001 library functions
 from pain001.constants.constants import valid_xml_types

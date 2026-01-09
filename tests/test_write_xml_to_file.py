@@ -138,10 +138,10 @@ class TestWriteXmlToFile:
     def test_write_xml_to_nonexistent_directory(self):
         """Test writing XML to a directory that doesn't exist raises error."""
         root = et.Element("root")
-        
+
         # Use a path that doesn't exist
         nonexistent_path = "/nonexistent/directory/file.xml"
-        
+
         with pytest.raises(FileNotFoundError):
             write_xml_to_file(nonexistent_path, root)
 

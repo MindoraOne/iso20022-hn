@@ -15,11 +15,12 @@
 
 import csv
 import logging
+from typing import Any, Dict, List
 
 logging.basicConfig(level=logging.ERROR, format="%(levelname)s: %(message)s")
 
 
-def load_csv_data(file_path):
+def load_csv_data(file_path: str) -> List[Dict[str, Any]]:
     """Load CSV data from a file.
 
     Args:
@@ -34,7 +35,7 @@ def load_csv_data(file_path):
         UnicodeDecodeError: If there is an issue decoding the file's content.
         ValueError: If the CSV file is empty.
     """
-    data = []
+    data: List[Dict[str, Any]] = []
     try:
         with open(file_path, mode="r", encoding="utf-8") as file:
             csv_reader = csv.DictReader(file)

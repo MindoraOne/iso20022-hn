@@ -498,7 +498,7 @@ class TestGenerateXMLFunction(unittest.TestCase):
         """Set up test fixtures."""
         self.test_template_path = "tests/data/template.xml"
         self.test_xsd_path = "tests/data/template.xsd"
-        
+
         # Sample data for pain.001.001.03
         self.sample_data_v3 = [
             {
@@ -543,52 +543,59 @@ class TestGenerateXMLFunction(unittest.TestCase):
     def test_generate_xml_with_empty_data(self):
         """Test that generate_xml exits when data is empty."""
         from pain001.xml.generate_xml import generate_xml
-        
+
         with self.assertRaises(SystemExit) as cm:
-            generate_xml([], "pain.001.001.03", self.test_template_path, self.test_xsd_path)
-        
+            generate_xml(
+                [],
+                "pain.001.001.03",
+                self.test_template_path,
+                self.test_xsd_path,
+            )
+
         self.assertEqual(cm.exception.code, 1)
 
     def test_generate_xml_with_invalid_message_type(self):
         """Test that generate_xml exits with invalid message type."""
         from pain001.xml.generate_xml import generate_xml
-        
+
         with self.assertRaises(SystemExit) as cm:
             generate_xml(
                 self.sample_data_v3,
                 "invalid.type",
                 self.test_template_path,
-                self.test_xsd_path
+                self.test_xsd_path,
             )
-        
+
         self.assertEqual(cm.exception.code, 1)
 
     def test_generate_xml_pain_001_001_03(self):
         """Test generate_xml with pain.001.001.03 message type."""
-        from pain001.xml.generate_xml import generate_xml
         import os
-        
+
+        from pain001.xml.generate_xml import generate_xml
+
         # This should create an XML file
         generate_xml(
             self.sample_data_v3,
             "pain.001.001.03",
             self.test_template_path,
-            self.test_xsd_path
+            self.test_xsd_path,
         )
-        
+
         # Check that the output file was created
         output_path = "tests/data/pain.001.001.03.xml"
         self.assertTrue(os.path.exists(output_path))
-        
+
         # Clean up
         if os.path.exists(output_path):
             os.remove(output_path)
 
     def test_generate_xml_pain_001_001_04(self):
         """Test generate_xml with pain.001.001.04 message type."""
-        from pain001.xml.generate_xml import generate_xml
         import os
-        
+
+        from pain001.xml.generate_xml import generate_xml
+
         # Prepare data for v4
         data_v4 = [
             {
@@ -630,25 +637,26 @@ class TestGenerateXMLFunction(unittest.TestCase):
                 "payment_end_to_end_id": "E2E123",
             }
         ]
-        
+
         generate_xml(
             data_v4,
             "pain.001.001.04",
             self.test_template_path,
-            self.test_xsd_path
+            self.test_xsd_path,
         )
-        
+
         output_path = "tests/data/pain.001.001.04.xml"
         self.assertTrue(os.path.exists(output_path))
-        
+
         if os.path.exists(output_path):
             os.remove(output_path)
 
     def test_generate_xml_pain_001_001_05(self):
         """Test generate_xml with pain.001.001.05 message type."""
-        from pain001.xml.generate_xml import generate_xml
         import os
-        
+
+        from pain001.xml.generate_xml import generate_xml
+
         data_v5 = [
             {
                 "id": "1",
@@ -694,25 +702,26 @@ class TestGenerateXMLFunction(unittest.TestCase):
                 "reference_date": "2023-03-10",
             }
         ]
-        
+
         generate_xml(
             data_v5,
             "pain.001.001.05",
             self.test_template_path,
-            self.test_xsd_path
+            self.test_xsd_path,
         )
-        
+
         output_path = "tests/data/pain.001.001.05.xml"
         self.assertTrue(os.path.exists(output_path))
-        
+
         if os.path.exists(output_path):
             os.remove(output_path)
 
     def test_generate_xml_pain_001_001_06(self):
         """Test generate_xml with pain.001.001.06 message type."""
-        from pain001.xml.generate_xml import generate_xml
         import os
-        
+
+        from pain001.xml.generate_xml import generate_xml
+
         data_v6 = [
             {
                 "id": "1",
@@ -761,25 +770,26 @@ class TestGenerateXMLFunction(unittest.TestCase):
                 "remittance_information": "Payment for invoice",
             }
         ]
-        
+
         generate_xml(
             data_v6,
             "pain.001.001.06",
             self.test_template_path,
-            self.test_xsd_path
+            self.test_xsd_path,
         )
-        
+
         output_path = "tests/data/pain.001.001.06.xml"
         self.assertTrue(os.path.exists(output_path))
-        
+
         if os.path.exists(output_path):
             os.remove(output_path)
 
     def test_generate_xml_pain_001_001_07(self):
         """Test generate_xml with pain.001.001.07 message type."""
-        from pain001.xml.generate_xml import generate_xml
         import os
-        
+
+        from pain001.xml.generate_xml import generate_xml
+
         data_v7 = [
             {
                 "id": "1",
@@ -828,25 +838,26 @@ class TestGenerateXMLFunction(unittest.TestCase):
                 "remittance_information": "Payment for invoice",
             }
         ]
-        
+
         generate_xml(
             data_v7,
             "pain.001.001.07",
             self.test_template_path,
-            self.test_xsd_path
+            self.test_xsd_path,
         )
-        
+
         output_path = "tests/data/pain.001.001.07.xml"
         self.assertTrue(os.path.exists(output_path))
-        
+
         if os.path.exists(output_path):
             os.remove(output_path)
 
     def test_generate_xml_pain_001_001_08(self):
         """Test generate_xml with pain.001.001.08 message type."""
-        from pain001.xml.generate_xml import generate_xml
         import os
-        
+
+        from pain001.xml.generate_xml import generate_xml
+
         data_v8 = [
             {
                 "id": "1",
@@ -895,25 +906,26 @@ class TestGenerateXMLFunction(unittest.TestCase):
                 "remittance_information": "Payment for invoice",
             }
         ]
-        
+
         generate_xml(
             data_v8,
             "pain.001.001.08",
             self.test_template_path,
-            self.test_xsd_path
+            self.test_xsd_path,
         )
-        
+
         output_path = "tests/data/pain.001.001.08.xml"
         self.assertTrue(os.path.exists(output_path))
-        
+
         if os.path.exists(output_path):
             os.remove(output_path)
 
     def test_generate_xml_pain_001_001_09(self):
         """Test generate_xml with pain.001.001.09 message type."""
-        from pain001.xml.generate_xml import generate_xml
         import os
-        
+
+        from pain001.xml.generate_xml import generate_xml
+
         data_v9 = [
             {
                 "id": "1",
@@ -962,52 +974,55 @@ class TestGenerateXMLFunction(unittest.TestCase):
                 "remittance_information": "Payment for invoice",
             }
         ]
-        
+
         generate_xml(
             data_v9,
             "pain.001.001.09",
             self.test_template_path,
-            self.test_xsd_path
+            self.test_xsd_path,
         )
-        
+
         output_path = "tests/data/pain.001.001.09.xml"
         self.assertTrue(os.path.exists(output_path))
-        
+
         if os.path.exists(output_path):
             os.remove(output_path)
 
     def test_generate_xml_unsupported_version(self):
         """Test generate_xml with unsupported version in supported format."""
         from pain001.xml.generate_xml import generate_xml
-        
+
         with self.assertRaises(SystemExit) as cm:
             generate_xml(
                 self.sample_data_v3,
                 "pain.001.001.10",  # Unsupported but similar format
                 self.test_template_path,
-                self.test_xsd_path
+                self.test_xsd_path,
             )
-        
+
         self.assertEqual(cm.exception.code, 1)
 
     def test_generate_xml_invalid_xsd_validation(self):
         """Test generate_xml with invalid XML that fails XSD validation."""
-        from pain001.xml.generate_xml import generate_xml
-        from unittest.mock import patch
         import os
-        
+        from unittest.mock import patch
+
+        from pain001.xml.generate_xml import generate_xml
+
         # Use pain.001.001.03 with valid data, but mock XSD validation to fail
-        with patch('pain001.xml.generate_xml.validate_via_xsd', return_value=False):
+        with patch(
+            "pain001.xml.generate_xml.validate_via_xsd", return_value=False
+        ):
             with self.assertRaises(SystemExit) as cm:
                 generate_xml(
                     self.sample_data_v3,
                     "pain.001.001.03",
                     self.test_template_path,
-                    self.test_xsd_path
+                    self.test_xsd_path,
                 )
-            
+
             self.assertEqual(cm.exception.code, 1)
-            
+
             # Clean up if file was created
             output_path = "tests/data/pain.001.001.03.xml"
             if os.path.exists(output_path):
@@ -1015,14 +1030,14 @@ class TestGenerateXMLFunction(unittest.TestCase):
 
     def test_generate_xml_message_type_in_generators_but_not_handled(self):
         """Test generate_xml with message type that's theoretically in xml_generators but not explicitly handled.
-        
+
         Note: Lines 532-538 in generate_xml.py represent defensive programming code.
         They're inside the xml_generators dictionary check but after all elif conditions.
         With the current code structure, these lines are unreachable because all message
         types in xml_generators (pain.001.001.03 through .09) are explicitly handled
         by the elif chain above. This else block would only execute if someone added
         a new message type to xml_generators without adding a corresponding elif.
-        
+
         This test documents that the code path exists but acknowledges it's defensive/dead code.
         """
         # This is defensive dead code - all message types in xml_generators are handled

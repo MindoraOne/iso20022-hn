@@ -153,7 +153,9 @@ class TestGenerateXmlAllVersions:
         with tempfile.NamedTemporaryFile(
             mode="w", delete=False, suffix=".xml"
         ) as f:
-            f.write('<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.03"></Document>')
+            f.write(
+                '<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.03"></Document>'
+            )
             return f.name
 
     def test_generate_xml_pain_001_001_04(

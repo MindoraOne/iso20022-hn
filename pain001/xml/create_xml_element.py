@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import xml.etree.ElementTree as et
+import xml.etree.ElementTree as et  # nosec B405 - Only used for element creation, not parsing untrusted XML
 
 
 def create_xml_element(parent, tag, text=None, attributes=None):

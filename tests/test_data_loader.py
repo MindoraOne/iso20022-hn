@@ -15,10 +15,10 @@
 
 """Tests for the unified data loader."""
 
-import os
-import tempfile
 import csv
+import os
 import sqlite3
+import tempfile
 
 import pytest
 
@@ -92,7 +92,9 @@ class TestDataLoader:
         """Create temporary CSV file."""
         csv_path = tmp_path / "test_data.csv"
         with open(csv_path, "w", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=sample_payment_data[0].keys())
+            writer = csv.DictWriter(
+                f, fieldnames=sample_payment_data[0].keys()
+            )
             writer.writeheader()
             writer.writerows(sample_payment_data)
         return str(csv_path)
@@ -103,18 +105,18 @@ class TestDataLoader:
         db_path = tmp_path / "test_data.db"
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
-        
+
         # Create table
         fields = list(sample_payment_data[0].keys())
         create_sql = f"CREATE TABLE pain001 ({', '.join([f'{k} TEXT' for k in fields])})"
         cursor.execute(create_sql)
-        
+
         # Insert data
         placeholders = ", ".join(["?" for _ in fields])
         insert_sql = f"INSERT INTO pain001 VALUES ({placeholders})"
         for row in sample_payment_data:
             cursor.execute(insert_sql, list(row.values()))
-        
+
         conn.commit()
         conn.close()
         return str(db_path)
@@ -124,7 +126,7 @@ class TestDataLoader:
     def test_load_from_csv_file(self, csv_file):
         """Test loading from CSV file (existing functionality)."""
         data = load_payment_data(csv_file)
-        
+
         assert isinstance(data, list)
         assert len(data) == 1
         assert data[0]["id"] == "1"
@@ -133,7 +135,7 @@ class TestDataLoader:
     def test_load_from_sqlite_file(self, sqlite_file):
         """Test loading from SQLite file (existing functionality)."""
         data = load_payment_data(sqlite_file)
-        
+
         assert isinstance(data, list)
         assert len(data) == 1
         assert data[0]["id"] == "1"
@@ -154,7 +156,7 @@ class TestDataLoader:
     def test_load_from_list_of_dicts(self, sample_payment_data):
         """Test loading from Python list of dictionaries (new feature)."""
         data = load_payment_data(sample_payment_data)
-        
+
         assert isinstance(data, list)
         assert len(data) == 1
         assert data[0]["id"] == "1"
@@ -165,9 +167,9 @@ class TestDataLoader:
         # Use first item from sample_payment_data fixture (which is a list)
         single_payment = sample_payment_data[0].copy()
         single_payment["id"] = "2"  # Change ID to distinguish from fixture
-        
+
         data = load_payment_data(single_payment)
-        
+
         assert isinstance(data, list)
         assert len(data) == 1
         assert data[0]["id"] == "2"
@@ -184,9 +186,9 @@ class TestDataLoader:
             payment["payment_id"] = f"PMT{i:03d}"
             payment["initiator_name"] = f"Corp {i}"
             payments.append(payment)
-        
+
         data = load_payment_data(payments)
-        
+
         assert isinstance(data, list)
         assert len(data) == 5
         assert data[0]["id"] == "1"
@@ -205,15 +207,17 @@ class TestDataLoader:
     def test_list_with_non_dict_raises_error(self):
         """Test that list with non-dict items raises ValueError."""
         invalid_data = [{"id": "MSG001"}, "not a dict", {"id": "MSG003"}]
-        
-        with pytest.raises(ValueError, match="All items in data list must be dictionaries"):
+
+        with pytest.raises(
+            ValueError, match="All items in data list must be dictionaries"
+        ):
             load_payment_data(invalid_data)
 
     def test_unsupported_type_raises_error(self):
         """Test that unsupported data types raise ValueError."""
         with pytest.raises(ValueError, match="Unsupported data source type"):
             load_payment_data(12345)
-        
+
         with pytest.raises(ValueError, match="Unsupported data source type"):
             load_payment_data(None)
 
@@ -223,18 +227,20 @@ class TestDataLoader:
         """Test that CSV and dict sources produce equivalent data."""
         data_from_csv = load_payment_data(csv_file)
         data_from_dict = load_payment_data(sample_payment_data)
-        
+
         # Compare values (ignoring potential type differences)
         assert len(data_from_csv) == len(data_from_dict)
         for csv_row, dict_row in zip(data_from_csv, data_from_dict):
             for key in csv_row.keys():
                 assert str(csv_row[key]) == str(dict_row[key])
 
-    def test_data_equivalence_sqlite_vs_dict(self, sqlite_file, sample_payment_data):
+    def test_data_equivalence_sqlite_vs_dict(
+        self, sqlite_file, sample_payment_data
+    ):
         """Test that SQLite and dict sources produce equivalent data."""
         data_from_db = load_payment_data(sqlite_file)
         data_from_dict = load_payment_data(sample_payment_data)
-        
+
         # Compare values
         assert len(data_from_db) == len(data_from_dict)
         for db_row, dict_row in zip(data_from_db, data_from_dict):

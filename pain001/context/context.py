@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import logging
+from typing import Optional
 
 
 class Context:
@@ -28,13 +29,10 @@ class Context:
         set_name(self, name): Sets the name of the logger.
     """
 
-    instance = None
-    name = ""
-    log_level = logging.INFO
-    logger = None
+    instance: Optional["Context"] = None
 
     @staticmethod
-    def get_instance():
+    def get_instance() -> "Context":
         """Returns the singleton instance of the class.
 
         Returns:
@@ -42,9 +40,11 @@ class Context:
         """
         if Context.instance is None:
             Context()
+        if Context.instance is None:
+            raise RuntimeError("Failed to initialize Context singleton")
         return Context.instance
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initializes the class and creates a logger.
 
         Raises:
@@ -54,11 +54,13 @@ class Context:
             raise Exception("This class is a singleton!")
         else:
             Context.instance = self
-            self.logger = logging.getLogger(self.name)
+            self.name: str = ""
+            self.log_level: int = logging.INFO
+            self.logger: logging.Logger = logging.getLogger(self.name)
             self.logger.setLevel(self.log_level)
             self.logger.info("Context initialized")
 
-    def set_name(self, name):
+    def set_name(self, name: str) -> None:
         """Sets the name of the logger.
 
         Args:
@@ -66,7 +68,7 @@ class Context:
         """
         self.name = name
 
-    def set_log_level(self, log_level):
+    def set_log_level(self, log_level) -> None:
         """Sets the log level of the logger.
 
         Args:
@@ -100,7 +102,7 @@ class Context:
         if self.logger:
             self.logger.setLevel(self.log_level)
 
-    def init_logger(self):
+    def init_logger(self) -> None:
         """Initializes the logger.
 
         Raises:
@@ -120,7 +122,7 @@ class Context:
             self.logger.addHandler(console_handler)
         self.logger.info("Logging initialized")
 
-    def get_logger(self):
+    def get_logger(self) -> logging.Logger:
         """Returns the logger.
 
         Returns:

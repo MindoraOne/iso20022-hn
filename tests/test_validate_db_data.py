@@ -85,7 +85,7 @@ class TestValidateDbData(unittest.TestCase):
         invalid_data[0].pop("id")
         validate_db_data(invalid_data)
         mock_logging_error.assert_called_once_with(
-            "Error: Missing value for column '%s' in row: %s",
+            "Error: Missing value for required column '%s' in row: %s",
             "id",
             invalid_data[0],
         )

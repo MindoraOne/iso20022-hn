@@ -29,6 +29,17 @@ def test_sanitize_table_name():
     assert sanitize_table_name("table!@#name") == "table___name"
 
 
+def test_sanitize_table_name_empty():
+    """Test that sanitize_table_name raises ValueError for empty string."""
+    with pytest.raises(ValueError, match="Table name cannot be empty"):
+        sanitize_table_name("")
+
+
+def test_sanitize_table_name_all_special_chars():
+    """Test table name with all special characters."""
+    assert sanitize_table_name("!@#$%") == "table______"
+
+
 # Test load_db_data function
 def test_load_db_data(tmp_path):
     # Create a temporary SQLite database

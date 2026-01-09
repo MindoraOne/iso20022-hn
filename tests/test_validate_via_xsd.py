@@ -102,11 +102,11 @@ class TestValidateViaXsd(unittest.TestCase):
         Test case for handling malformed XML file.
         """
         malformed_xml = "malformed_test.xml"
-        
+
         # Create malformed XML
         with open(malformed_xml, "w") as f:
             f.write("<root><unclosed>")
-        
+
         try:
             result = validate_via_xsd(malformed_xml, self.xsd_file)
             assert result is False
@@ -119,11 +119,11 @@ class TestValidateViaXsd(unittest.TestCase):
         Test case for handling invalid XSD schema file.
         """
         invalid_xsd = "invalid_schema.xsd"
-        
+
         # Create invalid XSD
         with open(invalid_xsd, "w") as f:
             f.write("<invalid>schema</invalid>")
-        
+
         try:
             # xmlschema will raise an exception for invalid XSD
             # which our function should catch and return False
@@ -137,21 +137,25 @@ class TestValidateViaXsd(unittest.TestCase):
         finally:
             if os.path.exists(invalid_xsd):
                 os.remove(invalid_xsd)
+
     def test_validation_exception_during_validation(self):
         """
         Test case for exception during XML validation process.
         """
-        from unittest.mock import patch, MagicMock
-        
+        from unittest.mock import MagicMock, patch
+
+        import xmlschema
+
         # Create a valid XML and XSD for parsing
         valid_xml = "test_valid.xml"
         valid_xsd = "test_valid.xsd"
-        
+
         with open(valid_xml, "w") as f:
             f.write("<root><element>data</element></root>")
-        
+
         with open(valid_xsd, "w") as f:
-            f.write("""
+            f.write(
+                """
                 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
                     <xs:element name="root">
                         <xs:complexType>
@@ -161,15 +165,19 @@ class TestValidateViaXsd(unittest.TestCase):
                         </xs:complexType>
                     </xs:element>
                 </xs:schema>
-            """)
-        
+            """
+            )
+
         try:
-            # Mock xsd.is_valid to raise an exception during validation
-            with patch('xmlschema.XMLSchema') as mock_schema_class:
+            # Mock xsd.is_valid to raise an XMLSchemaException during validation
+            with patch("xmlschema.XMLSchema") as mock_schema_class:
                 mock_xsd = MagicMock()
-                mock_xsd.is_valid.side_effect = Exception("Validation error")
+                # Use the actual exception type that our code catches
+                mock_xsd.is_valid.side_effect = xmlschema.XMLSchemaException(
+                    "Validation error"
+                )
                 mock_schema_class.return_value = mock_xsd
-                
+
                 result = validate_via_xsd(valid_xml, valid_xsd)
                 # Should return False when validation raises exception
                 assert result is False

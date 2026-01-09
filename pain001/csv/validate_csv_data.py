@@ -41,9 +41,10 @@
 
 
 import datetime
+from typing import Any, Dict, List
 
 
-def validate_csv_data(data):
+def validate_csv_data(data: List[Dict[str, Any]]) -> bool:
     """Validate the CSV data before processing it.
 
     Args:
