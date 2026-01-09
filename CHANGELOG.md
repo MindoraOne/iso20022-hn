@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.28] - 2026-01-09
+
+### Security
+
+- **Critical: Fixed urllib3 decompression bomb vulnerability** - Updated urllib3 from 2.6.0 to 2.6.3 to fix CVE-2026-21441 (CVSS 8.9 High) where decompression-bomb safeguards were bypassed when HTTP redirects were followed
+- **Critical: Fixed Jinja2 sandbox escape vulnerabilities** - Updated jinja2 from 3.1.4 to 3.1.6 to fix multiple security issues:
+  - GHSA-cpwx-vrp4-4pq7: The `|attr` filter no longer bypasses the environment's attribute lookup
+  - GHSA-q2x7-8rv6-6q7h: Sandboxed environment properly handles indirect calls to `str.format`
+  - GHSA-gmj6-6f8f-6699: Template names are properly escaped before formatting into error messages
+- **Updated setuptools** - Updated from 70.0.0 to 78.1.1 with security fixes and stability improvements
+
+### Changed
+
+- **GitHub Actions workflow** - Updated pypa/gh-action-pypi-publish from 1.3.1 to 1.13.0 with security fixes (GHSA-vxmw-7h4f-hqxh)
+- **CI/CD process** - Removed automatic PyPI publishing and GitHub release creation from CI to prevent conflicts with manual release processes
+- **Project organization** - Moved release notes to `releases/` folder with simplified naming (v0.0.26.md, v0.0.27.md)
+
 ## [0.0.27] - 2026-01-09
 
 ### Fixed
