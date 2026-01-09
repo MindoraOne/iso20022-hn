@@ -25,6 +25,8 @@ returns the root element of the modified XML tree.
 
 # Import ElementTree and Jinja2
 import xml.etree.ElementTree as et
+
+from defusedxml import ElementTree as defused_et
 from jinja2 import Environment, FileSystemLoader
 
 
@@ -100,9 +102,8 @@ def create_xml_v7(root, data):
     xml_content = template.render(**xml_data)
 
     # Parse rendered content
-    rendered_xml = et.fromstring(xml_content)
+    rendered_xml = defused_et.fromstring(xml_content)
 
-    # Append rendered XML children
     for child in rendered_xml:
         cstmr_cdt_trf_initn_element.append(child)
 

@@ -1,4 +1,7 @@
+import xml.etree.ElementTree as et
+
 import xmlschema
+from defusedxml import ElementTree as defused_et
 
 # Copyright (C) 2023-2024 Sebastien Rousseau.
 #
@@ -15,8 +18,6 @@ import xmlschema
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import xml.etree.ElementTree as et
-
 
 def validate_via_xsd(xml_file_path, xsd_file_path):
     """
@@ -30,9 +31,9 @@ def validate_via_xsd(xml_file_path, xsd_file_path):
         bool: True if the XML file is valid, False otherwise.
     """
 
-    # Load XML file into an ElementTree object.
+    # Load XML file into an ElementTree object using defusedxml for security.
     try:
-        xml_tree = et.parse(xml_file_path)
+        xml_tree = defused_et.parse(xml_file_path)
     except Exception as e:
         print(f"Error: {e}")
         return False

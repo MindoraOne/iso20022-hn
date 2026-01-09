@@ -16,6 +16,8 @@
 
 import unittest
 import xml.etree.ElementTree as ET
+
+from pain001.xml.create_common_elements import create_common_elements
 from pain001.xml.create_xml_v3 import create_xml_v3
 from pain001.xml.create_xml_v4 import create_xml_v4
 from pain001.xml.create_xml_v5 import create_xml_v5
@@ -23,9 +25,6 @@ from pain001.xml.create_xml_v6 import create_xml_v6
 from pain001.xml.create_xml_v7 import create_xml_v7
 from pain001.xml.create_xml_v8 import create_xml_v8
 from pain001.xml.create_xml_v9 import create_xml_v9
-from pain001.xml.create_common_elements import (
-    create_common_elements,
-)
 
 
 class TestXMLCreation(unittest.TestCase):

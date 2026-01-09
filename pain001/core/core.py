@@ -14,9 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+
 # Import the standard libraries
 import sys
-import os
 
 # Import the pain001 library functions
 from pain001.constants.constants import valid_xml_types
@@ -25,8 +26,8 @@ from pain001.csv.load_csv_data import load_csv_data
 from pain001.csv.validate_csv_data import validate_csv_data
 from pain001.db.load_db_data import load_db_data
 from pain001.db.validate_db_data import validate_db_data
-from pain001.xml.register_namespaces import register_namespaces
 from pain001.xml.generate_xml import generate_xml
+from pain001.xml.register_namespaces import register_namespaces
 
 
 def process_files(

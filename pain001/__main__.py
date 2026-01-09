@@ -1,13 +1,15 @@
 # Other imports remain the same
-import click
 import os
 import sys
+
+import click
+from rich import box
+from rich.console import Console
+from rich.table import Table
+
 from pain001.constants.constants import valid_xml_types
 from pain001.context.context import Context
 from pain001.core.core import process_files
-from rich.console import Console
-from rich.table import Table
-from rich import box
 
 console = Console()
 

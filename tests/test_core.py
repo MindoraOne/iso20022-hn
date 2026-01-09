@@ -16,8 +16,9 @@
 
 import os
 import unittest
-from unittest.mock import patch
 from io import StringIO
+from unittest.mock import patch
+
 from pain001.core.core import process_files
 
 

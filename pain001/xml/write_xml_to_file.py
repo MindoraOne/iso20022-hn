@@ -20,6 +20,7 @@ readability.
 """
 
 import xml.etree.ElementTree as et
+
 from defusedxml.minidom import parseString
 
 

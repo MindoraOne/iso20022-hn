@@ -14,8 +14,9 @@
 # limitations under the License.
 
 
-import unittest
 import os
+import unittest
+
 from pain001.xml.validate_via_xsd import validate_via_xsd
 
 # Test if the XML file is validated correctly against the XSD schema

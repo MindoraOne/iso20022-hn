@@ -21,9 +21,7 @@
 import sys
 
 from jinja2 import Environment, FileSystemLoader
-from pain001.xml.generate_updated_xml_file_path import (
-    generate_updated_xml_file_path,
-)
+
 from pain001.xml.create_xml_v3 import create_xml_v3
 from pain001.xml.create_xml_v4 import create_xml_v4
 from pain001.xml.create_xml_v5 import create_xml_v5
@@ -31,6 +29,9 @@ from pain001.xml.create_xml_v6 import create_xml_v6
 from pain001.xml.create_xml_v7 import create_xml_v7
 from pain001.xml.create_xml_v8 import create_xml_v8
 from pain001.xml.create_xml_v9 import create_xml_v9
+from pain001.xml.generate_updated_xml_file_path import (
+    generate_updated_xml_file_path,
+)
 from pain001.xml.validate_via_xsd import validate_via_xsd
 
 

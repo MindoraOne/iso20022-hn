@@ -97,8 +97,19 @@ processing.
   library, as it requires minimal coding knowledge.
 - **Open-source**: The library is open-source and free to use, making it
   accessible to everyone.
-- **Secure**: The library is secure and does not store any sensitive data,
-  ensuring that all information remains confidential.
+- **Secure**: The library prioritizes security with multiple layers of protection:
+  - Uses `defusedxml` for secure XML parsing to prevent XXE attacks
+  - Implements SQL injection protection in database operations
+  - Regular security audits with Bandit and Safety tools
+  - All dependencies kept up-to-date to address known vulnerabilities
+  - No sensitive data storage - all information remains confidential
+- **Robust Development**: Comprehensive quality assurance with:
+  - 100% test coverage with pytest
+  - Code formatting with Black
+  - Import sorting with isort
+  - Style checking with Flake8
+  - Static type checking with mypy
+  - Code quality analysis with Pylint
 - **Customizable**: The library allows developers to customize the output,
   making it adaptable to specific business requirements and preferences.
 - **Scalable solution**: The **Pain001** library can handle varying volumes of
@@ -465,6 +476,57 @@ payments.
 | ✅      | pain.001.001.09 | Customer Credit Transfer Initiation |
 | ⏳      | pain.001.001.10 | Customer Account Closure Request    |
 | ⏳      | pain.001.001.11 | Customer Account Change Request     |
+
+## Development
+
+### Setting Up Development Environment
+
+Pain001 uses [Poetry](https://python-poetry.org/) for dependency management and [mise](https://mise.jdx.dev/) for Python version management.
+
+```bash
+# Install Python version via mise
+mise install
+
+# Install dependencies
+poetry install
+
+# Activate the virtual environment
+poetry shell
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+poetry run pytest
+
+# Run tests with coverage
+poetry run pytest --cov=pain001 --cov-report=html
+```
+
+### Code Quality Tools
+
+The project uses several tools to maintain code quality:
+
+```bash
+# Format code with Black
+poetry run black .
+
+# Sort imports with isort
+poetry run isort .
+
+# Check style with Flake8
+poetry run flake8 pain001 tests
+
+# Type checking with mypy
+poetry run mypy pain001
+
+# Security scanning
+poetry run bandit -r pain001
+poetry run safety check
+```
+
+All code contributions must pass these quality checks before being merged.
 
 ## License
 

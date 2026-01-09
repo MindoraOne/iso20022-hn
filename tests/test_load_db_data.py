@@ -14,9 +14,11 @@
 # limitations under the License.
 
 
-import pytest
 import sqlite3
-from pain001.db.load_db_data import sanitize_table_name, load_db_data
+
+import pytest
+
+from pain001.db.load_db_data import load_db_data, sanitize_table_name
 
 
 # Test sanitize_table_name function

@@ -14,8 +14,9 @@
 # limitations under the License.
 
 
-from pain001.xml.create_root_element import create_root_element
 import xml.etree.ElementTree as ET
+
+from pain001.xml.create_root_element import create_root_element
 
 # Test if the root element is created correctly
 

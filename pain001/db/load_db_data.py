@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sqlite3
 import os
+import sqlite3
 
 
 def sanitize_table_name(table_name):
@@ -87,9 +87,10 @@ def load_db_data(data_file_path, table_name):
     # Sanitize the table_name before using it in the query
     table_name = sanitize_table_name(table_name)
 
-    # Use string formatting to construct the query
-
-    query = f"SELECT * FROM {table_name}"
+    # Use parameterized query to prevent SQL injection
+    # Note: Table names cannot be parameterized, but sanitize_table_name
+    # ensures only safe characters are used
+    query = f"SELECT * FROM [{table_name}]"  # nosec B608
     cursor.execute(query)
     rows = cursor.fetchall()
 

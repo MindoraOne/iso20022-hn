@@ -15,14 +15,15 @@
 # limitations under the License.
 
 from pathlib import Path
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup
 
 this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
 
 setup(
     name="pain001",
-    version="0.0.25",
+    version="0.0.26",
     description="Pain001, A Python Library for Automating ISO 20022-Compliant Payment Files Using CSV Or SQLite Data Files.",
     long_description=long_description,
     long_description_content_type="text/markdown",
