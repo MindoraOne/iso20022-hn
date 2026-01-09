@@ -249,8 +249,8 @@ class TestProcessFiles(unittest.TestCase):
 
     def test_valid_sqlite_data(self):
         with (
-            patch("pain001.core.core.load_db_data", return_value=[{}]),
-            patch("pain001.core.core.validate_db_data", return_value=True),
+            patch("pain001.data.loader.load_db_data", return_value=[{}]),
+            patch("pain001.data.loader.validate_db_data", return_value=True),
             patch("pain001.core.core.generate_xml") as mock_generate_xml,
         ):
             process_files(
@@ -263,8 +263,8 @@ class TestProcessFiles(unittest.TestCase):
 
     def test_invalid_sqlite_data(self):
         with (
-            patch("pain001.core.core.load_db_data", return_value=[{}]),
-            patch("pain001.core.core.validate_db_data", return_value=False),
+            patch("pain001.data.loader.load_db_data", return_value=[{}]),
+            patch("pain001.data.loader.validate_db_data", return_value=False),
         ):
             with self.assertRaises(ValueError):
                 process_files(
@@ -284,7 +284,7 @@ class TestProcessFiles(unittest.TestCase):
                     self.unsupported_file_path,
                 )
         self.assertIn(
-            "Error: Unsupported data file type.",
+            "Unsupported file type",
             log.output[0],
         )
 

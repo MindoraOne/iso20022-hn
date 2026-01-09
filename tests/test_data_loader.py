@@ -1,0 +1,242 @@
+# Copyright (C) 2023-2026 Sebastien Rousseau.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""Tests for the unified data loader."""
+
+import os
+import tempfile
+import csv
+import sqlite3
+
+import pytest
+
+from pain001.data.loader import load_payment_data
+
+
+class TestDataLoader:
+    """Test the universal data loader with various input sources."""
+
+    @pytest.fixture
+    def sample_payment_data(self):
+        """Sample payment data for testing with all required fields."""
+        return [
+            {
+                "id": "1",
+                "date": "2026-01-09T10:00:00.000Z",
+                "nb_of_txs": "1",
+                "ctrl_sum": "1000.00",
+                "initiator_name": "Test Corp",
+                "initiator_street_name": "Test Street",
+                "initiator_building_number": "1",
+                "initiator_postal_code": "12345",
+                "initiator_town_name": "Test Town",
+                "initiator_country_code": "DE",
+                "payment_information_id": "PMT001",
+                "payment_method": "TRF",
+                "batch_booking": "true",
+                "requested_execution_date": "2026-01-10T10:00:00.000Z",
+                "debtor_name": "Debtor Corp",
+                "debtor_street_name": "Debtor Street",
+                "debtor_building_number": "2",
+                "debtor_postal_code": "67890",
+                "debtor_town_name": "Debtor Town",
+                "debtor_country_code": "DE",
+                "debtor_account_IBAN": "DE89370400440532013000",
+                "debtor_agent_BIC": "BANKDEFFXXX",
+                "charge_bearer": "SLEV",
+                "payment_id": "TXN001",
+                "payment_amount": "1000.00",
+                "currency": "EUR",
+                "payment_currency": "EUR",
+                "creditor_agent_BIC": "SPUEDE2UXXX",
+                "creditor_name": "Creditor Ltd",
+                "creditor_street_name": "Creditor Street",
+                "creditor_building_number": "3",
+                "creditor_postal_code": "11223",
+                "creditor_town_name": "Creditor Town",
+                "creditor_country_code": "DE",
+                "creditor_account_IBAN": "DE68210501700024690959",
+                "purpose_code": "OTHR",
+                "reference_number": "INV-2026-001",
+                "reference_date": "2026-01-08T10:00:00.000Z",
+                "service_level_code": "SEPA",
+                "forwarding_agent_BIC": "SPUEDE2UXXX",
+                "remittance_information": "Invoice Payment",
+                "charge_account_IBAN": "DE89370400440532013000",
+                "end_to_end_id": "TXN001",
+                "payment_instruction_id": "PMT001",  # For SQLite validation
+                "instruction_id": "INSTR001",  # For SQLite validation
+                # Optional fields for DB validation
+                "category_purpose": "",
+                "remittance_info_unstructured": "",
+                "remittance_info_structured": "",
+                "addtl_end_to_end_id": "",
+                "payment_info_structured": "",
+            }
+        ]
+
+    @pytest.fixture
+    def csv_file(self, sample_payment_data, tmp_path):
+        """Create temporary CSV file."""
+        csv_path = tmp_path / "test_data.csv"
+        with open(csv_path, "w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=sample_payment_data[0].keys())
+            writer.writeheader()
+            writer.writerows(sample_payment_data)
+        return str(csv_path)
+
+    @pytest.fixture
+    def sqlite_file(self, sample_payment_data, tmp_path):
+        """Create temporary SQLite file."""
+        db_path = tmp_path / "test_data.db"
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        # Create table
+        fields = list(sample_payment_data[0].keys())
+        create_sql = f"CREATE TABLE pain001 ({', '.join([f'{k} TEXT' for k in fields])})"
+        cursor.execute(create_sql)
+        
+        # Insert data
+        placeholders = ", ".join(["?" for _ in fields])
+        insert_sql = f"INSERT INTO pain001 VALUES ({placeholders})"
+        for row in sample_payment_data:
+            cursor.execute(insert_sql, list(row.values()))
+        
+        conn.commit()
+        conn.close()
+        return str(db_path)
+
+    # ========== BACKWARD COMPATIBILITY TESTS ==========
+
+    def test_load_from_csv_file(self, csv_file):
+        """Test loading from CSV file (existing functionality)."""
+        data = load_payment_data(csv_file)
+        
+        assert isinstance(data, list)
+        assert len(data) == 1
+        assert data[0]["id"] == "1"
+        assert data[0]["initiator_name"] == "Test Corp"
+
+    def test_load_from_sqlite_file(self, sqlite_file):
+        """Test loading from SQLite file (existing functionality)."""
+        data = load_payment_data(sqlite_file)
+        
+        assert isinstance(data, list)
+        assert len(data) == 1
+        assert data[0]["id"] == "1"
+        assert data[0]["initiator_name"] == "Test Corp"
+
+    def test_file_not_found_error(self):
+        """Test that FileNotFoundError is raised for missing files."""
+        with pytest.raises(FileNotFoundError):
+            load_payment_data("/nonexistent/path/data.csv")
+
+    def test_unsupported_file_type(self):
+        """Test that ValueError is raised for unsupported file types."""
+        with pytest.raises(ValueError, match="Unsupported file type"):
+            load_payment_data("data.txt")
+
+    # ========== NEW FEATURE TESTS ==========
+
+    def test_load_from_list_of_dicts(self, sample_payment_data):
+        """Test loading from Python list of dictionaries (new feature)."""
+        data = load_payment_data(sample_payment_data)
+        
+        assert isinstance(data, list)
+        assert len(data) == 1
+        assert data[0]["id"] == "1"
+        assert data[0]["initiator_name"] == "Test Corp"
+
+    def test_load_from_single_dict(self, sample_payment_data):
+        """Test loading from single Python dictionary (new feature)."""
+        # Use first item from sample_payment_data fixture (which is a list)
+        single_payment = sample_payment_data[0].copy()
+        single_payment["id"] = "2"  # Change ID to distinguish from fixture
+        
+        data = load_payment_data(single_payment)
+        
+        assert isinstance(data, list)
+        assert len(data) == 1
+        assert data[0]["id"] == "2"
+        assert data[0]["initiator_name"] == "Test Corp"
+
+    def test_load_multiple_payments_from_list(self, sample_payment_data):
+        """Test loading multiple payments from list."""
+        # Create multiple copies of valid payment data
+        base_payment = sample_payment_data[0].copy()
+        payments = []
+        for i in range(1, 6):
+            payment = base_payment.copy()
+            payment["id"] = str(i)
+            payment["payment_id"] = f"PMT{i:03d}"
+            payment["initiator_name"] = f"Corp {i}"
+            payments.append(payment)
+        
+        data = load_payment_data(payments)
+        
+        assert isinstance(data, list)
+        assert len(data) == 5
+        assert data[0]["id"] == "1"
+        assert data[4]["id"] == "5"
+
+    def test_empty_list_raises_error(self):
+        """Test that empty list raises ValueError."""
+        with pytest.raises(ValueError, match="Empty data list"):
+            load_payment_data([])
+
+    def test_empty_dict_raises_error(self):
+        """Test that empty dict raises ValueError."""
+        with pytest.raises(ValueError, match="Empty data dictionary"):
+            load_payment_data({})
+
+    def test_list_with_non_dict_raises_error(self):
+        """Test that list with non-dict items raises ValueError."""
+        invalid_data = [{"id": "MSG001"}, "not a dict", {"id": "MSG003"}]
+        
+        with pytest.raises(ValueError, match="All items in data list must be dictionaries"):
+            load_payment_data(invalid_data)
+
+    def test_unsupported_type_raises_error(self):
+        """Test that unsupported data types raise ValueError."""
+        with pytest.raises(ValueError, match="Unsupported data source type"):
+            load_payment_data(12345)
+        
+        with pytest.raises(ValueError, match="Unsupported data source type"):
+            load_payment_data(None)
+
+    # ========== INTEGRATION TESTS ==========
+
+    def test_data_equivalence_csv_vs_dict(self, csv_file, sample_payment_data):
+        """Test that CSV and dict sources produce equivalent data."""
+        data_from_csv = load_payment_data(csv_file)
+        data_from_dict = load_payment_data(sample_payment_data)
+        
+        # Compare values (ignoring potential type differences)
+        assert len(data_from_csv) == len(data_from_dict)
+        for csv_row, dict_row in zip(data_from_csv, data_from_dict):
+            for key in csv_row.keys():
+                assert str(csv_row[key]) == str(dict_row[key])
+
+    def test_data_equivalence_sqlite_vs_dict(self, sqlite_file, sample_payment_data):
+        """Test that SQLite and dict sources produce equivalent data."""
+        data_from_db = load_payment_data(sqlite_file)
+        data_from_dict = load_payment_data(sample_payment_data)
+        
+        # Compare values
+        assert len(data_from_db) == len(data_from_dict)
+        for db_row, dict_row in zip(data_from_db, data_from_dict):
+            for key in db_row.keys():
+                assert str(db_row[key]) == str(dict_row[key])

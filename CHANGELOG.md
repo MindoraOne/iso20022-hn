@@ -5,6 +5,55 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.30] - 2026-01-09
+
+### Changed
+
+- **BREAKING: Mandatory data validation** - Data validation is now enforced across all data sources (CSV, SQLite, Python dict/list). Invalid data will raise a `ValueError` instead of being silently processed. This ensures payment files only contain valid, ISO 20022-compliant data.
+  - `load_csv_data()` now validates CSV data and raises `ValueError` if validation fails
+  - `load_db_data()` now validates SQLite data and raises `ValueError` if validation fails
+  - Python dict/list data passed directly is also validated
+  - Validation checks: required fields, data types, boolean values, field formats
+
+### Added
+
+- **Comprehensive test suite expansion** - Added 27 new tests, bringing total to 150 tests:
+  - `test_register_namespaces.py` - Complete namespace registration testing (14 tests)
+    - Tests for all pain.001.001.XX versions (03-09)
+    - XSI namespace registration
+    - Return value verification
+    - Namespace format validation
+    - Multiple registration calls
+    - Child element namespace inheritance
+  - Enhanced `test_generate_xml.py` - Complete XML generation testing (11 new tests)
+    - Tests for all 7 pain.001 message versions with complete valid data
+    - Empty data handling
+    - Invalid message type handling
+    - Unsupported version handling (pain.001.001.10)
+    - XSD validation failure testing
+  - Enhanced `test_validate_via_xsd.py` - Exception handling test
+    - Tests error handler when XML validation throws exceptions
+
+### Improved
+
+- **Test coverage increased from 92% to 97%**:
+  - `register_namespaces.py`: 0% → 100% coverage
+  - `generate_xml.py`: 54% → 97% coverage
+  - `validate_via_xsd.py`: 85% → 100% coverage
+  - Overall project: 92% → 97% coverage (579 statements, only 16 uncovered)
+- **Enhanced data integrity** - All payment files are now guaranteed to contain valid data that meets ISO 20022 standards
+- **Better error messages** - Clear `ValueError` messages indicate exactly what validation failed
+- **Documentation of defensive code** - Lines 532-538 in generate_xml.py are documented as defensive programming for future message type extensions
+
+### Fixed
+
+- **Data validation enforcement** - Fixed [#32](https://github.com/sebastienrousseau/pain001/issues/32) by making validation mandatory rather than optional
+- **Edge case testing** - All error handlers and exceptional code paths now tested
+- **Test data completeness** - Fixed test data to include all required fields for each pain.001 version:
+  - v05 requires `ultimate_debtor_name`
+  - v06-08 use `initiator_town` vs `initiator_town_name`
+  - v06-09 require `remittance_information`
+
 ## [0.0.29] - 2026-01-09
 
 ### Security

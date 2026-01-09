@@ -18,45 +18,52 @@ import os
 
 # Import the standard libraries
 import sys
+from typing import Union, List, Dict, Any
 
 # Import the pain001 library functions
 from pain001.constants.constants import valid_xml_types
 from pain001.context.context import Context
-from pain001.csv.load_csv_data import load_csv_data
-from pain001.csv.validate_csv_data import validate_csv_data
-from pain001.db.load_db_data import load_db_data
-from pain001.db.validate_db_data import validate_db_data
+from pain001.data.loader import load_payment_data
 from pain001.xml.generate_xml import generate_xml
 from pain001.xml.register_namespaces import register_namespaces
 
 
 def process_files(
-    xml_message_type,
-    xml_template_file_path,
-    xsd_schema_file_path,
-    data_file_path,
+    xml_message_type: str,
+    xml_template_file_path: str,
+    xsd_schema_file_path: str,
+    data_file_path: Union[str, List[Dict[str, Any]], Dict[str, Any]],
 ):
     """
-    This function generates an ISO 20022 payment message from a CSV or SQLite
-    file containing the payment data.
+    This function generates an ISO 20022 payment message from various data sources.
 
     Args:
         xml_message_type (str): The type of XML message to generate. Valid
         options are 'pain.001.001.03', 'pain.001.001.04', 'pain.001.001.05',
-        'pain.001.001.06' and 'pain.001.001.09'.
+        'pain.001.001.06', 'pain.001.001.07', 'pain.001.001.08', and 
+        'pain.001.001.09'.
         xml_template_file_path (str): The path of the XML template file.
         xsd_schema_file_path (str): The path of the XSD schema file.
-        data_file_path (str): The path of the CSV or SQLite file containing the
-        payment data.
+        data_file_path (Union[str, List[Dict], Dict]): The payment data source.
+            Supports:
+            - str: Path to CSV (.csv) or SQLite (.db) file (backward compatible)
+            - list: List of payment data dictionaries (new feature)
+            - dict: Single payment transaction dictionary (new feature)
 
     Returns:
         None
 
     Raises:
-        ValueError: If the XML message type is not supported.
-        FileNotFoundError: If the XML template file does not exist.
-        FileNotFoundError: If the XSD schema file does not exist.
-        FileNotFoundError: If the Data file does not exist.
+        ValueError: If the XML message type is not supported or data is invalid.
+        FileNotFoundError: If the XML template file or data file does not exist.
+        
+    Examples:
+        # Existing file-based usage (backward compatible)
+        >>> process_files('pain.001.001.03', 'template.xml', 'schema.xsd', 'data.csv')
+        
+        # New direct Python data usage
+        >>> data = [{'id': 'MSG001', 'date': '2026-01-09', ...}]
+        >>> process_files('pain.001.001.03', 'template.xml', 'schema.xsd', data)
     """
 
     # Initialize the context and log a message.
@@ -89,46 +96,13 @@ def process_files(
         logger.error(error_message)
         raise FileNotFoundError(error_message)
 
-    # Sanitize the path to the data file.
-    data_file_path = os.path.normpath(data_file_path)
-
-    # Check if the data file exists
-    if not os.path.exists(data_file_path):
-        error_message = f"Error: Data file '{data_file_path}' does not exist."
-        logger.error(error_message)
-        raise FileNotFoundError(error_message)
-
-    # Define mapping dictionary between XML element tags and CSV column names
-    # mapping = {
-    #     "MsgId": "id",
-    #     "CreDtTm": "date",
-    #     "NbOfTxs": "nb_of_txs",
-    #     "Nm": "initiator_name",
-    #     "PmtInfId": "payment_information_id",
-    #     "PmtMtd": "payment_method",
-    # }
-
-    # Determine the type of data file (CSV or SQLite)
-    is_csv = data_file_path.endswith(".csv")
-    is_sqlite = data_file_path.endswith(".db")
-
-    # Load data into a list of dictionaries based on the file type
-    if is_csv:
-        data = load_csv_data(data_file_path)
-        if not validate_csv_data(data):
-            error_message = "Error: Invalid CSV data."
-            logger.error(error_message)
-            raise ValueError(error_message)
-    elif is_sqlite:
-        data = load_db_data(data_file_path, table_name="pain001")
-        if not validate_db_data(data):
-            error_message = "Error: Invalid SQLite data."
-            logger.error(error_message)
-            raise ValueError(error_message)
-    else:
-        error_message = "Error: Unsupported data file type."
-        logger.error(error_message)
-        raise ValueError(error_message)
+    # Load and validate data from various sources using unified loader
+    # This supports: file paths (str), Python lists, and Python dicts
+    try:
+        data = load_payment_data(data_file_path)
+    except (FileNotFoundError, ValueError) as e:
+        logger.error(f"Error loading payment data: {e}")
+        raise
 
     # Register the namespace prefixes and URIs for the XML message type
     register_namespaces(xml_message_type)

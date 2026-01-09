@@ -137,3 +137,48 @@ class TestValidateViaXsd(unittest.TestCase):
         finally:
             if os.path.exists(invalid_xsd):
                 os.remove(invalid_xsd)
+    def test_validation_exception_during_validation(self):
+        """
+        Test case for exception during XML validation process.
+        """
+        from unittest.mock import patch, MagicMock
+        
+        # Create a valid XML and XSD for parsing
+        valid_xml = "test_valid.xml"
+        valid_xsd = "test_valid.xsd"
+        
+        with open(valid_xml, "w") as f:
+            f.write("<root><element>data</element></root>")
+        
+        with open(valid_xsd, "w") as f:
+            f.write("""
+                <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+                    <xs:element name="root">
+                        <xs:complexType>
+                            <xs:sequence>
+                                <xs:element name="element" type="xs:string"/>
+                            </xs:sequence>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:schema>
+            """)
+        
+        try:
+            # Mock xsd.is_valid to raise an exception during validation
+            with patch('xmlschema.XMLSchema') as mock_schema_class:
+                mock_xsd = MagicMock()
+                mock_xsd.is_valid.side_effect = Exception("Validation error")
+                mock_schema_class.return_value = mock_xsd
+                
+                result = validate_via_xsd(valid_xml, valid_xsd)
+                # Should return False when validation raises exception
+                assert result is False
+        finally:
+            if os.path.exists(valid_xml):
+                os.remove(valid_xml)
+            if os.path.exists(valid_xsd):
+                os.remove(valid_xsd)
+
+
+if __name__ == "__main__":
+    unittest.main()
