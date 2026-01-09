@@ -61,7 +61,7 @@ setup(
         "mdurl==0.1.2",
         "pygments==2.18.0",
         "rich==13.7.1",
-        "setuptools==70.0.0",
+        "setuptools==78.1.1",
         "xmlschema==3.3.1",
     ],
     extras_require={
