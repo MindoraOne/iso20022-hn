@@ -55,7 +55,7 @@ setup(
         "datetime==5.5",
         "defusedxml==0.7.1",
         "elementpath==4.4.0",
-        "jinja2==3.1.4",
+        "jinja2==3.1.6",
         "markdown-it-py==3.0.0",
         "markupsafe==2.1.5",
         "mdurl==0.1.2",
