@@ -40,7 +40,7 @@ def process_files(
     Args:
         xml_message_type (str): The type of XML message to generate. Valid
         options are 'pain.001.001.03', 'pain.001.001.04', 'pain.001.001.05',
-        'pain.001.001.06', 'pain.001.001.07', 'pain.001.001.08', and 
+        'pain.001.001.06', 'pain.001.001.07', 'pain.001.001.08', and
         'pain.001.001.09'.
         xml_template_file_path (str): The path of the XML template file.
         xsd_schema_file_path (str): The path of the XSD schema file.
@@ -56,11 +56,11 @@ def process_files(
     Raises:
         ValueError: If the XML message type is not supported or data is invalid.
         FileNotFoundError: If the XML template file or data file does not exist.
-        
+
     Examples:
         # Existing file-based usage (backward compatible)
         >>> process_files('pain.001.001.03', 'template.xml', 'schema.xsd', 'data.csv')
-        
+
         # New direct Python data usage
         >>> data = [{'id': 'MSG001', 'date': '2026-01-09', ...}]
         >>> process_files('pain.001.001.03', 'template.xml', 'schema.xsd', data)
