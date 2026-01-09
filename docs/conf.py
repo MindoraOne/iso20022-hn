@@ -7,9 +7,9 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "Pain001"
-copyright = "2024, Sebastien Rousseau"
+copyright = "2024-2026, Sebastien Rousseau"
 author = "Sebastien Rousseau"
-release = "0.0.25"
+release = "0.0.32"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

@@ -246,3 +246,31 @@ class TestDataLoader:
         for db_row, dict_row in zip(data_from_db, data_from_dict):
             for key in db_row.keys():
                 assert str(db_row[key]) == str(dict_row[key])
+
+    def test_load_from_list_with_validation_failure(self):
+        """Test _load_from_list when validation fails (line 127)."""
+        from unittest.mock import patch
+
+        invalid_data_list = [{"id": "test", "date": "2023-01-01"}]
+
+        with patch(
+            "pain001.data.loader.validate_csv_data", return_value=False
+        ):
+            with pytest.raises(
+                ValueError, match="Data list validation failed"
+            ):
+                load_payment_data(invalid_data_list)
+
+    def test_load_from_dict_with_validation_failure(self):
+        """Test _load_from_dict when validation fails (line 143)."""
+        from unittest.mock import patch
+
+        invalid_data_dict = {"id": "test", "date": "2023-01-01"}
+
+        with patch(
+            "pain001.data.loader.validate_csv_data", return_value=False
+        ):
+            with pytest.raises(
+                ValueError, match="Data dictionary validation failed"
+            ):
+                load_payment_data(invalid_data_dict)

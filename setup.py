@@ -23,7 +23,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name="pain001",
-    version="0.0.31",
+    version="0.0.32",
     description="Pain001, A Python Library for Automating ISO 20022-Compliant Payment Files Using CSV Or SQLite Data Files.",
     long_description=long_description,
     long_description_content_type="text/markdown",

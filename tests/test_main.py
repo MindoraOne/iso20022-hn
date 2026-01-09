@@ -162,3 +162,59 @@ class TestMain:
         )
         assert result.exit_code == 1
         assert "The data file 'invalid' does not exist." in result.output
+
+    def test_main_with_missing_xml_template_file_path(self):
+        """Test CLI when XML template file path is missing."""
+        result = self.runner.invoke(
+            cli,
+            [
+                "--xml_message_type",
+                self.xml_message_type,
+                "--xsd_schema_file_path",
+                self.xsd_file,
+                "--data_file_path",
+                self.csv_file,
+            ],
+        )
+        assert result.exit_code == 1
+        assert "The XML template file path is required." in result.output
+
+    def test_main_with_exception_handling(self):
+        """Test CLI exception handling."""
+        from unittest.mock import patch
+
+        # We need to mock it in the __main__ module where it's imported
+        with patch(
+            "pain001.__main__.process_files",
+            side_effect=Exception("Test exception"),
+        ):
+            result = self.runner.invoke(
+                cli,
+                [
+                    "--xml_message_type",
+                    self.xml_message_type,
+                    "--xml_template_file_path",
+                    self.xml_file,
+                    "--xsd_schema_file_path",
+                    self.xsd_file,
+                    "--data_file_path",
+                    self.csv_file,
+                ],
+            )
+            assert result.exit_code == 1
+            assert "An error occurred: Test exception" in result.output
+
+    def test_main_module_entry_point(self):
+        """Test __main__.py when run as a script."""
+        import subprocess
+        import sys
+
+        # Test running __main__.py directly as a module
+        result = subprocess.run(
+            [sys.executable, "-m", "pain001.__main__", "--help"],
+            capture_output=True,
+            text=True,
+        )
+        # Should show help without error
+        assert result.returncode == 0
+        assert "Usage:" in result.stdout or "Options:" in result.stdout

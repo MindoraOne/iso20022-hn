@@ -106,6 +106,7 @@ pyvenv.cfg
 
 # Type-checking
 .pytype/
+.mypy_cache/
 
 # macOS
 .DS_Store
@@ -113,6 +114,15 @@ pyvenv.cfg
 # VSCode
 .vscode/
 .vscode/settings.json
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# gh CLI temp files
+gh run view*
 
 # Database
 *.db-shm

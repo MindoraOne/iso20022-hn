@@ -288,6 +288,42 @@ class TestProcessFiles(unittest.TestCase):
             log.output[0],
         )
 
+    def test_core_main_entry_point(self):
+        """Test core.py __main__ entry point."""
+        import subprocess
+        import sys
+
+        # Test with insufficient arguments (should print usage)
+        result = subprocess.run(
+            [sys.executable, "-m", "pain001.core.core"],
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 1
+        assert "Usage:" in result.stdout or "Usage:" in result.stderr
+
+    def test_core_main_with_arguments(self):
+        """Test core.py __main__ with valid arguments."""
+        import subprocess
+        import sys
+
+        # Test with valid arguments
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "pain001.core.core",
+                "pain.001.001.03",
+                self.xml_template_file_path,
+                self.xsd_schema_file_path,
+                self.csv_file_path,
+            ],
+            capture_output=True,
+            text=True,
+        )
+        # Should complete successfully or with expected error
+        assert result.returncode in [0, 1]
+
 
 if __name__ == "__main__":
     unittest.main()

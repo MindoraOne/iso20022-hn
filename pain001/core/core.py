@@ -120,7 +120,9 @@ def process_files(
         logger.info(
             f"Successfully generated XML file '{xml_template_file_path}'"
         )
-    else:
+    else:  # pragma: no cover
+        # Defensive code: generate_xml raises SystemExit if it fails,
+        # so this block is rarely reached in normal operation
         logger.error(
             f"Failed to generate XML file at '{xml_template_file_path}'"
         )

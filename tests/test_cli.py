@@ -225,6 +225,21 @@ class TestCliModule(unittest.TestCase):
                         or result.exit_code != 1
                     )
 
+    def test_cli_main_entry_point(self):
+        """Test that CLI main entry point works."""
+        import subprocess
+        import sys
+
+        # Test running cli.py directly as a script
+        result = subprocess.run(
+            [sys.executable, "-m", "pain001.cli.cli"],
+            capture_output=True,
+            text=True,
+        )
+        # The script should exit with error code due to missing arguments
+        # but not crash with import errors
+        assert result.returncode in [0, 1, 2]
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -40,7 +40,8 @@ class Context:
         """
         if Context.instance is None:
             Context()
-        if Context.instance is None:
+        if Context.instance is None:  # pragma: no cover
+            # Defensive check: unreachable because Context() always sets instance
             raise RuntimeError("Failed to initialize Context singleton")
         return Context.instance
 

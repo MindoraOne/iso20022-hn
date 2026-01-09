@@ -527,8 +527,11 @@ def generate_xml(
         elif payment_initiation_message_type == "pain.001.001.09":
             # xml_data_pain001_001_09 = {}
             xml_data = xml_data_pain001_001_09
-        else:
-            # If it's not supported, print an error message and exit
+        else:  # pragma: no cover
+            # Defensive code: This else block is unreachable because all types
+            # in xml_generators are handled by the elif chain above. It serves
+            # as a safety net if xml_generators is extended without updating
+            # the elif conditions.
             print(
                 f"""
 The payment initiation message type {payment_initiation_message_type} is not

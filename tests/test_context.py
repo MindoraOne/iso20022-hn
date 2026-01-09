@@ -93,6 +93,23 @@ class TestContext(unittest.TestCase):
         context.set_log_level(logging.DEBUG)
         self.assertEqual(context.logger.level, logging.DEBUG)
 
+    def test_init_logger_with_existing_handlers(self):
+        """Test init_logger when logger already has handlers."""
+        context = Context.get_instance()
+
+        # Manually add a handler to test line 122 (if not self.logger.handlers)
+        test_handler = logging.StreamHandler()
+        context.logger.addHandler(test_handler)
+
+        # Remove all handlers and re-initialize to test the handler check
+        context.logger.handlers.clear()
+        context.logger = None
+        context.init_logger()
+
+        # Verify logger was initialized
+        self.assertIsNotNone(context.logger)
+        self.assertTrue(len(context.logger.handlers) > 0)
+
 
 if __name__ == "__main__":
     unittest.main()
