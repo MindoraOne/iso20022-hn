@@ -1,8 +1,17 @@
-# Release Notes - Pain001 v0.0.26
+## Release v0.0.26 - 2026-01-09
+# Pain001: Automate ISO 20022-Compliant Payment File Creation
 
-**Release Date:** January 9, 2026
+![Pain001 banner][banner]
 
-## 🎉 Overview
+## Overview
+
+**Pain001** is an open-source Python Library that you can use to create
+**ISO 20022-Compliant Payment Files** directly from your **CSV** or **SQLite**
+Data Files.
+
+- **Website:** <https://pain001.com>
+- **Source code:** <https://github.com/sebastienrousseau/pain001>
+- **Bug reports:** <https://github.com/sebastienrousseau/pain001/issues>
 
 This release focuses on **security hardening**, **dependency updates**, and **code quality improvements**. All critical security vulnerabilities identified by Bandit have been resolved, and the codebase now follows enhanced security best practices.
 
@@ -91,28 +100,55 @@ Added comprehensive development tools for code quality and security:
 
 **None** - This release is fully backward compatible with v0.0.25.
 
-## 🚀 Migration Guide
+## Requirements
 
-No migration steps required. Simply update to v0.0.26:
+**Pain001** works with macOS, Linux and Windows and requires Python 3.9.0 and
+above.
 
-```bash
-pip install --upgrade pain001
+## Installation
+
+We recommend creating a virtual environment to install **Pain001**. This will ensure that the package is installed in an isolated environment and will not affect other projects. To install **Pain001** in a virtual environment, follow these steps:
+
+### Install `virtualenv`
+
+```sh
+python -m pip install virtualenv
 ```
 
-or with Poetry:
+### Create a Virtual Environment
 
-```bash
-poetry update pain001
+```sh
+python -m venv venv
 ```
 
-## 🙏 Acknowledgements
+| Code | Explanation |
+|---|---|
+| `-m` | executes module `venv` |
+| `env` | name of the virtual environment |
 
-Special thanks to the security tools and libraries that made this release possible:
-- [defusedxml](https://github.com/tiran/defusedxml) for secure XML parsing
-- [Bandit](https://github.com/PyCQA/bandit) for security analysis
-- [Safety](https://github.com/pyupio/safety) for dependency scanning
+### Activate environment
 
-## 📋 Full Changelog
+```sh
+source venv/bin/activate
+```
+
+### Getting Started
+
+It takes just a few seconds to get up and running with **Pain001**. You can install Pain001 from PyPI with pip or your favourite package manager:
+
+Open your terminal and run the following command to add the latest version:
+
+```sh
+python -m pip install pain001
+```
+
+Add the -U switch to update to the current version, if `pain001` is already installed.
+
+```sh
+python -m pip install -U pain001
+```
+
+## Changelog
 
 ### Security
 - Fixed XML parsing vulnerabilities (XXE attacks) in all XML creation modules
@@ -133,11 +169,8 @@ Special thanks to the security tools and libraries that made this release possib
 - Code formatting issues
 - Yanked dependency (requests 2.32.0)
 
----
+## Artifacts 🎁
+* [pain001-0.0.26-py2.py3-none-any.whl](https://github.com/sebastienrousseau/pain001/releases/download/v0.0.26/pain001-0.0.26-py2.py3-none-any.whl)
+* [pain001-0.0.26.tar.gz](https://github.com/sebastienrousseau/pain001/releases/download/v0.0.26/pain001-0.0.26.tar.gz)
 
-**Full Diff**: [v0.0.25...v0.0.26](https://github.com/sebastienrousseau/pain001/compare/v0.0.25...v0.0.26)
-
-For detailed information about Pain001, visit:
-- **Website**: https://pain001.com
-- **Documentation**: https://github.com/sebastienrousseau/pain001
-- **Issue Tracker**: https://github.com/sebastienrousseau/pain001/issues
+[banner]: https://kura.pro/pain001/images/banners/banner-pain001.svg 'Pain001, A Python Library for Automating ISO 20022-Compliant Payment Files Using CSV Or SQLite Data Files.'

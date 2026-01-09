@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.27] - 2026-01-09
+
+### Fixed
+
+- **Package installation issue** - Added missing `__init__.py` files to all package directories (Fixes #58, #56)
+  - Added `__init__.py` to `pain001/xml/` - XML generation and validation module
+  - Added `__init__.py` to `pain001/db/` - Database operations module
+  - Added `__init__.py` to `pain001/csv/` - CSV operations module
+  - Added `__init__.py` to `pain001/cli/` - Command-line interface module
+  - Added `__init__.py` to `pain001/templates/` - ISO 20022 templates
+  - Added `__init__.py` to all template subdirectories (pain.001.001.03 through pain.001.001.09)
+- **Import errors resolved** - All submodules now correctly importable after pip installation
+- **Distribution completeness** - Package installation via pip now includes all necessary modules
+
 ## [0.0.26] - 2026-01-09
 
 ### Security
