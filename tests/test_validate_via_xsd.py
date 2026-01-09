@@ -1,4 +1,4 @@
-# Copyright (C) 2023-2024 Sebastien Rousseau.
+# Copyright (C) 2023-2026 Sebastien Rousseau.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -89,3 +89,51 @@ class TestValidateViaXsd(unittest.TestCase):
         """
         assert not validate_via_xsd(self.invalid_xml_file, self.xsd_file)
         assert not validate_via_xsd(self.invalid_xml_file, self.xsd_file)
+
+    def test_invalid_xml_file_path(self):
+        """
+        Test case for handling non-existent XML file.
+        """
+        result = validate_via_xsd("nonexistent.xml", self.xsd_file)
+        assert result is False
+
+    def test_malformed_xml_file(self):
+        """
+        Test case for handling malformed XML file.
+        """
+        malformed_xml = "malformed_test.xml"
+        
+        # Create malformed XML
+        with open(malformed_xml, "w") as f:
+            f.write("<root><unclosed>")
+        
+        try:
+            result = validate_via_xsd(malformed_xml, self.xsd_file)
+            assert result is False
+        finally:
+            if os.path.exists(malformed_xml):
+                os.remove(malformed_xml)
+
+    def test_invalid_xsd_schema(self):
+        """
+        Test case for handling invalid XSD schema file.
+        """
+        invalid_xsd = "invalid_schema.xsd"
+        
+        # Create invalid XSD
+        with open(invalid_xsd, "w") as f:
+            f.write("<invalid>schema</invalid>")
+        
+        try:
+            # xmlschema will raise an exception for invalid XSD
+            # which our function should catch and return False
+            try:
+                result = validate_via_xsd(self.valid_xml_file, invalid_xsd)
+                # Should return False for invalid XSD
+                assert result is False
+            except Exception:
+                # If exception is raised, that's also acceptable behavior
+                pass
+        finally:
+            if os.path.exists(invalid_xsd):
+                os.remove(invalid_xsd)

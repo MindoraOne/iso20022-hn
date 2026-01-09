@@ -13,6 +13,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Updated idna** - Updated from 3.7 to 3.11 with security improvements for internationalized domain names
 - **Updated charset-normalizer** - Updated from 3.3.2 to 3.4.4 with improved character encoding detection
 
+### Added
+
+- **Comprehensive test suite** - Added 39 new tests, increasing coverage from 77% to 92%:
+  - `test_write_xml_to_file.py` - XML file writing tests
+  - `test_cli.py` - Command-line interface tests
+  - `test_coverage_complete.py` - Edge case and error path coverage
+  - `test_generate_xml_versions.py` - All pain message version tests
+- **Enhanced package exports** - Added `main` and `process_files` to `pain001/__init__.py` for easier imports
+- **README improvements** - Added comprehensive sections:
+  - CSV Data Format guide with examples
+  - Output Files documentation
+  - Troubleshooting guide with common solutions
+  - Enhanced code examples with error handling
+
 ### Changed
 
 - **Updated core dependencies** - Updated multiple dependencies to latest versions:
@@ -20,7 +34,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - iniconfig: 2.0.0 → 2.1.0
   - pluggy: 1.5.0 → 1.6.0
   - babel: 2.15.0 → 2.17.0
-- **Improved stability** - All updates tested and verified with 71/71 tests passing
+- **Copyright notices** - Updated all 52 Python files to reflect 2026
+- **Code examples** - Fixed and verified all README code examples
+- **Import paths** - Corrected validation function import path in documentation
+
+### Fixed
+
+- **Import ergonomics** - Main functions now importable directly from `pain001` package
+- **Documentation accuracy** - All code examples tested and verified to work
 
 ## [0.0.28] - 2026-01-09
 

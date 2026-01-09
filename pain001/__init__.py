@@ -1,4 +1,4 @@
-# Copyright (C) 2023-2024 Sebastien Rousseau.
+# Copyright (C) 2023-2026 Sebastien Rousseau.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,3 +15,9 @@
 
 """The Python pain001 module."""
 __version__ = "0.0.29"
+
+# Import main functions for easier access
+from pain001.__main__ import main
+from pain001.core.core import process_files
+
+__all__ = ["main", "process_files", "__version__"]

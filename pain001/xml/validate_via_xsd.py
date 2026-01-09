@@ -3,7 +3,7 @@ import xml.etree.ElementTree as et
 import xmlschema
 from defusedxml import ElementTree as defused_et
 
-# Copyright (C) 2023-2024 Sebastien Rousseau.
+# Copyright (C) 2023-2026 Sebastien Rousseau.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,17 +35,21 @@ def validate_via_xsd(xml_file_path, xsd_file_path):
     try:
         xml_tree = defused_et.parse(xml_file_path)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error parsing XML file: {e}")
         return False
 
     # Load XSD schema into an XMLSchema object.
-    xsd = xmlschema.XMLSchema(xsd_file_path)
+    try:
+        xsd = xmlschema.XMLSchema(xsd_file_path)
+    except Exception as e:
+        print(f"Error loading XSD schema: {e}")
+        return False
 
     # Validate XML file against XSD schema.
     try:
         is_valid = xsd.is_valid(xml_tree)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error validating XML: {e}")
         return False
 
     # Return True if XML file is valid, False otherwise.

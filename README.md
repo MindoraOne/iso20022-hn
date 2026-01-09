@@ -69,6 +69,8 @@ processing.
     - [Getting Started](#getting-started)
   - [Quick Start](#quick-start)
     - [Arguments](#arguments)
+  - [CSV Data Format](#csv-data-format)
+    - [Required CSV Columns](#required-csv-columns)
   - [Examples](#examples)
     - [Using a CSV Data File as the source](#using-a-csv-data-file-as-the-source)
     - [Using a SQLite Data File as the source](#using-a-sqlite-data-file-as-the-source)
@@ -82,11 +84,20 @@ processing.
       - [Pain.001.001.09](#pain00100109)
     - [Embedded in an Application](#embedded-in-an-application)
     - [Validation](#validation)
+  - [Output Files](#output-files)
+    - [Output Location](#output-location)
+  - [Troubleshooting](#troubleshooting)
+    - [Common Issues and Solutions](#common-issues-and-solutions)
+    - [Getting Help](#getting-help)
   - [Documentation](#documentation)
     - [Supported messages](#supported-messages)
       - [Bank-to-Customer Cash Management](#bank-to-customer-cash-management)
       - [Payments Clearing and Settlement](#payments-clearing-and-settlement)
       - [Payments Initiation](#payments-initiation)
+  - [Development](#development)
+    - [Setting Up Development Environment](#setting-up-development-environment)
+    - [Running Tests](#running-tests)
+    - [Code Quality Tools](#code-quality-tools)
   - [License](#license)
   - [Contribution](#contribution)
   - [Acknowledgements](#acknowledgements)
@@ -138,8 +149,20 @@ processing.
 
 ## Requirements
 
-**Pain001** works with macOS, Linux, and Windows and requires Python 3.9.0 and
-above.
+**Pain001** works with macOS, Linux, and Windows and requires:
+
+- **Python 3.9.0 or higher**
+- **pip** (Python package installer)
+
+### Key Dependencies
+
+- `click` - Command-line interface creation
+- `defusedxml` - Secure XML parsing (protection against XXE attacks)
+- `xmlschema` - XML Schema validation
+- `rich` - Terminal output formatting
+- `lxml` - XML processing
+
+All dependencies are automatically installed when you install Pain001.
 
 ## Installation
 
@@ -236,6 +259,39 @@ When running **Pain001**, you will need to specify four arguments:
 
 - A `data_file_path`: This is the path to the CSV or SQLite Data file you want
   to convert to XML format.
+
+## CSV Data Format
+
+Before using **Pain001**, prepare your CSV file with the payment data. The CSV
+file must include specific columns that map to ISO 20022 fields. Here's the
+required structure:
+
+### Required CSV Columns
+
+| Column Name | Description | Example |
+|------------|-------------|----------|
+| `id` | Unique message identifier | MSG-20260109-001 |
+| `date` | Creation date/time | 2026-01-09T10:30:00 |
+| `nb_of_txs` | Number of transactions | 1 |
+| `initiator_name` | Name of payment initiator | ABC Corporation |
+| `payment_information_id` | Payment batch ID | PAYMENT-BATCH-001 |
+| `payment_method` | Payment method code | TRF |
+| `creditor_name` | Beneficiary name | XYZ Limited |
+| `creditor_account` | Beneficiary IBAN | GB29NWBK60161331926819 |
+| `creditor_agent` | Beneficiary BIC | NWBKGB2L |
+| `amount` | Payment amount | 1000.00 |
+| `currency` | Currency code | EUR |
+| `end_to_end_id` | End-to-end reference | E2E-REF-001 |
+
+**Sample CSV File:**
+
+```csv
+id,date,nb_of_txs,initiator_name,payment_information_id,payment_method,creditor_name,creditor_account,creditor_agent,amount,currency,end_to_end_id
+MSG-001,2026-01-09T10:30:00,1,ABC Corp,PMT-001,TRF,XYZ Ltd,GB29NWBK60161331926819,NWBKGB2L,1000.00,EUR,E2E-001
+```
+
+Template CSV files for each supported pain message type are available in the
+`pain001/templates/` directory.
 
 ## Examples
 
@@ -383,7 +439,7 @@ python3 -m pain001 \
 To embed **Pain001** in a new or existing application, import the main function
 and use it in your code.
 
-Here's an example:
+**Basic Integration:**
 
 ```python
 from pain001 import main
@@ -401,25 +457,162 @@ if __name__ == '__main__':
     )
 ```
 
+**Advanced Integration with Error Handling:**
+
+```python
+from pain001.core.core import process_files
+from pain001.xml.validate_via_xsd import validate_via_xsd
+import os
+
+def create_payment_file(data_file, output_dir='output'):
+    """Create and validate an ISO 20022 payment file."""
+    try:
+        # Define file paths
+        xml_message_type = 'pain.001.001.03'
+        xml_template = os.path.join(output_dir, 'payment.xml')
+        xsd_schema = 'pain001/templates/pain.001.001.03/pain.001.001.03.xsd'
+        
+        # Generate the payment file
+        process_files(
+            xml_message_type,
+            xml_template,
+            xsd_schema,
+            data_file
+        )
+        
+        # Validate the generated file
+        if validate_via_xsd(xml_template, xsd_schema):
+            print(f"✓ Successfully created and validated: {xml_template}")
+            return xml_template
+        else:
+            print(f"✗ Validation failed for: {xml_template}")
+            return None
+            
+    except FileNotFoundError as e:
+        print(f"Error: File not found - {e}")
+        return None
+    except ValueError as e:
+        print(f"Error: Invalid data - {e}")
+        return None
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+
+if __name__ == '__main__':
+    # Example usage
+    result = create_payment_file('payments.csv')
+    if result:
+        print(f"Payment file ready for submission: {result}")
+```
+
 ### Validation
 
-To validate the generated XML file against a given xsd schema, use the following
+To validate the generated XML file against a given XSD schema, use the following
 method:
 
 ```python
-from pain001.core import validate_xml_against_xsd
+from pain001.xml.validate_via_xsd import validate_via_xsd
 
-xml_message_type = 'pain.001.001.03'
 xml_file = 'generated.xml'
 xsd_file = 'schema.xsd'
 
-is_valid = validate_xml_against_xsd(
-    xml_message_type,
-    xml_file,
-    xsd_file
-)
+is_valid = validate_via_xsd(xml_file, xsd_file)
 print(f"XML validation result: {is_valid}")
 ```
+
+## Output Files
+
+When you run **Pain001**, it generates the following:
+
+1. **XML Payment File**: A fully compliant ISO 20022 pain.001 message file
+   - Generated in the same directory as your XML template
+   - Validated against the XSD schema before being saved
+   - Ready for submission to your bank or payment processor
+
+2. **Log Output**: Detailed logging information displayed in your terminal
+   - Shows validation progress and any errors
+   - Confirms successful file generation
+
+### Output Location
+
+The generated XML file will be created at the path you specified in the
+`xml_template_file_path` argument. For example:
+
+```sh
+python3 -m pain001 \
+    -t pain.001.001.03 \
+    -m /output/payment_2026-01-09.xml \
+    -s /path/to/schema.xsd \
+    -d /path/to/data.csv
+```
+
+Will create `/output/payment_2026-01-09.xml`
+
+## Troubleshooting
+
+### Common Issues and Solutions
+
+**Issue: "ModuleNotFoundError: No module named 'pain001'"**
+
+Solution: Ensure you have installed pain001 and are using the correct Python environment:
+```sh
+python -m pip install pain001
+# Or if you're using a virtual environment:
+source venv/bin/activate
+python -m pip install pain001
+```
+
+**Issue: "Error: Invalid XML message type"**
+
+Solution: Ensure you're using one of the supported message types:
+- pain.001.001.03
+- pain.001.001.04
+- pain.001.001.05
+- pain.001.001.06
+- pain.001.001.07
+- pain.001.001.08
+- pain.001.001.09
+
+**Issue: "Error: XML template file does not exist"**
+
+Solution: Verify the file path is correct and the file exists:
+```sh
+ls -la /path/to/your/template.xml
+```
+
+**Issue: "Error: Invalid CSV data"**
+
+Solution: Check that your CSV file:
+- Contains all required columns
+- Has valid data in each column
+- Uses proper CSV formatting (commas as delimiters, quotes for text with commas)
+- Has a header row with column names
+
+**Issue: "Validation failed"**
+
+Solution: This means the generated XML doesn't match the XSD schema:
+- Ensure your data values match ISO 20022 format requirements
+- Check that IBANs, BICs, and currency codes are valid
+- Verify date/time formats are correct (ISO 8601: YYYY-MM-DDTHH:MM:SS)
+- Review the error message for specific field issues
+
+**Issue: Permission denied when writing output file**
+
+Solution: Ensure you have write permissions for the output directory:
+```sh
+chmod u+w /path/to/output/directory
+```
+
+### Getting Help
+
+If you encounter issues not covered here:
+1. Check the [GitHub Issues](https://github.com/sebastienrousseau/pain001/issues) for similar problems
+2. Review the [Documentation](https://pain001.com) for detailed guides
+3. Create a new issue with:
+   - Your Python version (`python --version`)
+   - Pain001 version (`python -m pip show pain001`)
+   - Full error message
+   - Minimal example to reproduce the issue
 
 ## Documentation
 

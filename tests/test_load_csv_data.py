@@ -1,4 +1,4 @@
-# Copyright (C) 2023-2024 Sebastien Rousseau.
+# Copyright (C) 2023-2026 Sebastien Rousseau.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -491,6 +491,55 @@ class TestLoadCsvData(unittest.TestCase):
         file_path = "tests/data/single_row.csv"
         data = load_csv_data(file_path)
         self.assertEqual(len(data), 1)
+
+    def test_load_csv_file_not_found(self):
+        """Test that FileNotFoundError is raised for non-existent file."""
+        file_path = "tests/data/nonexistent_file.csv"
+        with self.assertRaises(FileNotFoundError):
+            load_csv_data(file_path)
+
+    def test_load_csv_io_error(self):
+        """Test handling of IOError (permission denied)."""
+        import tempfile
+        
+        # Create a file with no read permissions
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.csv') as f:
+            temp_file = f.name
+            f.write("header1,header2\n")
+            f.write("value1,value2\n")
+        
+        try:
+            # Remove read permissions
+            os.chmod(temp_file, 0o000)
+            
+            # This should raise IOError/PermissionError
+            with self.assertRaises((IOError, PermissionError)):
+                load_csv_data(temp_file)
+        finally:
+            # Restore permissions and clean up
+            try:
+                os.chmod(temp_file, 0o644)
+                os.remove(temp_file)
+            except:
+                pass
+
+    def test_load_csv_unicode_decode_error(self):
+        """Test handling of UnicodeDecodeError."""
+        import tempfile
+        
+        # Create a file with invalid UTF-8 bytes
+        with tempfile.NamedTemporaryFile(mode='wb', delete=False, suffix='.csv') as f:
+            temp_file = f.name
+            # Write invalid UTF-8 sequence
+            f.write(b"header1,header2\n")
+            f.write(b"value1,\xff\xfe\n")  # Invalid UTF-8
+        
+        try:
+            with self.assertRaises(UnicodeDecodeError):
+                load_csv_data(temp_file)
+        finally:
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
 
 
 if __name__ == "__main__":
