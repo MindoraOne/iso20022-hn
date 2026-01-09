@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.29] - 2026-01-09
+
+### Security
+
+- **Updated certifi** - Updated from 2024.7.4 to 2026.1.4 with latest Mozilla CA certificates
+- **Updated idna** - Updated from 3.7 to 3.11 with security improvements for internationalized domain names
+- **Updated charset-normalizer** - Updated from 3.3.2 to 3.4.4 with improved character encoding detection
+
+### Changed
+
+- **Updated core dependencies** - Updated multiple dependencies to latest versions:
+  - packaging: 24.0 → 25.0
+  - iniconfig: 2.0.0 → 2.1.0
+  - pluggy: 1.5.0 → 1.6.0
+  - babel: 2.15.0 → 2.17.0
+- **Improved stability** - All updates tested and verified with 71/71 tests passing
+
 ## [0.0.28] - 2026-01-09
 
 ### Security
