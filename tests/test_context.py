@@ -38,7 +38,7 @@ class TestContext(unittest.TestCase):
         context1 = Context()
         context2 = Context.get_instance()
         self.assertEqual(context1, context2)
-        with self.assertRaises(Exception):
+        with self.assertRaises(RuntimeError):
             Context()
 
     def test_set_name(self):
@@ -64,9 +64,9 @@ class TestContext(unittest.TestCase):
             context.set_log_level(level_int)
             self.assertEqual(context.log_level, level_int)
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             context.set_log_level("INVALID")
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             context.set_log_level(12345)  # some invalid int
 
     def test_init_logger(self):
@@ -75,7 +75,7 @@ class TestContext(unittest.TestCase):
         context.init_logger()
         self.assertIsNotNone(context.logger)
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(RuntimeError):
             context.init_logger()
 
     def test_get_logger(self):

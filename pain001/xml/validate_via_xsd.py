@@ -33,14 +33,14 @@ def validate_via_xsd(xml_file_path: str, xsd_file_path: str) -> bool:
     # Load XML file into an ElementTree object using defusedxml for security.
     try:
         xml_tree = defused_et.parse(xml_file_path)
-    except (ParseError, OSError, IOError) as e:
+    except (ParseError, OSError) as e:
         print(f"Error parsing XML file: {e}")
         return False
 
     # Load XSD schema into an XMLSchema object.
     try:
         xsd = xmlschema.XMLSchema(xsd_file_path)
-    except (xmlschema.XMLSchemaException, ParseError, OSError, IOError) as e:
+    except (xmlschema.XMLSchemaException, ParseError, OSError) as e:
         print(f"Error loading XSD schema: {e}")
         return False
 

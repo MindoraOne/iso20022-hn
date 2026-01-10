@@ -24,7 +24,6 @@ from pain001.csv.validate_csv_data import validate_csv_data
 
 
 class TestLoadCsvData(unittest.TestCase):
-
     def setUp(self):
         """Create test files before each test."""
         os.makedirs("tests/data", exist_ok=True)

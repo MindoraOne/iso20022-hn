@@ -17,8 +17,6 @@
 
 import xml.etree.ElementTree as ET
 
-import pytest
-
 from pain001.xml.register_namespaces import register_namespaces
 
 
@@ -176,7 +174,7 @@ class TestRegisterNamespaces:
         namespace = f"urn:iso:std:iso:20022:tech:xsd:{message_type}"
         root = ET.Element(f"{{{namespace}}}Document")
         child = ET.SubElement(root, f"{{{namespace}}}CstmrCdtTrfInitn")
-        grandchild = ET.SubElement(child, f"{{{namespace}}}GrpHdr")
+        ET.SubElement(child, f"{{{namespace}}}GrpHdr")
 
         xml_string = ET.tostring(root, encoding="unicode")
 

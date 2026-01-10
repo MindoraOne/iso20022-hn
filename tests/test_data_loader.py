@@ -16,9 +16,7 @@
 """Tests for the unified data loader."""
 
 import csv
-import os
 import sqlite3
-import tempfile
 
 import pytest
 

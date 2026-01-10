@@ -442,9 +442,9 @@ class TestXMLCreation(unittest.TestCase):
         cstmr_cdt_trf_initn_element = self.root[0]
         self.assertEqual(cstmr_cdt_trf_initn_element.tag, "CstmrCdtTrfInitn")
 
-    def test_create_xml_v4(self):
+    def test_create_xml_v4_detailed(self):
         """
-        Test create_xml_v4
+        Test create_xml_v4 with detailed checks
         """
         create_xml_v4(self.root, [self.row_v4])
         cstmr_cdt_trf_initn_element = self.root[0]

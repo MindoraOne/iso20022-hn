@@ -156,7 +156,7 @@ class TestCliModule(unittest.TestCase):
         # Mock the process_files and validate_via_xsd functions
         with patch("pain001.cli.cli.process_files") as mock_process:
             with patch("pain001.cli.cli.validate_via_xsd", return_value=True):
-                result = self.runner.invoke(
+                self.runner.invoke(
                     main,
                     [
                         "-t",

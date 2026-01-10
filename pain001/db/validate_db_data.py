@@ -14,14 +14,14 @@
 # limitations under the License.
 
 import logging
-from typing import Any, Dict, List
+from typing import Any
 
 # Configure the logger
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.ERROR)
 
 
-def validate_db_data(data: List[Dict[str, Any]]) -> bool:
+def validate_db_data(data: list[dict[str, Any]]) -> bool:
     """
     Validate the data from a database.
 

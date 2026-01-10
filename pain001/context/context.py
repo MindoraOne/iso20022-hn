@@ -49,10 +49,10 @@ class Context:
         """Initializes the class and creates a logger.
 
         Raises:
-            Exception: If the class is already initialized.
+            RuntimeError: If the class is already initialized.
         """
         if Context.instance is not None:
-            raise Exception("This class is a singleton!")
+            raise RuntimeError("This class is a singleton!")
         else:
             Context.instance = self
             self.name: str = ""
@@ -76,7 +76,7 @@ class Context:
             log_level: The log level of the logger.
 
         Raises:
-            Exception: If the log level is invalid.
+            ValueError: If the log level is invalid.
         """
         valid_log_levels = {
             "DEBUG": logging.DEBUG,
@@ -90,7 +90,7 @@ class Context:
             if log_level in valid_log_levels.values():
                 self.log_level = log_level
             else:
-                raise Exception("Invalid log level")
+                raise ValueError("Invalid log level")
         else:
             log_level = (
                 log_level.strip().upper()
@@ -98,7 +98,7 @@ class Context:
             if log_level in valid_log_levels:
                 self.log_level = valid_log_levels[log_level]
             else:
-                raise Exception("Invalid log level")
+                raise ValueError("Invalid log level")
 
         if self.logger:
             self.logger.setLevel(self.log_level)
@@ -107,10 +107,10 @@ class Context:
         """Initializes the logger.
 
         Raises:
-            Exception: If the logger has already been initialized.
+            RuntimeError: If the logger has already been initialized.
         """
         if self.logger is not None:
-            raise Exception("Logger has already been initialized")
+            raise RuntimeError("Logger has already been initialized")
 
         self.logger = logging.getLogger(self.name)
         console_handler = logging.StreamHandler()

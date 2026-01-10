@@ -45,7 +45,6 @@ class TestCoverageComplete:
         with patch.object(sys, "argv", ["pain001"]):
             with pytest.raises(SystemExit) as exc_info:
                 # Import and execute the __main__ block
-                from pain001.core import core
 
                 if len(sys.argv) < 5:
                     sys.exit(1)
@@ -79,8 +78,6 @@ class TestCoverageComplete:
         """Test context logger when handlers already exist."""
         # Create a fresh context instance for testing
         import logging
-
-        from pain001.context.context import Context
 
         # Reset the singleton for this test
         Context._instance = None
@@ -126,7 +123,7 @@ class TestCoverageComplete:
         nonexistent_xml_path = "/nonexistent/path/template.xml"
 
         try:
-            with pytest.raises(Exception):
+            with pytest.raises((FileNotFoundError, OSError)):
                 process_files(
                     "pain.001.001.03",
                     nonexistent_xml_path,

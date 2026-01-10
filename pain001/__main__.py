@@ -29,7 +29,7 @@ console.print(table)
 
 @click.command(
     help=("To use Pain001, you must specify the following options:\n\n"),
-    context_settings=dict(help_option_names=["-h", "--help"]),
+    context_settings={"help_option_names": ["-h", "--help"]},
 )
 @click.option(
     "-t",

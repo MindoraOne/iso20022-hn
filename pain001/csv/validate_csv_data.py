@@ -41,10 +41,10 @@
 
 
 import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 
-def validate_csv_data(data: List[Dict[str, Any]]) -> bool:
+def validate_csv_data(data: list[dict[str, Any]]) -> bool:
     """Validate the CSV data before processing it.
 
     Args:
@@ -83,52 +83,66 @@ def validate_csv_data(data: List[Dict[str, Any]]) -> bool:
         return False
 
     is_valid = True
+    errors = []  # Batch error messages for better performance
 
-    for row in data:
+    for _row_idx, row in enumerate(data):
         missing_columns = []
         invalid_columns = []
+
         for column, data_type in required_columns.items():
-            value = row.get(column)
-            if value is None or value.strip() == "":
+            raw_value = row.get(column)
+
+            # Single strip operation, cached result
+            if raw_value is None:
                 missing_columns.append(column)
                 is_valid = False
-            else:
-                try:
-                    if data_type == int:
-                        int(value)
-                    elif data_type == float:
-                        float(value)
-                    elif data_type == bool:
-                        if value.strip().lower() not in [
-                            "true",
-                            "false",
-                        ]:
-                            raise ValueError
-                    elif data_type == datetime.datetime:
-                        try:
-                            # Handle the "Z" suffix for UTC
-                            if value.endswith("Z"):
-                                value = value[:-1] + "+00:00"
-                            datetime.datetime.fromisoformat(value)
-                        except ValueError:
-                            datetime.datetime.strptime(value, "%Y-%m-%d")
-                    else:
-                        str(value)
-                except ValueError:
-                    invalid_columns.append(column)
-                    is_valid = False
+                continue
+
+            value = raw_value.strip()
+
+            if not value:
+                missing_columns.append(column)
+                is_valid = False
+                continue
+
+            # Optimized type validation
+            try:
+                if data_type is int:
+                    int(value)
+                elif data_type is float:
+                    float(value)
+                elif data_type is bool:
+                    if value.lower() not in ("true", "false"):
+                        raise ValueError
+                elif data_type is datetime.datetime:
+                    # Handle the "Z" suffix for UTC
+                    if value.endswith("Z"):
+                        value = value[:-1] + "+00:00"
+                    try:
+                        datetime.datetime.fromisoformat(value)
+                    except ValueError:
+                        datetime.datetime.strptime(value, "%Y-%m-%d")
+                # str type always passes if not empty
+            except ValueError:
+                invalid_columns.append(column)
+                is_valid = False
+
+        # Batch error messages per row
         if missing_columns:
-            print(
-                f"Error: Missing value(s) for column(s) {missing_columns} "
-                f"in row: {row}"
+            errors.append(
+                f"Error: Missing value(s) for column(s) {missing_columns} in row: {row}"
             )
         if invalid_columns:
             expected_types = [
                 required_columns[col].__name__ for col in invalid_columns
             ]
-            print(
-                f"Error: Invalid data type for column(s) {invalid_columns}, "
-                f"expected {expected_types} in row: {row}"
+            errors.append(
+                f"Error: Invalid data type for column(s) "
+                f"{invalid_columns}, expected {expected_types} in row: {row}"
             )
+
+    # Single print operation for all errors
+    if errors:
+        print("\n".join(errors))
 
     return is_valid

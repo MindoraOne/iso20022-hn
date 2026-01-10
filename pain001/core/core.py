@@ -18,7 +18,7 @@ import os
 
 # Import the standard libraries
 import sys
-from typing import Any, Dict, List, Union
+from typing import Any, Union
 
 # Import the pain001 library functions
 from pain001.constants.constants import valid_xml_types
@@ -32,7 +32,7 @@ def process_files(
     xml_message_type: str,
     xml_template_file_path: str,
     xsd_schema_file_path: str,
-    data_file_path: Union[str, List[Dict[str, Any]], Dict[str, Any]],
+    data_file_path: Union[str, list[dict[str, Any]], dict[str, Any]],
 ):
     """
     This function generates an ISO 20022 payment message from various data sources.
@@ -81,8 +81,7 @@ def process_files(
     # Check if the XML template file exists
     if not os.path.exists(xml_template_file_path):
         error_message = (
-            f"Error: XML template '{xml_template_file_path}' "
-            f"does not exist."
+            f"Error: XML template '{xml_template_file_path}' does not exist."
         )
         logger.error(error_message)
         raise FileNotFoundError(error_message)
@@ -90,8 +89,7 @@ def process_files(
     # Check if the XSD schema file exists
     if not os.path.exists(xsd_schema_file_path):
         error_message = (
-            f"Error: XSD schema file '{xsd_schema_file_path}' "
-            f"does not exist."
+            f"Error: XSD schema file '{xsd_schema_file_path}' does not exist."
         )
         logger.error(error_message)
         raise FileNotFoundError(error_message)

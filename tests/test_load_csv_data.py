@@ -18,12 +18,14 @@ import csv
 import os
 import unittest
 
-from pain001.csv.load_csv_data import load_csv_data
+from pain001.csv.load_csv_data import (
+    load_csv_data,
+    load_csv_data_streaming,
+)
 from pain001.csv.validate_csv_data import validate_csv_data
 
 
 class TestLoadCsvData(unittest.TestCase):
-
     def setUp(self):
         """Create test files before each test."""
         os.makedirs("tests/data", exist_ok=True)
@@ -522,7 +524,7 @@ class TestLoadCsvData(unittest.TestCase):
             try:
                 os.chmod(temp_file, 0o644)
                 os.remove(temp_file)
-            except:
+            except (OSError, PermissionError):
                 pass
 
     def test_load_csv_unicode_decode_error(self):
@@ -544,6 +546,147 @@ class TestLoadCsvData(unittest.TestCase):
         finally:
             if os.path.exists(temp_file):
                 os.remove(temp_file)
+
+
+class TestLoadCsvDataStreaming(unittest.TestCase):
+    """Test the streaming CSV data loader."""
+
+    def setUp(self):
+        """Create test files before each test."""
+        os.makedirs("tests/data", exist_ok=True)
+
+    def test_streaming_valid_csv(self):
+        """Test streaming with valid CSV data."""
+        chunks = list(
+            load_csv_data_streaming(
+                "tests/data/valid_data_unique.csv", chunk_size=1
+            )
+        )
+        # Should have multiple chunks for the valid_data.csv file
+        self.assertGreater(len(chunks), 0)
+        # Each chunk should be a list of dicts
+        for chunk in chunks:
+            self.assertIsInstance(chunk, list)
+            for row in chunk:
+                self.assertIsInstance(row, dict)
+
+    def test_streaming_with_custom_chunk_size(self):
+        """Test streaming with different chunk sizes."""
+        # Test with chunk size of 2
+        chunks_size_2 = list(
+            load_csv_data_streaming(
+                "tests/data/valid_data_unique.csv", chunk_size=2
+            )
+        )
+
+        # Test with chunk size of 10
+        chunks_size_10 = list(
+            load_csv_data_streaming(
+                "tests/data/valid_data_unique.csv", chunk_size=10
+            )
+        )
+
+        # Larger chunk size should result in fewer chunks
+        self.assertLessEqual(len(chunks_size_10), len(chunks_size_2))
+
+    def test_streaming_file_not_found(self):
+        """Test streaming with non-existent file."""
+        with self.assertRaises(FileNotFoundError):
+            list(load_csv_data_streaming("non_existent.csv"))
+
+    def test_streaming_empty_csv(self):
+        """Test streaming with empty CSV file."""
+        import tempfile
+
+        with tempfile.NamedTemporaryFile(
+            mode="w", delete=False, suffix=".csv", encoding="utf-8"
+        ) as f:
+            temp_file = f.name
+            # Write only header
+            f.write("col1,col2\n")
+
+        try:
+            with self.assertRaises(ValueError):
+                list(load_csv_data_streaming(temp_file))
+        finally:
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
+
+    def test_streaming_io_error(self):
+        """Test streaming with IO error."""
+        import tempfile
+
+        with tempfile.NamedTemporaryFile(
+            mode="w", delete=False, suffix=".csv", encoding="utf-8"
+        ) as f:
+            temp_file = f.name
+            f.write("col1,col2\n")
+            f.write("val1,val2\n")
+
+        # Make file unreadable
+        os.chmod(temp_file, 0o000)
+
+        try:
+            with self.assertRaises(OSError):
+                list(load_csv_data_streaming(temp_file))
+        finally:
+            # Restore permissions and clean up
+            try:
+                os.chmod(temp_file, 0o644)
+                os.remove(temp_file)
+            except (OSError, PermissionError):
+                pass
+
+    def test_streaming_unicode_decode_error(self):
+        """Test streaming with Unicode decode error."""
+        import tempfile
+
+        # Create a file with invalid UTF-8 bytes
+        with tempfile.NamedTemporaryFile(
+            mode="wb", delete=False, suffix=".csv"
+        ) as f:
+            temp_file = f.name
+            # Write invalid UTF-8 sequence
+            f.write(b"header1,header2\n")
+            f.write(b"value1,\xff\xfe\n")  # Invalid UTF-8
+
+        try:
+            with self.assertRaises(UnicodeDecodeError):
+                list(load_csv_data_streaming(temp_file))
+        finally:
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
+
+    def test_streaming_yields_all_data(self):
+        """Test that streaming yields all rows from the file."""
+        # Load data normally
+        normal_data = load_csv_data("tests/data/valid_data_unique.csv")
+
+        # Load data via streaming and flatten
+        streaming_data = []
+        for chunk in load_csv_data_streaming(
+            "tests/data/valid_data_unique.csv", chunk_size=1
+        ):
+            streaming_data.extend(chunk)
+
+        # Both should have the same number of rows
+        self.assertEqual(len(normal_data), len(streaming_data))
+
+    def test_streaming_chunk_boundaries(self):
+        """Test that chunk boundaries are correctly handled."""
+        chunks = list(
+            load_csv_data_streaming(
+                "tests/data/valid_data_unique.csv", chunk_size=2
+            )
+        )
+
+        # All chunks except possibly the last should have chunk_size rows
+        for chunk in chunks[:-1]:
+            self.assertEqual(len(chunk), 2)
+
+        # Last chunk should have <= chunk_size rows
+        if chunks:
+            self.assertLessEqual(len(chunks[-1]), 2)
 
 
 if __name__ == "__main__":

@@ -41,7 +41,7 @@ def test_create_root_element():
 
     # Check if xsi:schemaLocation attribute is set correctly
     schema_location = (
-        "urn:iso:std:iso:20022:tech:xsd:pain.001.001.03 " "pain.001.001.03.xsd"
+        "urn:iso:std:iso:20022:tech:xsd:pain.001.001.03 pain.001.001.03.xsd"
     )
     assert root.attrib["xsi:schemaLocation"] == schema_location
 
@@ -64,9 +64,9 @@ def test_create_root_element_does_not_raise_exception():
 
         # Create the root element
         create_root_element(payment_initiation_message_type)
-    except Exception:
+    except Exception as err:
         error_msg = "create_root_element unexpected exception"
-        assert False, error_msg
+        raise AssertionError(error_msg) from err
 
 
 def test_create_root_element_handles_empty_input_gracefully():
@@ -78,9 +78,9 @@ def test_create_root_element_handles_empty_input_gracefully():
 
         # Create the root element
         create_root_element(payment_initiation_message_type)
-    except Exception:
+    except Exception as err:
         error_msg = "create_root_element unexpected exception"
-        assert False, error_msg
+        raise AssertionError(error_msg) from err
 
 
 def test_create_root_element_sets_all_expected_attributes_correctly():
@@ -103,7 +103,7 @@ def test_create_root_element_sets_all_expected_attributes_correctly():
 
     # Check if xsi:schemaLocation attribute is set correctly
     assert root.attrib["xsi:schemaLocation"] == (
-        "urn:iso:std:iso:20022:tech:xsd:pain.001.001.03 " "pain.001.001.03.xsd"
+        "urn:iso:std:iso:20022:tech:xsd:pain.001.001.03 pain.001.001.03.xsd"
     )
 
     # Check if optional attributes are set correctly

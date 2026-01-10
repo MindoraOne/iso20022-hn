@@ -15,7 +15,7 @@
 
 """Universal data loader supporting multiple input sources."""
 
-from typing import Any, Dict, List, Union
+from typing import Any, Union
 
 from pain001.csv.load_csv_data import load_csv_data
 from pain001.csv.validate_csv_data import validate_csv_data
@@ -24,8 +24,8 @@ from pain001.db.validate_db_data import validate_db_data
 
 
 def load_payment_data(
-    data_source: Union[str, List[Dict[str, Any]], Dict[str, Any]]
-) -> List[Dict[str, Any]]:
+    data_source: Union[str, list[dict[str, Any]], dict[str, Any]],
+) -> list[dict[str, Any]]:
     """
     Universal data loader supporting multiple input sources.
 
@@ -80,7 +80,7 @@ def load_payment_data(
         )
 
 
-def _load_from_file(file_path: str) -> List[Dict[str, Any]]:
+def _load_from_file(file_path: str) -> list[dict[str, Any]]:
     """
     Load data from file (CSV or SQLite).
 
@@ -102,12 +102,11 @@ def _load_from_file(file_path: str) -> List[Dict[str, Any]]:
 
     else:
         raise ValueError(
-            f"Unsupported file type: {file_path}. "
-            f"Expected .csv or .db file."
+            f"Unsupported file type: {file_path}. Expected .csv or .db file."
         )
 
 
-def _load_from_list(data_list: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def _load_from_list(data_list: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """
     Load data from Python list of dictionaries.
 
@@ -128,7 +127,7 @@ def _load_from_list(data_list: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return data_list
 
 
-def _load_from_dict(data_dict: Dict[str, Any]) -> List[Dict[str, Any]]:
+def _load_from_dict(data_dict: dict[str, Any]) -> list[dict[str, Any]]:
     """
     Load data from a single Python dictionary.
 

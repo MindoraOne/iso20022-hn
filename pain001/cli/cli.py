@@ -47,7 +47,7 @@ console.print(table)
 
 @click.command(
     help=("To use Pain001, you must specify the following options:\n\n"),
-    context_settings=dict(help_option_names=["-h", "--help"]),
+    context_settings={"help_option_names": ["-h", "--help"]},
 )
 @click.option(
     "-t",
@@ -135,7 +135,7 @@ def main(
         print(
             f"""
                 Invalid XML message type: {xml_message_type}.
-                Valid types are: {', '.join(valid_xml_types)}.
+                Valid types are: {", ".join(valid_xml_types)}.
             """
         )
         sys.exit(1)

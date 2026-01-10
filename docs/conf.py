@@ -9,7 +9,7 @@
 project = "Pain001"
 copyright = "2024-2026, Sebastien Rousseau"
 author = "Sebastien Rousseau"
-release = "0.0.32"
+release = "0.0.33"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

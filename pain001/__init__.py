@@ -14,7 +14,8 @@
 # limitations under the License.
 
 """The Python pain001 module."""
-__version__ = "0.0.32"
+
+__version__ = "0.0.33"
 
 # Import main functions for easier access
 from pain001.__main__ import main

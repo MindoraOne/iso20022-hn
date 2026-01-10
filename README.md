@@ -6,7 +6,7 @@
 
 [![PyPI][pypi-badge]][03] [![PyPI Downloads][pypi-downloads-badge]][07] [![License][license-badge]][01] [![Codecov][codecov-badge]][06]
 
-> **Latest Release: v0.0.31** - Code quality and reliability improvements with enhanced type safety, better error handling, and critical bug fixes. [See what's new →](releases/v0.0.31.md)
+> **Latest Release: v0.0.33** - Performance optimizations and code quality improvements with ruff integration, CSV streaming, and significant speed enhancements. [See what's new →](releases/v0.0.33.md)
 
 ## Overview
 
