@@ -15,6 +15,7 @@
 
 import os
 import sqlite3
+from typing import Any
 
 
 def sanitize_table_name(table_name: str) -> str:
@@ -47,7 +48,7 @@ def sanitize_table_name(table_name: str) -> str:
     return sanitized_name
 
 
-def load_db_data(data_file_path, table_name):
+def load_db_data(data_file_path: str, table_name: str) -> list[dict[str, Any]]:
     """
     Load data from an SQLite database table into a list of dictionaries.
 

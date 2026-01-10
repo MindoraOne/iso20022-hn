@@ -22,7 +22,7 @@ readability.
 import xml.etree.ElementTree as et  # nosec B405 - Only used for tostring(), not parsing untrusted XML
 
 
-def indent_xml(elem, level=0):
+def indent_xml(elem: et.Element, level: int = 0) -> None:
     """
     Add indentation to XML elements in-place for pretty printing.
 
@@ -50,7 +50,7 @@ def indent_xml(elem, level=0):
             elem.tail = indent
 
 
-def write_xml_to_file(xml_file_path, root):
+def write_xml_to_file(xml_file_path: str, root: et.Element) -> None:
     """
     Write the XML tree to a file, with pretty formatting (indentation).
 
@@ -76,8 +76,5 @@ def write_xml_to_file(xml_file_path, root):
     # Create ElementTree and write with declaration
     tree = et.ElementTree(root)
     tree.write(
-        xml_file_path,
-        encoding="utf-8",
-        xml_declaration=True,
-        method="xml"
+        xml_file_path, encoding="utf-8", xml_declaration=True, method="xml"
     )

@@ -69,7 +69,7 @@ class Context:
         """
         self.name = name
 
-    def set_log_level(self, log_level) -> None:
+    def set_log_level(self, log_level: int) -> None:
         """Sets the log level of the logger.
 
         Args:

@@ -19,6 +19,7 @@
 
 # Import the CSV library
 import sys
+from typing import Any
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -36,8 +37,11 @@ from pain001.xml.validate_via_xsd import validate_via_xsd
 
 
 def generate_xml(
-    data, payment_initiation_message_type, xml_file_path, xsd_file_path
-):
+    data: list[dict[str, Any]],
+    payment_initiation_message_type: str,
+    xml_file_path: str,
+    xsd_file_path: str,
+) -> None:
     """Generates an ISO 20022 pain.001 XML file from input data.
 
     Args:

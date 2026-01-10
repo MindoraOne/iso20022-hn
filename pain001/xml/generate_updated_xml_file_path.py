@@ -21,8 +21,8 @@ import os
 
 
 def generate_updated_xml_file_path(
-    xml_file_path, payment_initiation_message_type
-):
+    xml_file_path: str, payment_initiation_message_type: str
+) -> str:
     """Generates the file path for an updated XML file.
 
     Given the original XML file path and payment message type, this function

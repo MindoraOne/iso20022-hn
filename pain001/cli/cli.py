@@ -17,6 +17,7 @@
 import configparser
 import os
 import sys
+from typing import Optional
 
 import click
 from rich import box
@@ -84,13 +85,27 @@ console.print(table)
     help="Path to configuration file (optional)",
 )
 def main(
-    xml_message_type,
-    xml_template_file_path,
-    xsd_schema_file_path,
-    data_file_path,
-    config_file,
-):
-    # Expand user-friendly paths
+    xml_message_type: Optional[str],
+    xml_template_file_path: Optional[str],
+    xsd_schema_file_path: Optional[str],
+    data_file_path: Optional[str],
+    config_file: Optional[str],
+) -> None:
+    # Check that the required arguments are provided first
+    if not xml_message_type:
+        print("The XML message type is required.")
+        sys.exit(1)
+    if not xml_template_file_path:
+        print("The XML template file path is required.")
+        sys.exit(1)
+    if not xsd_schema_file_path:
+        print("The XSD schema file path is required.")
+        sys.exit(1)
+    if not data_file_path:
+        print("The data file path is required.")
+        sys.exit(1)
+
+    # Expand user-friendly paths (now guaranteed to be non-None)
     xml_template_file_path = os.path.expanduser(xml_template_file_path)
     xsd_schema_file_path = os.path.expanduser(xsd_schema_file_path)
     data_file_path = os.path.expanduser(data_file_path)
@@ -109,11 +124,6 @@ def main(
             data_file_path = config["Paths"].get(
                 "data_file_path", data_file_path
             )
-
-    # Check that the required arguments are provided
-    if not xml_message_type:
-        print("The XML message type is required.")
-        sys.exit(1)
 
     # Check file existence
     for file_path in [

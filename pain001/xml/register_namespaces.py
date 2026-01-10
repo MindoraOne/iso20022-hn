@@ -20,7 +20,7 @@ import xml.etree.ElementTree as et  # nosec B405 - Only used for namespace regis
 # are created (XML tags and CSV columns mapping)
 
 
-def register_namespaces(payment_initiation_message_type):
+def register_namespaces(payment_initiation_message_type: str) -> None:
     """This function registers the namespaces for the payment initiation
     message type.
 

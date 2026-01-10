@@ -33,7 +33,7 @@ def process_files(
     xml_template_file_path: str,
     xsd_schema_file_path: str,
     data_file_path: Union[str, list[dict[str, Any]], dict[str, Any]],
-):
+) -> None:
     """
     This function generates an ISO 20022 payment message from various data sources.
 

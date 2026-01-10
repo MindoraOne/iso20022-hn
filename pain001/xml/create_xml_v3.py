@@ -24,12 +24,13 @@ returns the root element of the modified XML tree.
 """
 
 import xml.etree.ElementTree as et  # nosec B405 - Only used for element creation, not parsing; defused_et used for parsing
+from typing import Any
 
 from defusedxml import ElementTree as defused_et
 from jinja2 import Environment, FileSystemLoader
 
 
-def create_xml_v3(root, data):
+def create_xml_v3(root: et.Element, data: list[dict[str, Any]]) -> et.Element:
     """
     Constructs an XML tree based on the pain.001.001.03 schema and appends it
     to the provided root element. This function uses the Jinja2 templating

@@ -1,6 +1,7 @@
 # Other imports remain the same
 import os
 import sys
+from typing import Optional
 
 import click
 from rich import box
@@ -59,11 +60,11 @@ console.print(table)
     help="Path to data file (CSV or SQLite) (required)",
 )
 def cli(
-    xml_message_type,
-    xml_template_file_path,
-    xsd_schema_file_path,
-    data_file_path,
-):
+    xml_message_type: Optional[str],
+    xml_template_file_path: Optional[str],
+    xsd_schema_file_path: Optional[str],
+    data_file_path: Optional[str],
+) -> None:
     main(
         xml_message_type,
         xml_template_file_path,
@@ -73,11 +74,11 @@ def cli(
 
 
 def main(
-    xml_message_type,
-    xml_template_file_path,
-    xsd_schema_file_path,
-    data_file_path,
-):
+    xml_message_type: Optional[str],
+    xml_template_file_path: Optional[str],
+    xsd_schema_file_path: Optional[str],
+    data_file_path: Optional[str],
+) -> None:
     try:
         # Check that the required arguments are provided
         if not xml_message_type:

@@ -27,10 +27,15 @@ official ISO 20022 message definitions website:
 """
 
 # Import required modules
+import xml.etree.ElementTree as et
+from typing import Any
+
 from pain001.xml.create_xml_element import create_xml_element
 
 
-def create_common_elements(parent, row, mapping):
+def create_common_elements(
+    parent: et.Element, row: dict[str, Any], mapping: dict[str, str]
+) -> None:
     """
     Creates common XML elements, specifically "PmtInfId" and "PmtMtd",
     in the XML tree. This function uses data from the input Data files, which

@@ -14,9 +14,15 @@
 # limitations under the License.
 
 import xml.etree.ElementTree as et  # nosec B405 - Only used for element creation, not parsing untrusted XML
+from typing import Optional
 
 
-def create_xml_element(parent, tag, text=None, attributes=None):
+def create_xml_element(
+    parent: et.Element,
+    tag: str,
+    text: Optional[str] = None,
+    attributes: Optional[dict[str, str]] = None,
+) -> et.Element:
     """
     Create and append an XML element with the specified tag, text, and
     attributes to a given parent element in the XML tree. The new element

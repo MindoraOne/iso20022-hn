@@ -186,6 +186,7 @@ class TestMain:
         # We need to mock it in the __main__ module where it's imported
         with patch(
             "pain001.__main__.process_files",
+            autospec=True,
             side_effect=Exception("Test exception"),
         ):
             result = self.runner.invoke(

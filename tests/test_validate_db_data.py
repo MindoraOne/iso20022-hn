@@ -79,7 +79,7 @@ class TestValidateDbData(unittest.TestCase):
     def test_validate_db_data_valid(self):
         self.assertTrue(validate_db_data(self.valid_data))
 
-    @patch("pain001.db.validate_db_data.logger.error")
+    @patch("pain001.db.validate_db_data.logger.error", autospec=True)
     def test_validate_db_data_logging(self, mock_logging_error):
         invalid_data = self.valid_data.copy()
         invalid_data[0].pop("id")

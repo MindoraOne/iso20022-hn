@@ -252,7 +252,7 @@ class TestDataLoader:
         invalid_data_list = [{"id": "test", "date": "2023-01-01"}]
 
         with patch(
-            "pain001.data.loader.validate_csv_data", return_value=False
+            "pain001.data.loader.validate_csv_data", autospec=True, return_value=False
         ):
             with pytest.raises(
                 ValueError, match="Data list validation failed"
@@ -266,7 +266,7 @@ class TestDataLoader:
         invalid_data_dict = {"id": "test", "date": "2023-01-01"}
 
         with patch(
-            "pain001.data.loader.validate_csv_data", return_value=False
+            "pain001.data.loader.validate_csv_data", autospec=True, return_value=False
         ):
             with pytest.raises(
                 ValueError, match="Data dictionary validation failed"

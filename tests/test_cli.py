@@ -154,8 +154,8 @@ class TestCliModule(unittest.TestCase):
             f.write(f"data_file_path = {self.csv_file}\n")
 
         # Mock the process_files and validate_via_xsd functions
-        with patch("pain001.cli.cli.process_files") as mock_process:
-            with patch("pain001.cli.cli.validate_via_xsd", return_value=True):
+        with patch("pain001.cli.cli.process_files", autospec=True) as mock_process:
+            with patch("pain001.cli.cli.validate_via_xsd", autospec=True, return_value=True):
                 self.runner.invoke(
                     main,
                     [
@@ -178,6 +178,7 @@ class TestCliModule(unittest.TestCase):
         """Test CLI when schema validation fails."""
         with patch(
             "pain001.cli.cli.validate_via_xsd",
+            autospec=True,
             side_effect=Exception("Validation error"),
         ):
             result = self.runner.invoke(
@@ -203,9 +204,9 @@ class TestCliModule(unittest.TestCase):
         with open(home_xml, "w") as f:
             f.write("<root></root>")
 
-        with patch("os.path.expanduser", return_value=home_xml):
-            with patch("pain001.cli.cli.validate_via_xsd", return_value=True):
-                with patch("pain001.cli.cli.process_files"):
+        with patch("os.path.expanduser", autospec=True, return_value=home_xml):
+            with patch("pain001.cli.cli.validate_via_xsd", autospec=True, return_value=True):
+                with patch("pain001.cli.cli.process_files", autospec=True):
                     result = self.runner.invoke(
                         main,
                         [

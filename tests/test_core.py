@@ -238,7 +238,7 @@ class TestProcessFiles(unittest.TestCase):
             )
 
     def test_valid_csv_data(self):
-        with patch("pain001.core.core.generate_xml") as mock_generate_xml:
+        with patch("pain001.core.core.generate_xml", autospec=True) as mock_generate_xml:
             process_files(
                 self.xml_message_type,
                 self.xml_template_file_path,
@@ -249,9 +249,9 @@ class TestProcessFiles(unittest.TestCase):
 
     def test_valid_sqlite_data(self):
         with (
-            patch("pain001.data.loader.load_db_data", return_value=[{}]),
-            patch("pain001.data.loader.validate_db_data", return_value=True),
-            patch("pain001.core.core.generate_xml") as mock_generate_xml,
+            patch("pain001.data.loader.load_db_data", autospec=True, return_value=[{}]),
+            patch("pain001.data.loader.validate_db_data", autospec=True, return_value=True),
+            patch("pain001.core.core.generate_xml", autospec=True) as mock_generate_xml,
         ):
             process_files(
                 self.xml_message_type,
@@ -263,8 +263,8 @@ class TestProcessFiles(unittest.TestCase):
 
     def test_invalid_sqlite_data(self):
         with (
-            patch("pain001.data.loader.load_db_data", return_value=[{}]),
-            patch("pain001.data.loader.validate_db_data", return_value=False),
+            patch("pain001.data.loader.load_db_data", autospec=True, return_value=[{}]),
+            patch("pain001.data.loader.validate_db_data", autospec=True, return_value=False),
         ):
             with self.assertRaises(ValueError):
                 process_files(

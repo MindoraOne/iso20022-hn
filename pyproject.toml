@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pain001"
-version = "0.0.33"
+version = "0.0.34"
 description = "Pain001 is a Python Library for Automating ISO 20022-Compliant Payment Files Using CSV Data."
 authors = ["Sebastien Rousseau <sebastian.rousseau@gmail.com>"]
 license = "Apache Software License"
@@ -11,19 +11,12 @@ homepage = "https://pain001.com"
 [tool.poetry.dependencies]
 click = "8.1.7"
 colorama = "0.4.6"
-datetime = "5.5"
 defusedxml = "0.7.1"
-elementpath = "4.4.0"
 jinja2 = "3.1.6"
-markdown-it-py = "3.0.0"
 markupsafe = "2.1.5"
-mdurl = "0.1.2"
 pygments = "2.18.0"
 python = "^3.9"
-requests = "^2.32.3"
 rich = "13.7.1"
-setuptools = "78.1.1"
-urllib3 = "2.6.3"
 xmlschema = "3.3.1"
 
 [tool.poetry.group.dev.dependencies]
@@ -37,6 +30,7 @@ pylint = "^3.2.0"
 bandit = "^1.7.0"
 safety = "^3.0.0"
 ruff = "^0.8.0"
+types-defusedxml = "^0.7.0.20250822"
 
 [tool.poetry.group.docs]
 optional = true
@@ -96,3 +90,23 @@ ignore = [
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+[tool.mypy]
+python_version = "3.9"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_any_unimported = false
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+check_untyped_defs = true
+strict_equality = true
+exclude = [
+    "pain001/templates/",
+]
+
+[[tool.mypy.overrides]]
+module = "xmlschema.*"
+ignore_missing_imports = true

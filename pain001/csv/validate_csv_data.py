@@ -40,7 +40,7 @@
 # - remittance_information (str) - remittance information
 
 
-import datetime
+from datetime import datetime
 from typing import Any
 
 
@@ -58,11 +58,11 @@ def _validate_datetime(value: str) -> bool:
     if value.endswith("Z"):
         cleaned_value = value[:-1] + "+00:00"
     try:
-        datetime.datetime.fromisoformat(cleaned_value)
+        datetime.fromisoformat(cleaned_value)
         return True
     except ValueError:
         try:
-            datetime.datetime.strptime(cleaned_value, "%Y-%m-%d")
+            datetime.strptime(cleaned_value, "%Y-%m-%d")
             return True
         except ValueError:
             return False
@@ -86,7 +86,7 @@ def _validate_field_type(value: str, data_type: type) -> bool:
         elif data_type is bool:
             if value.lower() not in ("true", "false"):
                 return False
-        elif data_type is datetime.datetime:
+        elif data_type is datetime:
             return _validate_datetime(value)
         # str type always passes if not empty
         return True
@@ -174,7 +174,7 @@ def validate_csv_data(data: list[dict[str, Any]]) -> bool:
     """
     required_columns = {
         "id": int,
-        "date": datetime.datetime,
+        "date": datetime,
         "nb_of_txs": int,
         "ctrl_sum": float,
         "initiator_name": str,
@@ -182,7 +182,7 @@ def validate_csv_data(data: list[dict[str, Any]]) -> bool:
         "payment_method": str,
         "batch_booking": bool,
         "service_level_code": str,
-        "requested_execution_date": datetime.datetime,
+        "requested_execution_date": datetime,
         "debtor_name": str,
         "debtor_account_IBAN": str,
         "debtor_agent_BIC": str,
@@ -204,7 +204,7 @@ def validate_csv_data(data: list[dict[str, Any]]) -> bool:
     is_valid = True
     all_errors = []  # Batch error messages for better performance
 
-    for _row_idx, row in enumerate(data):
+    for row in data:
         missing_columns, invalid_columns = _validate_row(row, required_columns)
 
         if missing_columns or invalid_columns:
