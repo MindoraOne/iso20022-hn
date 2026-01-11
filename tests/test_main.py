@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
+
 from click.testing import CliRunner
 
 from pain001.__main__ import cli
@@ -123,8 +125,10 @@ class TestMain:
             ],
         )
         assert result.exit_code == 1
+        # Strip ANSI color codes before assertion
+        clean_output = re.sub(r"\x1b\[[0-9;]*m", "", result.output)
         assert (
-            "The XML template file 'invalid' does not exist." in result.output
+            "The XML template file 'invalid' does not exist." in clean_output
         )
 
     def test_main_with_invalid_xsd_template_file(self) -> None:
