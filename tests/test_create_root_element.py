@@ -21,7 +21,7 @@ from pain001.xml.create_root_element import create_root_element
 # Test if the root element is created correctly
 
 
-def test_create_root_element():
+def test_create_root_element() -> None:
     # Define the XML message type
     payment_initiation_message_type = "pain.001.001.03"
 
@@ -46,7 +46,7 @@ def test_create_root_element():
     assert root.attrib["xsi:schemaLocation"] == schema_location
 
 
-def test_create_root_element_returns_element_object():
+def test_create_root_element_returns_element_object() -> None:
     # Define the XML message type
     payment_initiation_message_type = "pain.001.001.03"
 
@@ -57,7 +57,7 @@ def test_create_root_element_returns_element_object():
     assert isinstance(root, ET.Element)
 
 
-def test_create_root_element_does_not_raise_exception():
+def test_create_root_element_does_not_raise_exception() -> None:
     try:
         # Define the XML message type
         payment_initiation_message_type = "pain.001.001.03"
@@ -69,7 +69,7 @@ def test_create_root_element_does_not_raise_exception():
         raise AssertionError(error_msg) from err
 
 
-def test_create_root_element_handles_empty_input_gracefully():
+def test_create_root_element_handles_empty_input_gracefully() -> None:
     # Test that the function does not raise an exception when
     # called with no input
     try:
@@ -83,7 +83,7 @@ def test_create_root_element_handles_empty_input_gracefully():
         raise AssertionError(error_msg) from err
 
 
-def test_create_root_element_sets_all_expected_attributes_correctly():
+def test_create_root_element_sets_all_expected_attributes_correctly() -> None:
     # Define the XML message type
     payment_initiation_message_type = "pain.001.001.03"
 

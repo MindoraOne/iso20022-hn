@@ -23,7 +23,7 @@ from pain001.core.core import process_files
 
 
 class TestProcessFiles(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.xml_message_type = "pain.001.001.03"
         self.xml_template_file_path = "tests/data/template_unique.xml"
         self.xsd_schema_file_path = "tests/data/template_unique.xsd"
@@ -43,7 +43,7 @@ class TestProcessFiles(unittest.TestCase):
 
         self.create_test_files()
 
-    def create_test_files(self):
+    def create_test_files(self) -> None:
         os.makedirs("tests/data", exist_ok=True)
 
         # Create valid_data_unique.csv
@@ -163,7 +163,7 @@ class TestProcessFiles(unittest.TestCase):
         with open(self.unsupported_file_path, "w") as f:
             f.write("Unsupported content")
 
-    def test_invalid_xml_message_type(self):
+    def test_invalid_xml_message_type(self) -> None:
         with self.assertRaises(ValueError):
             process_files(
                 "invalid.type",
@@ -172,7 +172,7 @@ class TestProcessFiles(unittest.TestCase):
                 self.csv_file_path,
             )
 
-    def test_missing_xml_template_file(self):
+    def test_missing_xml_template_file(self) -> None:
         with self.assertRaises(FileNotFoundError):
             with self.assertLogs(level="ERROR") as log:
                 process_files(
@@ -187,7 +187,7 @@ class TestProcessFiles(unittest.TestCase):
             log.output[0],
         )
 
-    def test_missing_xsd_schema_file(self):
+    def test_missing_xsd_schema_file(self) -> None:
         with self.assertRaises(FileNotFoundError):
             process_files(
                 self.xml_message_type,
@@ -196,7 +196,7 @@ class TestProcessFiles(unittest.TestCase):
                 self.csv_file_path,
             )
 
-    def test_missing_csv_file(self):
+    def test_missing_csv_file(self) -> None:
         with self.assertRaises(FileNotFoundError):
             process_files(
                 self.xml_message_type,
@@ -205,7 +205,7 @@ class TestProcessFiles(unittest.TestCase):
                 "tests/data/non_existent_data.csv",
             )
 
-    def test_empty_csv_data(self):
+    def test_empty_csv_data(self) -> None:
         with self.assertRaises(ValueError):
             process_files(
                 self.xml_message_type,
@@ -215,7 +215,7 @@ class TestProcessFiles(unittest.TestCase):
             )
 
     @patch("sys.stdout", new_callable=StringIO)
-    def test_single_column_csv_data(self, mock_stdout):
+    def test_single_column_csv_data(self, mock_stdout) -> None:
         with self.assertRaises(ValueError):
             process_files(
                 self.xml_message_type,
@@ -228,7 +228,7 @@ class TestProcessFiles(unittest.TestCase):
             mock_stdout.getvalue(),
         )
 
-    def test_invalid_csv_data(self):
+    def test_invalid_csv_data(self) -> None:
         with self.assertRaises(ValueError):
             process_files(
                 self.xml_message_type,
@@ -237,8 +237,10 @@ class TestProcessFiles(unittest.TestCase):
                 self.invalid_csv_file_path,
             )
 
-    def test_valid_csv_data(self):
-        with patch("pain001.core.core.generate_xml", autospec=True) as mock_generate_xml:
+    def test_valid_csv_data(self) -> None:
+        with patch(
+            "pain001.core.core.generate_xml", autospec=True
+        ) as mock_generate_xml:
             process_files(
                 self.xml_message_type,
                 self.xml_template_file_path,
@@ -247,11 +249,21 @@ class TestProcessFiles(unittest.TestCase):
             )
             mock_generate_xml.assert_called_once()
 
-    def test_valid_sqlite_data(self):
+    def test_valid_sqlite_data(self) -> None:
         with (
-            patch("pain001.data.loader.load_db_data", autospec=True, return_value=[{}]),
-            patch("pain001.data.loader.validate_db_data", autospec=True, return_value=True),
-            patch("pain001.core.core.generate_xml", autospec=True) as mock_generate_xml,
+            patch(
+                "pain001.data.loader.load_db_data",
+                autospec=True,
+                return_value=[{}],
+            ),
+            patch(
+                "pain001.data.loader.validate_db_data",
+                autospec=True,
+                return_value=True,
+            ),
+            patch(
+                "pain001.core.core.generate_xml", autospec=True
+            ) as mock_generate_xml,
         ):
             process_files(
                 self.xml_message_type,
@@ -261,10 +273,18 @@ class TestProcessFiles(unittest.TestCase):
             )
             mock_generate_xml.assert_called_once()
 
-    def test_invalid_sqlite_data(self):
+    def test_invalid_sqlite_data(self) -> None:
         with (
-            patch("pain001.data.loader.load_db_data", autospec=True, return_value=[{}]),
-            patch("pain001.data.loader.validate_db_data", autospec=True, return_value=False),
+            patch(
+                "pain001.data.loader.load_db_data",
+                autospec=True,
+                return_value=[{}],
+            ),
+            patch(
+                "pain001.data.loader.validate_db_data",
+                autospec=True,
+                return_value=False,
+            ),
         ):
             with self.assertRaises(ValueError):
                 process_files(
@@ -274,7 +294,7 @@ class TestProcessFiles(unittest.TestCase):
                     self.sqlite_file_path,
                 )
 
-    def test_unsupported_data_file_type(self):
+    def test_unsupported_data_file_type(self) -> None:
         with self.assertRaises(ValueError):
             with self.assertLogs(level="ERROR") as log:
                 process_files(
@@ -288,7 +308,7 @@ class TestProcessFiles(unittest.TestCase):
             log.output[0],
         )
 
-    def test_core_main_entry_point(self):
+    def test_core_main_entry_point(self) -> None:
         """Test core.py __main__ entry point."""
         import subprocess
         import sys
@@ -302,7 +322,7 @@ class TestProcessFiles(unittest.TestCase):
         assert result.returncode == 1
         assert "Usage:" in result.stdout or "Usage:" in result.stderr
 
-    def test_core_main_with_arguments(self):
+    def test_core_main_with_arguments(self) -> None:
         """Test core.py __main__ with valid arguments."""
         import subprocess
         import sys

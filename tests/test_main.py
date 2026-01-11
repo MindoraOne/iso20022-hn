@@ -19,14 +19,14 @@ from pain001.__main__ import cli
 
 
 class TestMain:
-    def setup_method(self):
+    def setup_method(self) -> None:
         self.runner = CliRunner()
         self.xml_message_type = "pain.001.001.03"
         self.xml_file = "tests/data/template.xml"
         self.xsd_file = "tests/data/template.xsd"
         self.csv_file = "tests/data/template.csv"
 
-    def test_main_with_valid_files(self):
+    def test_main_with_valid_files(self) -> None:
         result = self.runner.invoke(
             cli,
             [
@@ -46,7 +46,7 @@ class TestMain:
             in result.output
         )
 
-    def test_main_with_missing_xml_message_type(self):
+    def test_main_with_missing_xml_message_type(self) -> None:
         result = self.runner.invoke(
             cli,
             [
@@ -61,7 +61,7 @@ class TestMain:
         assert result.exit_code == 1
         assert "The XML message type is required." in result.output
 
-    def test_main_with_missing_xsd_template_file(self):
+    def test_main_with_missing_xsd_template_file(self) -> None:
         result = self.runner.invoke(
             cli,
             [
@@ -76,7 +76,7 @@ class TestMain:
         assert result.exit_code == 1
         assert "The XSD schema file path is required." in result.output
 
-    def test_main_with_missing_data_file(self):
+    def test_main_with_missing_data_file(self) -> None:
         result = self.runner.invoke(
             cli,
             [
@@ -91,7 +91,7 @@ class TestMain:
         assert result.exit_code == 1
         assert "The data file path is required." in result.output
 
-    def test_main_with_invalid_xml_message_type(self):
+    def test_main_with_invalid_xml_message_type(self) -> None:
         result = self.runner.invoke(
             cli,
             [
@@ -108,7 +108,7 @@ class TestMain:
         assert result.exit_code == 1
         assert "Invalid XML message type: invalid." in result.output
 
-    def test_main_with_invalid_xml_template_file(self):
+    def test_main_with_invalid_xml_template_file(self) -> None:
         result = self.runner.invoke(
             cli,
             [
@@ -127,7 +127,7 @@ class TestMain:
             "The XML template file 'invalid' does not exist." in result.output
         )
 
-    def test_main_with_invalid_xsd_template_file(self):
+    def test_main_with_invalid_xsd_template_file(self) -> None:
         result = self.runner.invoke(
             cli,
             [
@@ -146,7 +146,7 @@ class TestMain:
             "The XSD template file 'invalid' does not exist." in result.output
         )
 
-    def test_main_with_invalid_data_file(self):
+    def test_main_with_invalid_data_file(self) -> None:
         result = self.runner.invoke(
             cli,
             [
@@ -163,7 +163,7 @@ class TestMain:
         assert result.exit_code == 1
         assert "The data file 'invalid' does not exist." in result.output
 
-    def test_main_with_missing_xml_template_file_path(self):
+    def test_main_with_missing_xml_template_file_path(self) -> None:
         """Test CLI when XML template file path is missing."""
         result = self.runner.invoke(
             cli,
@@ -179,7 +179,7 @@ class TestMain:
         assert result.exit_code == 1
         assert "The XML template file path is required." in result.output
 
-    def test_main_with_exception_handling(self):
+    def test_main_with_exception_handling(self) -> None:
         """Test CLI exception handling."""
         from unittest.mock import patch
 
@@ -205,7 +205,7 @@ class TestMain:
             assert result.exit_code == 1
             assert "An error occurred: Test exception" in result.output
 
-    def test_main_module_entry_point(self):
+    def test_main_module_entry_point(self) -> None:
         """Test __main__.py when run as a script."""
         import subprocess
         import sys

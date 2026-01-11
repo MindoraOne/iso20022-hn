@@ -23,7 +23,7 @@ from pain001.xml.validate_via_xsd import validate_via_xsd
 
 
 class TestValidateViaXsd(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         """
         Test case setup method.
         """
@@ -69,7 +69,7 @@ class TestValidateViaXsd(unittest.TestCase):
             """
             )
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """
         Test case tear down method.
         """
@@ -77,27 +77,27 @@ class TestValidateViaXsd(unittest.TestCase):
         os.remove(self.invalid_xml_file)
         os.remove(self.xsd_file)
 
-    def test_valid_xml(self):
+    def test_valid_xml(self) -> None:
         """
         Test case for validating a valid XML file against an XSD schema.
         """
         assert validate_via_xsd(self.valid_xml_file, self.xsd_file)
 
-    def test_invalid_xml(self):
+    def test_invalid_xml(self) -> None:
         """
         Test case for validating an invalid XML file against an XSD schema.
         """
         assert not validate_via_xsd(self.invalid_xml_file, self.xsd_file)
         assert not validate_via_xsd(self.invalid_xml_file, self.xsd_file)
 
-    def test_invalid_xml_file_path(self):
+    def test_invalid_xml_file_path(self) -> None:
         """
         Test case for handling non-existent XML file.
         """
         result = validate_via_xsd("nonexistent.xml", self.xsd_file)
         assert result is False
 
-    def test_malformed_xml_file(self):
+    def test_malformed_xml_file(self) -> None:
         """
         Test case for handling malformed XML file.
         """
@@ -114,7 +114,7 @@ class TestValidateViaXsd(unittest.TestCase):
             if os.path.exists(malformed_xml):
                 os.remove(malformed_xml)
 
-    def test_invalid_xsd_schema(self):
+    def test_invalid_xsd_schema(self) -> None:
         """
         Test case for handling invalid XSD schema file.
         """
@@ -138,11 +138,11 @@ class TestValidateViaXsd(unittest.TestCase):
             if os.path.exists(invalid_xsd):
                 os.remove(invalid_xsd)
 
-    def test_validation_exception_during_validation(self):
+    def test_validation_exception_during_validation(self) -> None:
         """
         Test case for exception during XML validation process.
         """
-        from unittest.mock import MagicMock, patch
+        from unittest.mock import patch
 
         import xmlschema
 
@@ -170,7 +170,9 @@ class TestValidateViaXsd(unittest.TestCase):
 
         try:
             # Mock xsd.is_valid to raise an XMLSchemaException during validation
-            with patch("xmlschema.XMLSchema", autospec=True) as mock_schema_class:
+            with patch(
+                "xmlschema.XMLSchema", autospec=True
+            ) as mock_schema_class:
                 # Create instance mock from the class mock
                 mock_xsd = mock_schema_class.return_value
                 # Use the actual exception type that our code catches

@@ -23,7 +23,7 @@ from pain001.xml.register_namespaces import register_namespaces
 class TestRegisterNamespaces:
     """Test the register_namespaces function."""
 
-    def test_register_namespaces_pain_001_001_03(self):
+    def test_register_namespaces_pain_001_001_03(self) -> None:
         """Test registering namespaces for pain.001.001.03."""
         message_type = "pain.001.001.03"
         register_namespaces(message_type)
@@ -37,7 +37,7 @@ class TestRegisterNamespaces:
         assert namespace in xml_string
         assert "Document" in xml_string
 
-    def test_register_namespaces_pain_001_001_04(self):
+    def test_register_namespaces_pain_001_001_04(self) -> None:
         """Test registering namespaces for pain.001.001.04."""
         message_type = "pain.001.001.04"
         register_namespaces(message_type)
@@ -48,7 +48,7 @@ class TestRegisterNamespaces:
 
         assert namespace in xml_string
 
-    def test_register_namespaces_pain_001_001_05(self):
+    def test_register_namespaces_pain_001_001_05(self) -> None:
         """Test registering namespaces for pain.001.001.05."""
         message_type = "pain.001.001.05"
         register_namespaces(message_type)
@@ -59,7 +59,7 @@ class TestRegisterNamespaces:
 
         assert namespace in xml_string
 
-    def test_register_namespaces_pain_001_001_06(self):
+    def test_register_namespaces_pain_001_001_06(self) -> None:
         """Test registering namespaces for pain.001.001.06."""
         message_type = "pain.001.001.06"
         register_namespaces(message_type)
@@ -70,7 +70,7 @@ class TestRegisterNamespaces:
 
         assert namespace in xml_string
 
-    def test_register_namespaces_pain_001_001_07(self):
+    def test_register_namespaces_pain_001_001_07(self) -> None:
         """Test registering namespaces for pain.001.001.07."""
         message_type = "pain.001.001.07"
         register_namespaces(message_type)
@@ -81,7 +81,7 @@ class TestRegisterNamespaces:
 
         assert namespace in xml_string
 
-    def test_register_namespaces_pain_001_001_08(self):
+    def test_register_namespaces_pain_001_001_08(self) -> None:
         """Test registering namespaces for pain.001.001.08."""
         message_type = "pain.001.001.08"
         register_namespaces(message_type)
@@ -92,7 +92,7 @@ class TestRegisterNamespaces:
 
         assert namespace in xml_string
 
-    def test_register_namespaces_pain_001_001_09(self):
+    def test_register_namespaces_pain_001_001_09(self) -> None:
         """Test registering namespaces for pain.001.001.09."""
         message_type = "pain.001.001.09"
         register_namespaces(message_type)
@@ -103,7 +103,7 @@ class TestRegisterNamespaces:
 
         assert namespace in xml_string
 
-    def test_register_namespaces_xsi_namespace(self):
+    def test_register_namespaces_xsi_namespace(self) -> None:
         """Test that xsi namespace is registered correctly."""
         message_type = "pain.001.001.03"
         register_namespaces(message_type)
@@ -118,14 +118,14 @@ class TestRegisterNamespaces:
         xml_string = ET.tostring(root, encoding="unicode")
         assert "xsi:" in xml_string or xsi_ns in xml_string
 
-    def test_register_namespaces_returns_none(self):
+    def test_register_namespaces_returns_none(self) -> None:
         """Test that register_namespaces returns None."""
         message_type = "pain.001.001.03"
-        result = register_namespaces(message_type)
+        result = register_namespaces(message_type)  # type: ignore
 
         assert result is None
 
-    def test_register_namespaces_with_custom_message_type(self):
+    def test_register_namespaces_with_custom_message_type(self) -> None:
         """Test registering namespaces with a custom message type."""
         message_type = "pain.001.001.10"
         register_namespaces(message_type)
@@ -137,7 +137,7 @@ class TestRegisterNamespaces:
         assert namespace in xml_string
         assert "CustomDocument" in xml_string
 
-    def test_register_namespaces_namespace_format(self):
+    def test_register_namespaces_namespace_format(self) -> None:
         """Test that the namespace is formatted correctly."""
         message_type = "pain.001.001.03"
         register_namespaces(message_type)
@@ -149,7 +149,7 @@ class TestRegisterNamespaces:
 
         assert "urn:iso:std:iso:20022:tech:xsd:pain.001.001.03" in xml_string
 
-    def test_register_namespaces_multiple_calls(self):
+    def test_register_namespaces_multiple_calls(self) -> None:
         """Test calling register_namespaces multiple times with different types."""
         # First call
         register_namespaces("pain.001.001.03")
@@ -166,7 +166,7 @@ class TestRegisterNamespaces:
         assert namespace_03 in xml_03
         assert namespace_04 in xml_04
 
-    def test_register_namespaces_with_child_elements(self):
+    def test_register_namespaces_with_child_elements(self) -> None:
         """Test that namespace registration works with child elements."""
         message_type = "pain.001.001.03"
         register_namespaces(message_type)
@@ -182,7 +182,9 @@ class TestRegisterNamespaces:
         assert "CstmrCdtTrfInitn" in xml_string
         assert "GrpHdr" in xml_string
 
-    def test_register_namespaces_preserves_element_tree_functionality(self):
+    def test_register_namespaces_preserves_element_tree_functionality(
+        self,
+    ) -> None:
         """Test that ElementTree functionality is preserved after registration."""
         message_type = "pain.001.001.03"
         register_namespaces(message_type)

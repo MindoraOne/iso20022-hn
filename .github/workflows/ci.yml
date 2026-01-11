@@ -137,6 +137,6 @@ jobs:
         with:
           user: ${{ env.TWINE_USERNAME }}
           password: ${{ env.TWINE_PASSWORD }}
-          packages_dir: dist
-          verify_metadata: true
-          skip_existing: true
+          packages-dir: dist
+          verify-metadata: true
+          skip-existing: true

@@ -30,7 +30,7 @@ from pain001.xml.generate_xml import generate_xml
 class TestCoverageComplete:
     """Test cases to cover remaining code paths."""
 
-    def test_main_module_direct_execution(self):
+    def test_main_module_direct_execution(self) -> None:
         """Test __main__ module when executed directly."""
         # Test __main__.py if __name__ == "__main__"
         with patch.object(sys, "argv", ["pain001"]):
@@ -40,7 +40,7 @@ class TestCoverageComplete:
                     {"__name__": "__main__"},
                 )
 
-    def test_core_module_direct_execution(self):
+    def test_core_module_direct_execution(self) -> None:
         """Test core.py module when executed directly with insufficient args."""
         with patch.object(sys, "argv", ["pain001"]):
             with pytest.raises(SystemExit) as exc_info:
@@ -50,7 +50,7 @@ class TestCoverageComplete:
                     sys.exit(1)
             assert exc_info.value.code == 1
 
-    def test_cli_module_direct_execution(self):
+    def test_cli_module_direct_execution(self) -> None:
         """Test cli.py module when executed directly."""
         # This covers the if __name__ == "__main__" block in cli.py
         with patch.object(
@@ -74,7 +74,7 @@ class TestCoverageComplete:
                     {"__name__": "__main__"},
                 )
 
-    def test_context_logger_with_existing_handlers(self):
+    def test_context_logger_with_existing_handlers(self) -> None:
         """Test context logger when handlers already exist."""
         # Create a fresh context instance for testing
         import logging
@@ -94,7 +94,7 @@ class TestCoverageComplete:
         ):
             ctx.init_logger()
 
-    def test_process_files_with_failed_xml_generation(self):
+    def test_process_files_with_failed_xml_generation(self) -> None:
         """Test process_files when XML file generation fails."""
         # Create temporary files
         with tempfile.NamedTemporaryFile(
@@ -137,7 +137,7 @@ class TestCoverageComplete:
             if os.path.exists(xsd_path):
                 os.remove(xsd_path)
 
-    def test_generate_xml_with_empty_data(self):
+    def test_generate_xml_with_empty_data(self) -> None:
         """Test generate_xml with empty data list."""
         with tempfile.NamedTemporaryFile(
             mode="w", delete=False, suffix=".xml"
@@ -169,7 +169,7 @@ class TestCoverageComplete:
             if os.path.exists(xsd_path):
                 os.remove(xsd_path)
 
-    def test_validate_via_xsd_with_validation_error(self):
+    def test_validate_via_xsd_with_validation_error(self) -> None:
         """Test validate_via_xsd with schema validation error."""
         from pain001.xml.validate_via_xsd import validate_via_xsd
 
@@ -208,7 +208,7 @@ class TestCoverageComplete:
             if os.path.exists(xsd_path):
                 os.remove(xsd_path)
 
-    def test_main_with_general_exception(self):
+    def test_main_with_general_exception(self) -> None:
         """Test main function with general exception handling."""
         from pain001.__main__ import main
 
@@ -221,7 +221,7 @@ class TestCoverageComplete:
                 "/nonexistent/data.csv",
             )
 
-    def test_main_missing_xsd_template(self):
+    def test_main_missing_xsd_template(self) -> None:
         """Test main function with missing XSD template file."""
         from pain001.__main__ import main
 
@@ -251,7 +251,7 @@ class TestCoverageComplete:
             if os.path.exists(xml_path):
                 os.remove(xml_path)
 
-    def test_main_missing_data_file(self):
+    def test_main_missing_data_file(self) -> None:
         """Test main function with missing data file."""
         from pain001.__main__ import main
 
@@ -279,7 +279,7 @@ class TestCoverageComplete:
             if os.path.exists(xsd_path):
                 os.remove(xsd_path)
 
-    def test_validate_xsd_with_corrupt_xsd(self):
+    def test_validate_xsd_with_corrupt_xsd(self) -> None:
         """Test validate_via_xsd with corrupt XSD schema."""
         from pain001.xml.validate_via_xsd import validate_via_xsd
 

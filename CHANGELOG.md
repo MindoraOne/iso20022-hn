@@ -5,6 +5,50 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.35] - 2026-01-11
+
+### Added
+
+- **Industry-Leading Agent Profiles** - Three comprehensive agent specifications for deterministic, scoped automation:
+  - `python-quality.md` (77 lines): Lead maintainer enforcing type safety (mypy strict), testing excellence (95%+ coverage), code style standards (ruff/black/isort), and documentation best practices
+  - `python-security.md` (122 lines): Security maintainer enforcing OWASP Top 10, CVE prevention, supply chain integrity, cryptographic standards, incident response procedures
+  - `python-deps.md` (191 lines): Dependency maintainer ensuring reproducible builds, minimal dependency tree, transitive dependency auditing, security update prioritization, 10-step validation workflow
+
+- **Enhanced Security Framework** - Comprehensive guidelines for enterprise-class security:
+  - Input validation patterns (type, length, format, range checking)
+  - Secrets & PII protection procedures with logging guidelines
+  - OWASP Top 10 prevention patterns (XXE, SQL injection, deserialization, code injection, path traversal, command injection)
+  - Network security with mandatory timeouts and TLS verification
+  - Cryptographic standards and audit/compliance procedures
+  - Incident response workflow with severity classifications
+
+- **Dependency Management Framework** - Industry-standard practices for supply chain integrity:
+  - Dependency evaluation criteria (necessity, maturity, quality, license, security)
+  - Patch/minor/major version update workflows with risk assessment
+  - Security update priority timelines (7 days critical, 30 days high, 60 days medium, 90 days low)
+  - Transitive dependency auditing and constraint documentation
+  - Pre-merge audit checklist with 10-point validation
+
+- **Performance & Maintainability Standards** - Guidelines for production-grade code:
+  - Cyclomatic complexity targets (CC ≤7 per function)
+  - Performance benchmarking with `make perf`
+  - Code style enforcement (line length 79, conventional commits)
+  - Documentation standards (module, function, inline, Sphinx integration)
+
+### Changed
+
+- **Version Bump** - Updated version to 0.0.35:
+  - `pyproject.toml` version constraint
+  - `pain001/__init__.py` package version
+  - `README.md` release reference
+
+### Documentation
+
+- Expanded agent profiles from basic guidelines to enterprise-grade specifications
+- Added security threat modeling and secure development workflow
+- Enhanced dependency management with detailed governance rules
+- Included communication templates for transparency and team coordination
+
 ## [0.0.34] - 2026-01-10
 
 ### Added

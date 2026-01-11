@@ -6,10 +6,12 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+import pain001
+
 project = "Pain001"
 copyright = "2024-2026, Sebastien Rousseau"
 author = "Sebastien Rousseau"
-release = "0.0.34"
+release = pain001.__version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

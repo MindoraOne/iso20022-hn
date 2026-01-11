@@ -27,7 +27,7 @@ class TestDataLoader:
     """Test the universal data loader with various input sources."""
 
     @pytest.fixture
-    def sample_payment_data(self):
+    def sample_payment_data(self):  # type: ignore
         """Sample payment data for testing with all required fields."""
         return [
             {
@@ -86,7 +86,7 @@ class TestDataLoader:
         ]
 
     @pytest.fixture
-    def csv_file(self, sample_payment_data, tmp_path):
+    def csv_file(self, sample_payment_data, tmp_path):  # type: ignore
         """Create temporary CSV file."""
         csv_path = tmp_path / "test_data.csv"
         with open(csv_path, "w", newline="") as f:
@@ -98,7 +98,7 @@ class TestDataLoader:
         return str(csv_path)
 
     @pytest.fixture
-    def sqlite_file(self, sample_payment_data, tmp_path):
+    def sqlite_file(self, sample_payment_data, tmp_path) -> None:
         """Create temporary SQLite file."""
         db_path = tmp_path / "test_data.db"
         conn = sqlite3.connect(db_path)
@@ -121,7 +121,7 @@ class TestDataLoader:
 
     # ========== BACKWARD COMPATIBILITY TESTS ==========
 
-    def test_load_from_csv_file(self, csv_file):
+    def test_load_from_csv_file(self, csv_file) -> None:
         """Test loading from CSV file (existing functionality)."""
         data = load_payment_data(csv_file)
 
@@ -130,7 +130,7 @@ class TestDataLoader:
         assert data[0]["id"] == "1"
         assert data[0]["initiator_name"] == "Test Corp"
 
-    def test_load_from_sqlite_file(self, sqlite_file):
+    def test_load_from_sqlite_file(self, sqlite_file) -> None:
         """Test loading from SQLite file (existing functionality)."""
         data = load_payment_data(sqlite_file)
 
@@ -139,19 +139,19 @@ class TestDataLoader:
         assert data[0]["id"] == "1"
         assert data[0]["initiator_name"] == "Test Corp"
 
-    def test_file_not_found_error(self):
+    def test_file_not_found_error(self) -> None:
         """Test that FileNotFoundError is raised for missing files."""
         with pytest.raises(FileNotFoundError):
             load_payment_data("/nonexistent/path/data.csv")
 
-    def test_unsupported_file_type(self):
+    def test_unsupported_file_type(self) -> None:
         """Test that ValueError is raised for unsupported file types."""
         with pytest.raises(ValueError, match="Unsupported file type"):
             load_payment_data("data.txt")
 
     # ========== NEW FEATURE TESTS ==========
 
-    def test_load_from_list_of_dicts(self, sample_payment_data):
+    def test_load_from_list_of_dicts(self, sample_payment_data) -> None:
         """Test loading from Python list of dictionaries (new feature)."""
         data = load_payment_data(sample_payment_data)
 
@@ -160,7 +160,7 @@ class TestDataLoader:
         assert data[0]["id"] == "1"
         assert data[0]["initiator_name"] == "Test Corp"
 
-    def test_load_from_single_dict(self, sample_payment_data):
+    def test_load_from_single_dict(self, sample_payment_data) -> None:
         """Test loading from single Python dictionary (new feature)."""
         # Use first item from sample_payment_data fixture (which is a list)
         single_payment = sample_payment_data[0].copy()
@@ -173,7 +173,9 @@ class TestDataLoader:
         assert data[0]["id"] == "2"
         assert data[0]["initiator_name"] == "Test Corp"
 
-    def test_load_multiple_payments_from_list(self, sample_payment_data):
+    def test_load_multiple_payments_from_list(
+        self, sample_payment_data
+    ) -> None:
         """Test loading multiple payments from list."""
         # Create multiple copies of valid payment data
         base_payment = sample_payment_data[0].copy()
@@ -192,17 +194,17 @@ class TestDataLoader:
         assert data[0]["id"] == "1"
         assert data[4]["id"] == "5"
 
-    def test_empty_list_raises_error(self):
+    def test_empty_list_raises_error(self) -> None:
         """Test that empty list raises ValueError."""
         with pytest.raises(ValueError, match="Empty data list"):
             load_payment_data([])
 
-    def test_empty_dict_raises_error(self):
+    def test_empty_dict_raises_error(self) -> None:
         """Test that empty dict raises ValueError."""
         with pytest.raises(ValueError, match="Empty data dictionary"):
             load_payment_data({})
 
-    def test_list_with_non_dict_raises_error(self):
+    def test_list_with_non_dict_raises_error(self) -> None:
         """Test that list with non-dict items raises ValueError."""
         invalid_data = [{"id": "MSG001"}, "not a dict", {"id": "MSG003"}]
 
@@ -211,7 +213,7 @@ class TestDataLoader:
         ):
             load_payment_data(invalid_data)
 
-    def test_unsupported_type_raises_error(self):
+    def test_unsupported_type_raises_error(self) -> None:
         """Test that unsupported data types raise ValueError."""
         with pytest.raises(ValueError, match="Unsupported data source type"):
             load_payment_data(12345)
@@ -221,7 +223,9 @@ class TestDataLoader:
 
     # ========== INTEGRATION TESTS ==========
 
-    def test_data_equivalence_csv_vs_dict(self, csv_file, sample_payment_data):
+    def test_data_equivalence_csv_vs_dict(
+        self, csv_file, sample_payment_data
+    ) -> None:
         """Test that CSV and dict sources produce equivalent data."""
         data_from_csv = load_payment_data(csv_file)
         data_from_dict = load_payment_data(sample_payment_data)
@@ -234,7 +238,7 @@ class TestDataLoader:
 
     def test_data_equivalence_sqlite_vs_dict(
         self, sqlite_file, sample_payment_data
-    ):
+    ) -> None:
         """Test that SQLite and dict sources produce equivalent data."""
         data_from_db = load_payment_data(sqlite_file)
         data_from_dict = load_payment_data(sample_payment_data)
@@ -245,28 +249,32 @@ class TestDataLoader:
             for key in db_row.keys():
                 assert str(db_row[key]) == str(dict_row[key])
 
-    def test_load_from_list_with_validation_failure(self):
+    def test_load_from_list_with_validation_failure(self) -> None:
         """Test _load_from_list when validation fails (line 127)."""
         from unittest.mock import patch
 
         invalid_data_list = [{"id": "test", "date": "2023-01-01"}]
 
         with patch(
-            "pain001.data.loader.validate_csv_data", autospec=True, return_value=False
+            "pain001.data.loader.validate_csv_data",
+            autospec=True,
+            return_value=False,
         ):
             with pytest.raises(
                 ValueError, match="Data list validation failed"
             ):
                 load_payment_data(invalid_data_list)
 
-    def test_load_from_dict_with_validation_failure(self):
+    def test_load_from_dict_with_validation_failure(self) -> None:
         """Test _load_from_dict when validation fails (line 143)."""
         from unittest.mock import patch
 
         invalid_data_dict = {"id": "test", "date": "2023-01-01"}
 
         with patch(
-            "pain001.data.loader.validate_csv_data", autospec=True, return_value=False
+            "pain001.data.loader.validate_csv_data",
+            autospec=True,
+            return_value=False,
         ):
             with pytest.raises(
                 ValueError, match="Data dictionary validation failed"

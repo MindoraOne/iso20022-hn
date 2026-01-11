@@ -21,7 +21,7 @@ from pain001.db.validate_db_data import validate_db_data
 
 
 class TestValidateDbData(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.valid_data = [
             {
                 "id": 1,
@@ -76,11 +76,11 @@ class TestValidateDbData(unittest.TestCase):
             }
         ]
 
-    def test_validate_db_data_valid(self):
+    def test_validate_db_data_valid(self) -> None:
         self.assertTrue(validate_db_data(self.valid_data))
 
     @patch("pain001.db.validate_db_data.logger.error", autospec=True)
-    def test_validate_db_data_logging(self, mock_logging_error):
+    def test_validate_db_data_logging(self, mock_logging_error) -> None:
         invalid_data = self.valid_data.copy()
         invalid_data[0].pop("id")
         validate_db_data(invalid_data)

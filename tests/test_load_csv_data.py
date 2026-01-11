@@ -18,15 +18,12 @@ import csv
 import os
 import unittest
 
-from pain001.csv.load_csv_data import (
-    load_csv_data,
-    load_csv_data_streaming,
-)
+from pain001.csv.load_csv_data import load_csv_data, load_csv_data_streaming
 from pain001.csv.validate_csv_data import validate_csv_data
 
 
 class TestLoadCsvData(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         """Create test files before each test."""
         os.makedirs("tests/data", exist_ok=True)
 
@@ -456,7 +453,7 @@ class TestLoadCsvData(unittest.TestCase):
             writer = csv.writer(file)
             writer.writerows(single_row)
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Delete test files after each test."""
         files = [
             "tests/data/valid_data.csv",
@@ -469,38 +466,38 @@ class TestLoadCsvData(unittest.TestCase):
             if os.path.exists(file):
                 os.remove(file)
 
-    def test_load_valid_csv(self):
+    def test_load_valid_csv(self) -> None:
         file_path = "tests/data/valid_data.csv"
         data = load_csv_data(file_path)
         self.assertEqual(len(data), 4)
 
-    def test_load_csv_with_invalid_data(self):
+    def test_load_csv_with_invalid_data(self) -> None:
         file_path = "tests/data/invalid_data.csv"
         data = load_csv_data(file_path)
         self.assertFalse(validate_csv_data(data))
 
-    def test_load_empty_csv(self):
+    def test_load_empty_csv(self) -> None:
         file_path = "tests/data/empty.csv"
         with self.assertRaises(ValueError):
             load_csv_data(file_path)
 
-    def test_load_single_column_csv(self):
+    def test_load_single_column_csv(self) -> None:
         file_path = "tests/data/single_column.csv"
         data = load_csv_data(file_path)
         self.assertEqual(len(data), 3)
 
-    def test_load_single_row_csv(self):
+    def test_load_single_row_csv(self) -> None:
         file_path = "tests/data/single_row.csv"
         data = load_csv_data(file_path)
         self.assertEqual(len(data), 1)
 
-    def test_load_csv_file_not_found(self):
+    def test_load_csv_file_not_found(self) -> None:
         """Test that FileNotFoundError is raised for non-existent file."""
         file_path = "tests/data/nonexistent_file.csv"
         with self.assertRaises(FileNotFoundError):
             load_csv_data(file_path)
 
-    def test_load_csv_io_error(self):
+    def test_load_csv_io_error(self) -> None:
         """Test handling of IOError (permission denied)."""
         import tempfile
 
@@ -527,7 +524,7 @@ class TestLoadCsvData(unittest.TestCase):
             except (OSError, PermissionError):
                 pass
 
-    def test_load_csv_unicode_decode_error(self):
+    def test_load_csv_unicode_decode_error(self) -> None:
         """Test handling of UnicodeDecodeError."""
         import tempfile
 
@@ -551,11 +548,11 @@ class TestLoadCsvData(unittest.TestCase):
 class TestLoadCsvDataStreaming(unittest.TestCase):
     """Test the streaming CSV data loader."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Create test files before each test."""
         os.makedirs("tests/data", exist_ok=True)
 
-    def test_streaming_valid_csv(self):
+    def test_streaming_valid_csv(self) -> None:
         """Test streaming with valid CSV data."""
         chunks = list(
             load_csv_data_streaming(
@@ -570,7 +567,7 @@ class TestLoadCsvDataStreaming(unittest.TestCase):
             for row in chunk:
                 self.assertIsInstance(row, dict)
 
-    def test_streaming_with_custom_chunk_size(self):
+    def test_streaming_with_custom_chunk_size(self) -> None:
         """Test streaming with different chunk sizes."""
         # Test with chunk size of 2
         chunks_size_2 = list(
@@ -589,12 +586,12 @@ class TestLoadCsvDataStreaming(unittest.TestCase):
         # Larger chunk size should result in fewer chunks
         self.assertLessEqual(len(chunks_size_10), len(chunks_size_2))
 
-    def test_streaming_file_not_found(self):
+    def test_streaming_file_not_found(self) -> None:
         """Test streaming with non-existent file."""
         with self.assertRaises(FileNotFoundError):
             list(load_csv_data_streaming("non_existent.csv"))
 
-    def test_streaming_empty_csv(self):
+    def test_streaming_empty_csv(self) -> None:
         """Test streaming with empty CSV file."""
         import tempfile
 
@@ -612,7 +609,7 @@ class TestLoadCsvDataStreaming(unittest.TestCase):
             if os.path.exists(temp_file):
                 os.remove(temp_file)
 
-    def test_streaming_io_error(self):
+    def test_streaming_io_error(self) -> None:
         """Test streaming with IO error."""
         import tempfile
 
@@ -637,7 +634,7 @@ class TestLoadCsvDataStreaming(unittest.TestCase):
             except (OSError, PermissionError):
                 pass
 
-    def test_streaming_unicode_decode_error(self):
+    def test_streaming_unicode_decode_error(self) -> None:
         """Test streaming with Unicode decode error."""
         import tempfile
 
@@ -657,7 +654,7 @@ class TestLoadCsvDataStreaming(unittest.TestCase):
             if os.path.exists(temp_file):
                 os.remove(temp_file)
 
-    def test_streaming_yields_all_data(self):
+    def test_streaming_yields_all_data(self) -> None:
         """Test that streaming yields all rows from the file."""
         # Load data normally
         normal_data = load_csv_data("tests/data/valid_data_unique.csv")
@@ -672,7 +669,7 @@ class TestLoadCsvDataStreaming(unittest.TestCase):
         # Both should have the same number of rows
         self.assertEqual(len(normal_data), len(streaming_data))
 
-    def test_streaming_chunk_boundaries(self):
+    def test_streaming_chunk_boundaries(self) -> None:
         """Test that chunk boundaries are correctly handled."""
         chunks = list(
             load_csv_data_streaming(

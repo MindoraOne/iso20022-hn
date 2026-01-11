@@ -28,7 +28,7 @@ from pain001.xml.create_xml_v9 import create_xml_v9
 
 
 class TestXMLCreation(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         """
         Test setup
         """
@@ -348,7 +348,7 @@ class TestXMLCreation(unittest.TestCase):
             "PmtMtd": "payment_method",
         }
 
-    def generate_xml(self):
+    def generate_xml(self) -> None:
         """
         Generate XML using create_xml_v3
         """
@@ -360,7 +360,7 @@ class TestXMLCreation(unittest.TestCase):
         create_xml_v8(self.root, [self.row_v8])
         create_xml_v9(self.root, [self.row_v9])
 
-    def test_create_common_elements_v3(self):
+    def test_create_common_elements_v3(self) -> None:
         """
         Test create_common_elements for version 3
         """
@@ -371,7 +371,7 @@ class TestXMLCreation(unittest.TestCase):
         self.assertEqual(self.root[1].tag, "PmtMtd")
         self.assertEqual(self.root[1].text, "pain.001.001.03")
 
-    def test_create_xml_v4(self):
+    def test_create_xml_v4(self) -> None:
         """
         Test create_xml_v4
         """
@@ -379,7 +379,7 @@ class TestXMLCreation(unittest.TestCase):
         # Check if the root contains the expected elements and values
         self.assertTrue(self.root.find(".//CstmrCdtTrfInitn") is not None)
 
-    def test_create_common_elements_v5(self):
+    def test_create_common_elements_v5(self) -> None:
         """
         Test create_common_elements for version 5
         """
@@ -390,7 +390,7 @@ class TestXMLCreation(unittest.TestCase):
         self.assertEqual(self.root[1].tag, "PmtMtd")
         self.assertEqual(self.root[1].text, "pain.001.001.05")
 
-    def test_create_common_elements_v6(self):
+    def test_create_common_elements_v6(self) -> None:
         """
         Test create_common_elements for version 6
         """
@@ -401,7 +401,7 @@ class TestXMLCreation(unittest.TestCase):
         self.assertEqual(self.root[1].tag, "PmtMtd")
         self.assertEqual(self.root[1].text, "pain.001.001.06")
 
-    def test_create_common_elements_v7(self):
+    def test_create_common_elements_v7(self) -> None:
         """
         Test create_common_elements for version 7
         """
@@ -412,7 +412,7 @@ class TestXMLCreation(unittest.TestCase):
         self.assertEqual(self.root[1].tag, "PmtMtd")
         self.assertEqual(self.root[1].text, "pain.001.001.07")
 
-    def test_create_common_elements_v8(self):
+    def test_create_common_elements_v8(self) -> None:
         """
         Test create_common_elements for version 8
         """
@@ -423,7 +423,7 @@ class TestXMLCreation(unittest.TestCase):
         self.assertEqual(self.root[1].tag, "PmtMtd")
         self.assertEqual(self.root[1].text, "pain.001.001.08")
 
-    def test_create_common_elements_v9(self):
+    def test_create_common_elements_v9(self) -> None:
         """
         Test create_common_elements for version 9
         """
@@ -434,7 +434,7 @@ class TestXMLCreation(unittest.TestCase):
         self.assertEqual(self.root[1].tag, "PmtMtd")
         self.assertEqual(self.root[1].text, "pain.001.001.09")
 
-    def test_create_xml_v3(self):
+    def test_create_xml_v3(self) -> None:
         """
         Test create_xml_v3
         """
@@ -442,7 +442,7 @@ class TestXMLCreation(unittest.TestCase):
         cstmr_cdt_trf_initn_element = self.root[0]
         self.assertEqual(cstmr_cdt_trf_initn_element.tag, "CstmrCdtTrfInitn")
 
-    def test_create_xml_v4_detailed(self):
+    def test_create_xml_v4_detailed(self) -> None:
         """
         Test create_xml_v4 with detailed checks
         """
@@ -450,7 +450,7 @@ class TestXMLCreation(unittest.TestCase):
         cstmr_cdt_trf_initn_element = self.root[0]
         self.assertEqual(cstmr_cdt_trf_initn_element.tag, "CstmrCdtTrfInitn")
 
-    def test_create_xml_v5(self):
+    def test_create_xml_v5(self) -> None:
         """
         Test create_xml_v5
         """
@@ -458,7 +458,7 @@ class TestXMLCreation(unittest.TestCase):
         cstmr_cdt_trf_initn_element = self.root[0]
         self.assertEqual(cstmr_cdt_trf_initn_element.tag, "CstmrCdtTrfInitn")
 
-    def test_create_xml_v6(self):
+    def test_create_xml_v6(self) -> None:
         """
         Test create_xml_v6
         """
@@ -466,7 +466,7 @@ class TestXMLCreation(unittest.TestCase):
         cstmr_cdt_trf_initn_element = self.root[0]
         self.assertEqual(cstmr_cdt_trf_initn_element.tag, "CstmrCdtTrfInitn")
 
-    def test_create_xml_v7(self):
+    def test_create_xml_v7(self) -> None:
         """
         Test create_xml_v7
         """
@@ -474,7 +474,7 @@ class TestXMLCreation(unittest.TestCase):
         cstmr_cdt_trf_initn_element = self.root[0]
         self.assertEqual(cstmr_cdt_trf_initn_element.tag, "CstmrCdtTrfInitn")
 
-    def test_create_xml_v8(self):
+    def test_create_xml_v8(self) -> None:
         """
         Test create_xml_v8
         """
@@ -482,7 +482,7 @@ class TestXMLCreation(unittest.TestCase):
         cstmr_cdt_trf_initn_element = self.root[0]
         self.assertEqual(cstmr_cdt_trf_initn_element.tag, "CstmrCdtTrfInitn")
 
-    def test_create_xml_v9(self):
+    def test_create_xml_v9(self) -> None:
         """
         Test create_xml_v9
         """
@@ -494,7 +494,7 @@ class TestXMLCreation(unittest.TestCase):
 class TestGenerateXMLFunction(unittest.TestCase):
     """Test the generate_xml function directly."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.test_template_path = "tests/data/template.xml"
         self.test_xsd_path = "tests/data/template.xsd"
@@ -540,7 +540,7 @@ class TestGenerateXMLFunction(unittest.TestCase):
             }
         ]
 
-    def test_generate_xml_with_empty_data(self):
+    def test_generate_xml_with_empty_data(self) -> None:
         """Test that generate_xml exits when data is empty."""
         from pain001.xml.generate_xml import generate_xml
 
@@ -554,7 +554,7 @@ class TestGenerateXMLFunction(unittest.TestCase):
 
         self.assertEqual(cm.exception.code, 1)
 
-    def test_generate_xml_with_invalid_message_type(self):
+    def test_generate_xml_with_invalid_message_type(self) -> None:
         """Test that generate_xml exits with invalid message type."""
         from pain001.xml.generate_xml import generate_xml
 
@@ -568,7 +568,7 @@ class TestGenerateXMLFunction(unittest.TestCase):
 
         self.assertEqual(cm.exception.code, 1)
 
-    def test_generate_xml_pain_001_001_03(self):
+    def test_generate_xml_pain_001_001_03(self) -> None:
         """Test generate_xml with pain.001.001.03 message type."""
         import os
 
@@ -590,7 +590,7 @@ class TestGenerateXMLFunction(unittest.TestCase):
         if os.path.exists(output_path):
             os.remove(output_path)
 
-    def test_generate_xml_pain_001_001_04(self):
+    def test_generate_xml_pain_001_001_04(self) -> None:
         """Test generate_xml with pain.001.001.04 message type."""
         import os
 
@@ -651,7 +651,7 @@ class TestGenerateXMLFunction(unittest.TestCase):
         if os.path.exists(output_path):
             os.remove(output_path)
 
-    def test_generate_xml_pain_001_001_05(self):
+    def test_generate_xml_pain_001_001_05(self) -> None:
         """Test generate_xml with pain.001.001.05 message type."""
         import os
 
@@ -716,7 +716,7 @@ class TestGenerateXMLFunction(unittest.TestCase):
         if os.path.exists(output_path):
             os.remove(output_path)
 
-    def test_generate_xml_pain_001_001_06(self):
+    def test_generate_xml_pain_001_001_06(self) -> None:
         """Test generate_xml with pain.001.001.06 message type."""
         import os
 
@@ -784,7 +784,7 @@ class TestGenerateXMLFunction(unittest.TestCase):
         if os.path.exists(output_path):
             os.remove(output_path)
 
-    def test_generate_xml_pain_001_001_07(self):
+    def test_generate_xml_pain_001_001_07(self) -> None:
         """Test generate_xml with pain.001.001.07 message type."""
         import os
 
@@ -852,7 +852,7 @@ class TestGenerateXMLFunction(unittest.TestCase):
         if os.path.exists(output_path):
             os.remove(output_path)
 
-    def test_generate_xml_pain_001_001_08(self):
+    def test_generate_xml_pain_001_001_08(self) -> None:
         """Test generate_xml with pain.001.001.08 message type."""
         import os
 
@@ -920,7 +920,7 @@ class TestGenerateXMLFunction(unittest.TestCase):
         if os.path.exists(output_path):
             os.remove(output_path)
 
-    def test_generate_xml_pain_001_001_09(self):
+    def test_generate_xml_pain_001_001_09(self) -> None:
         """Test generate_xml with pain.001.001.09 message type."""
         import os
 
@@ -988,7 +988,7 @@ class TestGenerateXMLFunction(unittest.TestCase):
         if os.path.exists(output_path):
             os.remove(output_path)
 
-    def test_generate_xml_unsupported_version(self):
+    def test_generate_xml_unsupported_version(self) -> None:
         """Test generate_xml with unsupported version in supported format."""
         from pain001.xml.generate_xml import generate_xml
 
@@ -1002,7 +1002,7 @@ class TestGenerateXMLFunction(unittest.TestCase):
 
         self.assertEqual(cm.exception.code, 1)
 
-    def test_generate_xml_invalid_xsd_validation(self):
+    def test_generate_xml_invalid_xsd_validation(self) -> None:
         """Test generate_xml with invalid XML that fails XSD validation."""
         import os
         from unittest.mock import patch
@@ -1011,7 +1011,9 @@ class TestGenerateXMLFunction(unittest.TestCase):
 
         # Use pain.001.001.03 with valid data, but mock XSD validation to fail
         with patch(
-            "pain001.xml.generate_xml.validate_via_xsd", autospec=True, return_value=False
+            "pain001.xml.generate_xml.validate_via_xsd",
+            autospec=True,
+            return_value=False,
         ):
             with self.assertRaises(SystemExit) as cm:
                 generate_xml(
@@ -1028,7 +1030,9 @@ class TestGenerateXMLFunction(unittest.TestCase):
             if os.path.exists(output_path):
                 os.remove(output_path)
 
-    def test_generate_xml_message_type_in_generators_but_not_handled(self):
+    def test_generate_xml_message_type_in_generators_but_not_handled(
+        self,
+    ) -> None:
         """Test documentation for defensive else block (lines 532-538).
 
         The else block at lines 532-538 in generate_xml.py is defensive/unreachable

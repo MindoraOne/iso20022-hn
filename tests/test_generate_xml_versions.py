@@ -27,7 +27,7 @@ class TestGenerateXmlAllVersions:
     """Test generate_xml function with all supported pain message versions."""
 
     @pytest.fixture
-    def sample_data_v03(self):
+    def sample_data_v03(self) -> None:
         """Sample data for pain.001.001.03."""
         return [
             {
@@ -61,7 +61,7 @@ class TestGenerateXmlAllVersions:
         ]
 
     @pytest.fixture
-    def sample_data_v04(self):
+    def sample_data_v04(self) -> None:
         """Sample data for pain.001.001.04."""
         data = [
             {
@@ -106,7 +106,7 @@ class TestGenerateXmlAllVersions:
         return data
 
     @pytest.fixture
-    def sample_data_v05(self):
+    def sample_data_v05(self) -> None:
         """Sample data for pain.001.001.05."""
         return [
             {
@@ -134,7 +134,7 @@ class TestGenerateXmlAllVersions:
         ]
 
     @pytest.fixture
-    def xsd_schema(self):
+    def xsd_schema(self) -> None:
         """Create a minimal XSD schema for testing."""
         with tempfile.NamedTemporaryFile(
             mode="w", delete=False, suffix=".xsd"
@@ -148,7 +148,7 @@ class TestGenerateXmlAllVersions:
             return f.name
 
     @pytest.fixture
-    def xml_template(self):
+    def xml_template(self) -> None:
         """Create XML template file."""
         with tempfile.NamedTemporaryFile(
             mode="w", delete=False, suffix=".xml"
@@ -160,7 +160,7 @@ class TestGenerateXmlAllVersions:
 
     def test_generate_xml_pain_001_001_04(
         self, sample_data_v04, xml_template, xsd_schema
-    ):
+    ) -> None:
         """Test XML generation for pain.001.001.04."""
         try:
             # Skip XSD validation for this test as we're testing data transformation
@@ -180,7 +180,7 @@ class TestGenerateXmlAllVersions:
 
     def test_generate_xml_pain_001_001_05(
         self, sample_data_v05, xml_template, xsd_schema
-    ):
+    ) -> None:
         """Test XML generation for pain.001.001.05."""
         try:
             with pytest.raises((FileNotFoundError, Exception)):
@@ -198,7 +198,7 @@ class TestGenerateXmlAllVersions:
 
     def test_generate_xml_pain_001_001_06(
         self, sample_data_v05, xml_template, xsd_schema
-    ):
+    ) -> None:
         """Test XML generation for pain.001.001.06."""
         try:
             with pytest.raises((FileNotFoundError, Exception)):
@@ -216,7 +216,7 @@ class TestGenerateXmlAllVersions:
 
     def test_generate_xml_pain_001_001_07(
         self, sample_data_v05, xml_template, xsd_schema
-    ):
+    ) -> None:
         """Test XML generation for pain.001.001.07."""
         try:
             with pytest.raises((FileNotFoundError, Exception)):
@@ -234,7 +234,7 @@ class TestGenerateXmlAllVersions:
 
     def test_generate_xml_pain_001_001_08(
         self, sample_data_v05, xml_template, xsd_schema
-    ):
+    ) -> None:
         """Test XML generation for pain.001.001.08."""
         try:
             with pytest.raises((FileNotFoundError, Exception)):
@@ -252,7 +252,7 @@ class TestGenerateXmlAllVersions:
 
     def test_generate_xml_pain_001_001_09(
         self, sample_data_v05, xml_template, xsd_schema
-    ):
+    ) -> None:
         """Test XML generation for pain.001.001.09."""
         try:
             with pytest.raises((FileNotFoundError, Exception)):
@@ -268,7 +268,7 @@ class TestGenerateXmlAllVersions:
             if os.path.exists(xsd_schema):
                 os.remove(xsd_schema)
 
-    def test_generate_xml_with_actual_templates(self):
+    def test_generate_xml_with_actual_templates(self) -> None:
         """Test with actual template files from the project."""
         sample_data = [
             {

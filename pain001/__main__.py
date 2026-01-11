@@ -14,11 +14,7 @@ from pain001.core.core import process_files
 
 console = Console()
 
-description = """
-A powerful Python library that enables you to create
-ISO 20022-compliant payment files directly from CSV or SQLite Data files.\n
-https://pain001.com
-"""
+description = None
 title = "Pain001"
 
 table = Table(box=box.ROUNDED, safe_box=True, show_header=False, title=title)

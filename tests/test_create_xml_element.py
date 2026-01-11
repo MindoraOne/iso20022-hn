@@ -23,7 +23,7 @@ from pain001.xml.create_xml_element import create_xml_element
 
 
 class TestCreateXmlElement(unittest.TestCase):
-    def test_create_element_with_tag_only(self):
+    def test_create_element_with_tag_only(self) -> None:
         """
         Test if the XML element is created correctly with a tag only.
         """
@@ -33,7 +33,7 @@ class TestCreateXmlElement(unittest.TestCase):
         self.assertIsNone(elem.text)
         self.assertEqual(root.find("test"), elem)
 
-    def test_create_element_with_tag_and_text(self):
+    def test_create_element_with_tag_and_text(self) -> None:
         """
         Test if the XML element is created correctly with a tag and text.
         """
@@ -43,7 +43,7 @@ class TestCreateXmlElement(unittest.TestCase):
         self.assertEqual(elem.text, "Hello, world!")
         self.assertEqual(root.find("test"), elem)
 
-    def test_create_element_with_tag_and_attributes(self):
+    def test_create_element_with_tag_and_attributes(self) -> None:
         """
         Test if the XML element is created correctly with a tag and attributes.
         """
@@ -55,7 +55,7 @@ class TestCreateXmlElement(unittest.TestCase):
         self.assertEqual(elem.attrib, attributes)
         self.assertEqual(root.find("test"), elem)
 
-    def test_create_element_with_tag_text_and_attributes(self):
+    def test_create_element_with_tag_text_and_attributes(self) -> None:
         """
         Test if the XML element is created correctly with a tag, text and
         attributes.

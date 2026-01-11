@@ -26,7 +26,7 @@ from pain001.cli.cli import main
 class TestCliModule(unittest.TestCase):
     """Test cases for the CLI module."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.runner = CliRunner()
 
@@ -85,14 +85,14 @@ class TestCliModule(unittest.TestCase):
             )
             f.write("MSG001,2026-01-09T10:00:00,1,Test Corp,PMT001,TRF\n")
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Clean up test fixtures."""
         import shutil
 
         if os.path.exists(self.temp_dir):
             shutil.rmtree(self.temp_dir)
 
-    def test_cli_missing_xml_message_type(self):
+    def test_cli_missing_xml_message_type(self) -> None:
         """Test CLI with missing XML message type."""
         result = self.runner.invoke(
             main,
@@ -108,7 +108,7 @@ class TestCliModule(unittest.TestCase):
         assert result.exit_code == 1
         assert "XML message type is required" in result.output
 
-    def test_cli_missing_files(self):
+    def test_cli_missing_files(self) -> None:
         """Test CLI with non-existent file."""
         result = self.runner.invoke(
             main,
@@ -126,7 +126,7 @@ class TestCliModule(unittest.TestCase):
         assert result.exit_code == 1
         assert "does not exist" in result.output
 
-    def test_cli_invalid_xml_message_type(self):
+    def test_cli_invalid_xml_message_type(self) -> None:
         """Test CLI with invalid XML message type."""
         result = self.runner.invoke(
             main,
@@ -144,7 +144,7 @@ class TestCliModule(unittest.TestCase):
         assert result.exit_code == 1
         assert "Invalid XML message type" in result.output
 
-    def test_cli_with_config_file(self):
+    def test_cli_with_config_file(self) -> None:
         """Test CLI with config file."""
         config_file = os.path.join(self.temp_dir, "config.ini")
         with open(config_file, "w") as f:
@@ -154,8 +154,14 @@ class TestCliModule(unittest.TestCase):
             f.write(f"data_file_path = {self.csv_file}\n")
 
         # Mock the process_files and validate_via_xsd functions
-        with patch("pain001.cli.cli.process_files", autospec=True) as mock_process:
-            with patch("pain001.cli.cli.validate_via_xsd", autospec=True, return_value=True):
+        with patch(
+            "pain001.cli.cli.process_files", autospec=True
+        ) as mock_process:
+            with patch(
+                "pain001.cli.cli.validate_via_xsd",
+                autospec=True,
+                return_value=True,
+            ):
                 self.runner.invoke(
                     main,
                     [
@@ -174,7 +180,7 @@ class TestCliModule(unittest.TestCase):
                 # The CLI should process the files
                 assert mock_process.called
 
-    def test_cli_schema_validation_failure(self):
+    def test_cli_schema_validation_failure(self) -> None:
         """Test CLI when schema validation fails."""
         with patch(
             "pain001.cli.cli.validate_via_xsd",
@@ -197,7 +203,7 @@ class TestCliModule(unittest.TestCase):
             assert result.exit_code == 1
             assert "Schema validation failed" in result.output
 
-    def test_cli_expanduser_paths(self):
+    def test_cli_expanduser_paths(self) -> None:
         """Test that CLI expands user paths correctly."""
         # Create a file in the temp directory
         home_xml = os.path.join(self.temp_dir, "home_template.xml")
@@ -205,7 +211,11 @@ class TestCliModule(unittest.TestCase):
             f.write("<root></root>")
 
         with patch("os.path.expanduser", autospec=True, return_value=home_xml):
-            with patch("pain001.cli.cli.validate_via_xsd", autospec=True, return_value=True):
+            with patch(
+                "pain001.cli.cli.validate_via_xsd",
+                autospec=True,
+                return_value=True,
+            ):
                 with patch("pain001.cli.cli.process_files", autospec=True):
                     result = self.runner.invoke(
                         main,
@@ -226,7 +236,7 @@ class TestCliModule(unittest.TestCase):
                         or result.exit_code != 1
                     )
 
-    def test_cli_main_entry_point(self):
+    def test_cli_main_entry_point(self) -> None:
         """Test that CLI main entry point works."""
         import subprocess
         import sys

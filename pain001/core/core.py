@@ -14,18 +14,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+import logging
 import os
-
-# Import the standard libraries
 import sys
+import time
 from typing import Any, Union
 
-# Import the pain001 library functions
 from pain001.constants.constants import valid_xml_types
 from pain001.context.context import Context
 from pain001.data.loader import load_payment_data
 from pain001.xml.generate_xml import generate_xml
 from pain001.xml.register_namespaces import register_namespaces
+
+# Configure structured logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
 
 def process_files(
@@ -66,64 +78,183 @@ def process_files(
         >>> process_files('pain.001.001.03', 'template.xml', 'schema.xsd', data)
     """
 
-    # Initialize the context and log a message.
-    logger = Context.get_instance().get_logger()
+    # Initialize context and timing
+    context_logger = Context.get_instance().get_logger()
+    start_time = time.time()
 
-    # Loop through the payment initiation message types and check if the XML
-    # message type is supported.
-    if xml_message_type not in valid_xml_types:
-        error_message = (
-            f"Error: Invalid XML message type: '{xml_message_type}'."
+    # Log structured event
+    logger.info(
+        json.dumps(
+            {
+                "event": "process_files_start",
+                "message_type": xml_message_type,
+                "timestamp": start_time,
+            }
         )
-        logger.error(error_message)
-        raise ValueError(error_message)
-
-    # Check if the XML template file exists
-    if not os.path.exists(xml_template_file_path):
-        error_message = (
-            f"Error: XML template '{xml_template_file_path}' does not exist."
-        )
-        logger.error(error_message)
-        raise FileNotFoundError(error_message)
-
-    # Check if the XSD schema file exists
-    if not os.path.exists(xsd_schema_file_path):
-        error_message = (
-            f"Error: XSD schema file '{xsd_schema_file_path}' does not exist."
-        )
-        logger.error(error_message)
-        raise FileNotFoundError(error_message)
-
-    # Load and validate data from various sources using unified loader
-    # This supports: file paths (str), Python lists, and Python dicts
-    try:
-        data = load_payment_data(data_file_path)
-    except (FileNotFoundError, ValueError) as e:
-        logger.error(f"Error loading payment data: {e}")
-        raise
-
-    # Register the namespace prefixes and URIs for the XML message type
-    register_namespaces(xml_message_type)
-
-    # Generate the updated XML file path
-    generate_xml(
-        data,
-        xml_message_type,
-        xml_template_file_path,
-        xsd_schema_file_path,
     )
 
-    # Confirm the XML file has been created
-    if os.path.exists(xml_template_file_path):
+    try:
+        # Loop through the payment initiation message types and check if the XML
+        # message type is supported.
+        if xml_message_type not in valid_xml_types:
+            error_message = (
+                f"Error: Invalid XML message type: '{xml_message_type}'."
+            )
+            context_logger.error(error_message)
+            logger.error(
+                json.dumps(
+                    {
+                        "event": "invalid_message_type",
+                        "message_type": xml_message_type,
+                        "error": error_message,
+                    }
+                )
+            )
+            raise ValueError(error_message)
+
+        # Check if the XML template file exists
+        if not os.path.exists(xml_template_file_path):
+            error_message = f"Error: XML template '{xml_template_file_path}' does not exist."
+            context_logger.error(error_message)
+            logger.error(
+                json.dumps(
+                    {
+                        "event": "template_not_found",
+                        "template_path": xml_template_file_path,
+                    }
+                )
+            )
+            raise FileNotFoundError(error_message)
+
+        # Check if the XSD schema file exists
+        if not os.path.exists(xsd_schema_file_path):
+            error_message = f"Error: XSD schema file '{xsd_schema_file_path}' does not exist."
+            context_logger.error(error_message)
+            logger.error(
+                json.dumps(
+                    {
+                        "event": "schema_not_found",
+                        "schema_path": xsd_schema_file_path,
+                    }
+                )
+            )
+            raise FileNotFoundError(error_message)
+
+        # Load and validate data from various sources
         logger.info(
-            f"Successfully generated XML file '{xml_template_file_path}'"
+            json.dumps(
+                {
+                    "event": "loading_payment_data",
+                    "data_source": (
+                        data_file_path
+                        if isinstance(data_file_path, str)
+                        else "python_object"
+                    ),
+                }
+            )
         )
-    else:  # pragma: no cover
-        # Defensive code: generate_xml raises SystemExit if it fails,
-        # so this block is rarely reached in normal operation
+
+        try:
+            data = load_payment_data(data_file_path)
+            logger.info(
+                json.dumps(
+                    {
+                        "event": "data_loaded",
+                        "record_count": len(data),
+                        "duration_ms": int((time.time() - start_time) * 1000),
+                    }
+                )
+            )
+        except (FileNotFoundError, ValueError) as e:
+            logger.error(
+                json.dumps(
+                    {
+                        "event": "data_load_error",
+                        "error": str(e),
+                        "duration_ms": int((time.time() - start_time) * 1000),
+                    }
+                )
+            )
+            raise
+
+        # Register the namespace prefixes and URIs
+        logger.info(
+            json.dumps(
+                {
+                    "event": "registering_namespaces",
+                    "message_type": xml_message_type,
+                }
+            )
+        )
+        register_namespaces(xml_message_type)
+
+        # Generate XML
+        gen_start = time.time()
+        logger.info(
+            json.dumps(
+                {
+                    "event": "generating_xml",
+                    "message_type": xml_message_type,
+                    "record_count": len(data),
+                }
+            )
+        )
+
+        generate_xml(
+            data,
+            xml_message_type,
+            xml_template_file_path,
+            xsd_schema_file_path,
+        )
+
+        gen_duration = int((time.time() - gen_start) * 1000)
+
+        # Confirm success
+        if os.path.exists(xml_template_file_path):
+            total_duration = int((time.time() - start_time) * 1000)
+            context_logger.info(
+                f"Successfully generated XML file '{xml_template_file_path}'"
+            )
+            logger.info(
+                json.dumps(
+                    {
+                        "event": "xml_generated_success",
+                        "file_path": xml_template_file_path,
+                        "message_type": xml_message_type,
+                        "record_count": len(data),
+                        "generation_ms": gen_duration,
+                        "total_duration_ms": total_duration,
+                    }
+                )
+            )
+        else:
+            error_msg = (
+                f"Failed to generate XML file at '{xml_template_file_path}'"
+            )
+            context_logger.error(error_msg)
+            logger.error(
+                json.dumps(
+                    {
+                        "event": "xml_generation_failed",
+                        "file_path": xml_template_file_path,
+                    }
+                )
+            )
+
+    except Exception as e:
+        total_duration = int((time.time() - start_time) * 1000)
         logger.error(
-            f"Failed to generate XML file at '{xml_template_file_path}'"
+            json.dumps(
+                {
+                    "event": "process_files_error",
+                    "error": str(e),
+                    "error_type": type(e).__name__,
+                    "duration_ms": total_duration,
+                }
+            ),
+            exc_info=True,
         )
+        raise
 
 
 if __name__ == "__main__":

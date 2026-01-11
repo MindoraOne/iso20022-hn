@@ -1,12 +1,14 @@
 [tool.poetry]
 name = "pain001"
-version = "0.0.34"
+version = "0.0.35"
 description = "Pain001 is a Python Library for Automating ISO 20022-Compliant Payment Files Using CSV Data."
 authors = ["Sebastien Rousseau <sebastian.rousseau@gmail.com>"]
 license = "Apache Software License"
 readme = "README.md"
 repository = "https://github.com/sebastienrousseau/pain001"
 homepage = "https://pain001.com"
+
+[tool.poetry.scripts]
 
 [tool.poetry.dependencies]
 click = "8.1.7"
@@ -20,23 +22,38 @@ rich = "13.7.1"
 xmlschema = "3.3.1"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.2.0"
-pytest-cov = "^5.0.0"
+pytest = "^8.0.0"
+pytest-cov = "^4.0.0"
+pytest-benchmark = "^4.0.0"
+pytest-xdist = "^3.0.0"
 black = "^24.0.0"
 flake8 = "^7.0.0"
 isort = "^5.13.0"
 mypy = "^1.11.0"
-pylint = "^3.2.0"
+pylint = "^3.0.0"
 bandit = "^1.7.0"
-safety = "^3.0.0"
-ruff = "^0.8.0"
-types-defusedxml = "^0.7.0.20250822"
+safety = "^2.3.0"
+ruff = "^0.1.0"
+types-defusedxml = "^0.7.0"
+diff-cover = "^8.0.0"
+types-setuptools = "^65.0.0"
+radon = "^5.1.0"
+mutmut = "^2.4.0"
+hypothesis = "^6.0.0"
+memory-profiler = "^0.60.0"
+sphinx = "^7.0.0"
+sphinx-rtd-theme = "^1.0.0"
+sphinx-autodoc-typehints = "^1.0.0"
+cyclonedx-bom = "^4.0.0"
+pip-licenses = "^4.0.0"
 
 [tool.poetry.group.docs]
 optional = true
 
 [tool.poetry.group.docs.dependencies]
-Sphinx = "^7.3.7"
+sphinx = "^7.0.0"
+sphinx-rtd-theme = "^1.0.0"
+sphinx-autodoc-typehints = "^1.0.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -105,6 +122,20 @@ check_untyped_defs = true
 strict_equality = true
 exclude = [
     "pain001/templates/",
+    "setup.py",
+]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+disallow_untyped_calls = false
+warn_unused_ignores = false
+disable_error_code = [
+    "arg-type",
+    "return-value",
+    "attr-defined",
+    "assignment",
 ]
 
 [[tool.mypy.overrides]]

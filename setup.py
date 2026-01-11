@@ -15,15 +15,23 @@
 # limitations under the License.
 
 from pathlib import Path
+import re
 
 from setuptools import find_packages, setup
 
 this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
 
+# Read version from pain001/__init__.py (single source of truth)
+version_file = (this_directory / "pain001" / "__init__.py").read_text()
+version_match = re.search(r'^__version__ = ["\']([^"\']*)["\']', version_file, re.MULTILINE)
+if not version_match:
+    raise RuntimeError("Unable to find version string in pain001/__init__.py")
+version = version_match.group(1)
+
 setup(
     name="pain001",
-    version="0.0.34",
+    version=version,
     description="Pain001, A Python Library for Automating ISO 20022-Compliant Payment Files Using CSV Or SQLite Data Files.",
     long_description=long_description,
     long_description_content_type="text/markdown",

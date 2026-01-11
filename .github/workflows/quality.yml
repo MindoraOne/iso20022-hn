@@ -1,0 +1,89 @@
+name: quality
+
+on:
+  schedule:
+    - cron: "0 8 * * *"  # Daily 08:00 UTC
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  complexity:
+    runs-on: ubuntu-latest
+    name: Code Complexity Analysis
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - uses: abatilo/actions-poetry@v3
+      - run: poetry install --no-interaction
+      - run: make complex
+      - uses: actions/upload-artifact@v4
+        with:
+          name: complexity-report
+          path: |
+            .radon-rc
+            htmlcov/
+
+  benchmarks:
+    runs-on: ubuntu-latest
+    name: Performance Benchmarks
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - uses: abatilo/actions-poetry@v3
+      - run: poetry install --no-interaction
+      - run: make perf
+      - uses: actions/upload-artifact@v4
+        with:
+          name: benchmarks
+          path: |
+            .benchmarks/
+
+  mutation:
+    runs-on: ubuntu-latest
+    name: Mutation Testing
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - uses: abatilo/actions-poetry@v3
+      - run: poetry install --no-interaction
+      - run: make mutate || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mutation-report
+          path: htmlcov/mutmut.html
+
+  coverage:
+    runs-on: ubuntu-latest
+    name: Coverage Report
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - uses: abatilo/actions-poetry@v3
+      - run: poetry install --no-interaction
+      - run: make cov
+      - uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  heavy-lint:
+    runs-on: ubuntu-latest
+    name: Heavy Lint (flake8/pylint)
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - uses: abatilo/actions-poetry@v3
+      - run: poetry install --no-interaction
+      - run: make lint

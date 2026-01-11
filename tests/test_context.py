@@ -23,17 +23,17 @@ from pain001.context.context import Context
 class TestContext(unittest.TestCase):
     """Unit tests for the Context class."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up the test fixture."""
         Context.instance = None
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Tear down the test fixture."""
         if Context.instance:
             Context.instance.logger = None
         Context.instance = None
 
-    def test_singleton(self):
+    def test_singleton(self) -> None:
         """Test that Context is a singleton."""
         context1 = Context()
         context2 = Context.get_instance()
@@ -41,13 +41,13 @@ class TestContext(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             Context()
 
-    def test_set_name(self):
+    def test_set_name(self) -> None:
         """Test that set_name() sets the name of the logger."""
         context = Context.get_instance()
         context.set_name("my_context")
         self.assertEqual(context.name, "my_context")
 
-    def test_set_log_level(self):
+    def test_set_log_level(self) -> None:
         context = Context.get_instance()
 
         valid_log_levels = {
@@ -69,7 +69,7 @@ class TestContext(unittest.TestCase):
         with self.assertRaises(ValueError):
             context.set_log_level(12345)  # some invalid int
 
-    def test_init_logger(self):
+    def test_init_logger(self) -> None:
         context = Context.get_instance()
         context.logger = None
         context.init_logger()
@@ -78,7 +78,7 @@ class TestContext(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             context.init_logger()
 
-    def test_get_logger(self):
+    def test_get_logger(self) -> None:
         context = Context.get_instance()
         logger = context.get_logger()
         self.assertIsNotNone(logger)
@@ -88,12 +88,12 @@ class TestContext(unittest.TestCase):
         self.assertIsNotNone(logger)
         self.assertEqual(logger, context.logger)
 
-    def test_log_level_propagation(self):
+    def test_log_level_propagation(self) -> None:
         context = Context.get_instance()
         context.set_log_level(logging.DEBUG)
         self.assertEqual(context.logger.level, logging.DEBUG)
 
-    def test_init_logger_with_existing_handlers(self):
+    def test_init_logger_with_existing_handlers(self) -> None:
         """Test init_logger when logger already has handlers."""
         context = Context.get_instance()
 

@@ -20,7 +20,7 @@ from pain001.csv.validate_csv_data import validate_csv_data
 
 
 class TestValidateCsvData(unittest.TestCase):
-    def test_validate_csv_with_valid_data(self):
+    def test_validate_csv_with_valid_data(self) -> None:
         data = [
             {
                 "id": "1",
@@ -69,7 +69,7 @@ class TestValidateCsvData(unittest.TestCase):
         ]
         self.assertTrue(validate_csv_data(data))
 
-    def test_validate_csv_with_invalid_data(self):
+    def test_validate_csv_with_invalid_data(self) -> None:
         data = [
             {
                 "id": "1",
@@ -118,12 +118,12 @@ class TestValidateCsvData(unittest.TestCase):
         ]
         self.assertFalse(validate_csv_data(data))
 
-    def test_validate_csv_with_empty_data(self):
+    def test_validate_csv_with_empty_data(self) -> None:
         """Test validation with empty data list."""
-        data = []
+        data: list[dict[str, str]] = []
         self.assertFalse(validate_csv_data(data))
 
-    def test_validate_csv_with_missing_column_values(self):
+    def test_validate_csv_with_missing_column_values(self) -> None:
         """Test validation with missing required column values."""
         data = [
             {
@@ -173,7 +173,7 @@ class TestValidateCsvData(unittest.TestCase):
         ]
         self.assertFalse(validate_csv_data(data))
 
-    def test_validate_csv_with_invalid_boolean(self):
+    def test_validate_csv_with_invalid_boolean(self) -> None:
         """Test validation with invalid boolean value."""
         data = [
             {
@@ -223,7 +223,7 @@ class TestValidateCsvData(unittest.TestCase):
         ]
         self.assertFalse(validate_csv_data(data))
 
-    def test_validate_csv_with_date_format(self):
+    def test_validate_csv_with_date_format(self) -> None:
         """Test validation with simple date format (YYYY-MM-DD)."""
         data = [
             {
@@ -273,7 +273,7 @@ class TestValidateCsvData(unittest.TestCase):
         ]
         self.assertTrue(validate_csv_data(data))
 
-    def test_validate_csv_with_invalid_float(self):
+    def test_validate_csv_with_invalid_float(self) -> None:
         """Test validation with invalid float value."""
         data = [
             {
@@ -323,7 +323,7 @@ class TestValidateCsvData(unittest.TestCase):
         ]
         self.assertFalse(validate_csv_data(data))
 
-    def test_validate_csv_with_completely_invalid_datetime(self):
+    def test_validate_csv_with_completely_invalid_datetime(self) -> None:
         """Test validation with datetime that fails both ISO and Y-m-d parsing."""
         data = [
             {

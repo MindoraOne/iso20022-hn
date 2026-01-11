@@ -6,7 +6,7 @@
 
 [![PyPI][pypi-badge]][03] [![PyPI Downloads][pypi-downloads-badge]][07] [![License][license-badge]][01] [![Codecov][codecov-badge]][06]
 
-> **Latest Release: v0.0.33** - Performance optimizations and code quality improvements with ruff integration, CSV streaming, and significant speed enhancements. [See what's new →](releases/v0.0.33.md)
+> **Latest Release: v0.0.35** - Industry-leading agent profiles, enhanced security practices, and dependency management guidelines. [See what's new →](https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.35)
 
 ## Overview
 
@@ -984,7 +984,7 @@ We would like to extend a big thank you to all the awesome contributors of
 [07]: https://pypi.org/project/pain001/
 
 [banner]: https://kura.pro/pain001/images/banners/banner-pain001.svg 'Pain001, A Python Library for Automating ISO 20022-Compliant Payment Files Using CSV Or SQlite Data Files.'
-[codecov-badge]: https://img.shields.io/codecov/c/github/sebastienrousseau/pain001?style=for-the-badge&token=AaUxKfRiou 'Codecov badge'
+[codecov-badge]: https://codecov.io/github/sebastienrousseau/pain001/graph/badge.svg?token=AaUxKfRiou 'Codecov badge'
 [license-badge]: https://img.shields.io/pypi/l/pain001?style=for-the-badge 'License badge'
 [pypi-badge]: https://img.shields.io/pypi/pyversions/pain001.svg?style=for-the-badge 'PyPI badge'
 [pypi-downloads-badge]:https://img.shields.io/pypi/dm/pain001.svg?style=for-the-badge 'PyPI Downloads badge'

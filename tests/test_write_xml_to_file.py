@@ -25,7 +25,7 @@ from pain001.xml.write_xml_to_file import write_xml_to_file
 class TestWriteXmlToFile:
     """Test cases for the write_xml_to_file function."""
 
-    def test_write_simple_xml(self):
+    def test_write_simple_xml(self) -> None:
         """Test writing a simple XML structure to a file."""
         # Create a simple XML structure
         root = et.Element("root")
@@ -57,7 +57,7 @@ class TestWriteXmlToFile:
             if os.path.exists(temp_file):
                 os.remove(temp_file)
 
-    def test_write_xml_with_attributes(self):
+    def test_write_xml_with_attributes(self) -> None:
         """Test writing XML with attributes to a file."""
         # Create XML with attributes
         root = et.Element("root", attrib={"version": "1.0"})
@@ -81,7 +81,7 @@ class TestWriteXmlToFile:
             if os.path.exists(temp_file):
                 os.remove(temp_file)
 
-    def test_write_xml_with_nested_elements(self):
+    def test_write_xml_with_nested_elements(self) -> None:
         """Test writing XML with nested elements."""
         root = et.Element("root")
         parent = et.SubElement(root, "parent")
@@ -108,7 +108,7 @@ class TestWriteXmlToFile:
             if os.path.exists(temp_file):
                 os.remove(temp_file)
 
-    def test_write_xml_formatting(self):
+    def test_write_xml_formatting(self) -> None:
         """Test that the XML is properly formatted with indentation."""
         root = et.Element("root")
         child1 = et.SubElement(root, "child1")
@@ -135,7 +135,7 @@ class TestWriteXmlToFile:
             if os.path.exists(temp_file):
                 os.remove(temp_file)
 
-    def test_write_xml_to_nonexistent_directory(self):
+    def test_write_xml_to_nonexistent_directory(self) -> None:
         """Test writing XML to a directory that doesn't exist raises error."""
         root = et.Element("root")
 
@@ -145,7 +145,7 @@ class TestWriteXmlToFile:
         with pytest.raises(FileNotFoundError):
             write_xml_to_file(nonexistent_path, root)
 
-    def test_write_xml_with_special_characters(self):
+    def test_write_xml_with_special_characters(self) -> None:
         """Test writing XML with special characters."""
         root = et.Element("root")
         child = et.SubElement(root, "child")

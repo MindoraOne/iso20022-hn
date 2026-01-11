@@ -21,7 +21,7 @@ from pain001.xml.generate_updated_xml_file_path import (
 # Test if the updated XML file path is generated correctly
 
 
-def test_generate_updated_xml_file_path():
+def test_generate_updated_xml_file_path() -> None:
     # Test with a file path that has an extension
     xml_file_path = "tests/data/template.xml"
     payment_initiation_message_type = "pain.001.001.03"

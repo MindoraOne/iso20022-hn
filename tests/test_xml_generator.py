@@ -20,7 +20,7 @@ from pain001.xml.generate_xml import generate_xml
 
 
 class TestXmlGenerator(unittest.TestCase):
-    def test_xml_generator_with_invalid_input(self):
+    def test_xml_generator_with_invalid_input(self) -> None:
         """
         Test if the XML generator exits with a non-zero exit code when
         invalid input is provided.
