@@ -184,7 +184,7 @@ class TestProcessFiles(unittest.TestCase):
         self.assertIn(
             "Error: XML template 'tests/data/non_existent_template.xml' "
             "does not exist.",
-            log.output[0],
+            log.output[-1],
         )
 
     def test_missing_xsd_schema_file(self) -> None:
@@ -305,7 +305,7 @@ class TestProcessFiles(unittest.TestCase):
                 )
         self.assertIn(
             "Unsupported file type",
-            log.output[0],
+            log.output[-1],
         )
 
     def test_core_main_entry_point(self) -> None:
