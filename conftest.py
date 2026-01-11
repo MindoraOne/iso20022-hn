@@ -45,13 +45,19 @@ class SLOPlugin:
         self.session_monitor = SLOMonitor(60.0, "Test Suite")
         self.lint_monitor = SLOMonitor(15.0, "Linting")
         self.type_monitor = SLOMonitor(10.0, "Type Checking")
-        self.monitors = [self.session_monitor, self.lint_monitor, self.type_monitor]
+        self.monitors = [
+            self.session_monitor,
+            self.lint_monitor,
+            self.type_monitor,
+        ]
 
     def pytest_configure(self, config: pytest.Config) -> None:
         """Configure plugin at test start."""
         self.session_monitor.start()
 
-    def pytest_sessionfinish(self, session: pytest.Session, exitstatus: int) -> None:
+    def pytest_sessionfinish(
+        self, session: pytest.Session, exitstatus: int
+    ) -> None:
         """Report SLOs after all tests finish."""
         self.session_monitor.stop()
 
@@ -65,7 +71,9 @@ class SLOPlugin:
             print(
                 f"\n⚠ TEST SUITE SLO EXCEEDED ({self.session_monitor.elapsed:.2f}s > 60s)"
             )
-            print("  Consider optimizing slow tests or splitting into parallel runs.")
+            print(
+                "  Consider optimizing slow tests or splitting into parallel runs."
+            )
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:

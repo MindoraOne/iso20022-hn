@@ -83,7 +83,9 @@ def validate_coverage(coverage_pct: float, floor: float) -> bool:
         return False
 
 
-def validate_slo(metric_name: str, measured_secs: float, threshold_secs: float) -> bool:
+def validate_slo(
+    metric_name: str, measured_secs: float, threshold_secs: float
+) -> bool:
     """Validate SLO is met.
 
     Args:
@@ -161,7 +163,9 @@ def main() -> int:
                             print(f"  ✓ {name}: {mean_ms:.2f}ms < 500ms")
                         else:
                             print(f"  ✗ {name}: {mean_ms:.2f}ms >= 500ms")
-                            failures.append(f"Benchmark {name} exceeds 500ms SLO")
+                            failures.append(
+                                f"Benchmark {name} exceeds 500ms SLO"
+                            )
         except Exception as e:
             print(f"  ⚠ Could not parse benchmark results: {e}")
     else:
