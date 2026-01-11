@@ -40,6 +40,150 @@ if not logger.handlers:
     logger.addHandler(handler)
 
 
+def _validate_inputs(
+    xml_message_type: str,
+    xml_template_file_path: str,
+    xsd_schema_file_path: str,
+) -> None:
+    """Validate message type and required file paths.
+
+    Raises:
+        ValueError: If the XML message type is not supported.
+        FileNotFoundError: If required files do not exist.
+    """
+    context_logger = Context.get_instance().get_logger()
+
+    if xml_message_type not in valid_xml_types:
+        error_message = (
+            f"Error: Invalid XML message type: '{xml_message_type}'."
+        )
+        context_logger.error(error_message)
+        logger.error(
+            json.dumps(
+                {
+                    "event": "invalid_message_type",
+                    "message_type": xml_message_type,
+                    "error": error_message,
+                }
+            )
+        )
+        raise ValueError(error_message)
+
+    if not os.path.exists(xml_template_file_path):
+        error_message = (
+            f"Error: XML template '{xml_template_file_path}' does not exist."
+        )
+        context_logger.error(error_message)
+        logger.error(
+            json.dumps(
+                {
+                    "event": "template_not_found",
+                    "template_path": xml_template_file_path,
+                }
+            )
+        )
+        raise FileNotFoundError(error_message)
+
+    if not os.path.exists(xsd_schema_file_path):
+        error_message = (
+            f"Error: XSD schema file '{xsd_schema_file_path}' does not exist."
+        )
+        context_logger.error(error_message)
+        logger.error(
+            json.dumps(
+                {
+                    "event": "schema_not_found",
+                    "schema_path": xsd_schema_file_path,
+                }
+            )
+        )
+        raise FileNotFoundError(error_message)
+
+
+def _load_data(
+    data_file_path: Union[str, list[dict[str, Any]], dict[str, Any]],
+    start_time: float,
+) -> list[dict[str, Any]]:
+    """Load and validate payment data from CSV/DB or Python objects."""
+    logger.info(
+        json.dumps(
+            {
+                "event": "loading_payment_data",
+                "data_source": (
+                    data_file_path
+                    if isinstance(data_file_path, str)
+                    else "python_object"
+                ),
+            }
+        )
+    )
+
+    try:
+        data = load_payment_data(data_file_path)
+        logger.info(
+            json.dumps(
+                {
+                    "event": "data_loaded",
+                    "record_count": len(data),
+                    "duration_ms": int((time.time() - start_time) * 1000),
+                }
+            )
+        )
+        return data
+    except (FileNotFoundError, ValueError) as e:
+        logger.error(
+            json.dumps(
+                {
+                    "event": "data_load_error",
+                    "error": str(e),
+                    "duration_ms": int((time.time() - start_time) * 1000),
+                }
+            )
+        )
+        raise
+
+
+def _register_message_namespaces(xml_message_type: str) -> None:
+    """Register XML namespace prefixes and URIs for the given message type."""
+    logger.info(
+        json.dumps(
+            {
+                "event": "registering_namespaces",
+                "message_type": xml_message_type,
+            }
+        )
+    )
+    register_namespaces(xml_message_type)
+
+
+def _generate_and_log(
+    data: list[dict[str, Any]],
+    xml_message_type: str,
+    xml_template_file_path: str,
+    xsd_schema_file_path: str,
+) -> int:
+    """Generate the XML and return generation duration in milliseconds."""
+    gen_start = time.time()
+    logger.info(
+        json.dumps(
+            {
+                "event": "generating_xml",
+                "message_type": xml_message_type,
+                "record_count": len(data),
+            }
+        )
+    )
+
+    generate_xml(
+        data,
+        xml_message_type,
+        xml_template_file_path,
+        xsd_schema_file_path,
+    )
+
+    return int((time.time() - gen_start) * 1000)
+
+
 def process_files(
     xml_message_type: str,
     xml_template_file_path: str,
@@ -47,38 +191,19 @@ def process_files(
     data_file_path: Union[str, list[dict[str, Any]], dict[str, Any]],
 ) -> None:
     """
-    This function generates an ISO 20022 payment message from various data sources.
+    Generate an ISO 20022 payment message from various data sources.
 
     Args:
-        xml_message_type (str): The type of XML message to generate. Valid
-        options are 'pain.001.001.03', 'pain.001.001.04', 'pain.001.001.05',
-        'pain.001.001.06', 'pain.001.001.07', 'pain.001.001.08', and
-        'pain.001.001.09'.
-        xml_template_file_path (str): The path of the XML template file.
-        xsd_schema_file_path (str): The path of the XSD schema file.
-        data_file_path (Union[str, List[Dict], Dict]): The payment data source.
-            Supports:
-            - str: Path to CSV (.csv) or SQLite (.db) file (backward compatible)
-            - list: List of payment data dictionaries (new feature)
-            - dict: Single payment transaction dictionary (new feature)
-
-    Returns:
-        None
+        xml_message_type: XML message type (e.g., 'pain.001.001.03').
+        xml_template_file_path: Path to the XML template file.
+        xsd_schema_file_path: Path to the XSD schema file.
+        data_file_path: CSV/DB path or Python data (list/dict).
 
     Raises:
         ValueError: If the XML message type is not supported or data is invalid.
-        FileNotFoundError: If the XML template file or data file does not exist.
-
-    Examples:
-        # Existing file-based usage (backward compatible)
-        >>> process_files('pain.001.001.03', 'template.xml', 'schema.xsd', 'data.csv')
-
-        # New direct Python data usage
-        >>> data = [{'id': 'MSG001', 'date': '2026-01-09', ...}]
-        >>> process_files('pain.001.001.03', 'template.xml', 'schema.xsd', data)
+        FileNotFoundError: If required files do not exist.
     """
 
-    # TODO: split this orchestration into smaller helpers (validate inputs, load data, render, validate output)
     # Initialize context and timing
     context_logger = Context.get_instance().get_logger()
     start_time = time.time()
@@ -95,122 +220,19 @@ def process_files(
     )
 
     try:
-        # Loop through the payment initiation message types and check if the XML
-        # message type is supported.
-        if xml_message_type not in valid_xml_types:
-            error_message = (
-                f"Error: Invalid XML message type: '{xml_message_type}'."
-            )
-            context_logger.error(error_message)
-            logger.error(
-                json.dumps(
-                    {
-                        "event": "invalid_message_type",
-                        "message_type": xml_message_type,
-                        "error": error_message,
-                    }
-                )
-            )
-            raise ValueError(error_message)
-
-        # Check if the XML template file exists
-        if not os.path.exists(xml_template_file_path):
-            error_message = f"Error: XML template '{xml_template_file_path}' does not exist."
-            context_logger.error(error_message)
-            logger.error(
-                json.dumps(
-                    {
-                        "event": "template_not_found",
-                        "template_path": xml_template_file_path,
-                    }
-                )
-            )
-            raise FileNotFoundError(error_message)
-
-        # Check if the XSD schema file exists
-        if not os.path.exists(xsd_schema_file_path):
-            error_message = f"Error: XSD schema file '{xsd_schema_file_path}' does not exist."
-            context_logger.error(error_message)
-            logger.error(
-                json.dumps(
-                    {
-                        "event": "schema_not_found",
-                        "schema_path": xsd_schema_file_path,
-                    }
-                )
-            )
-            raise FileNotFoundError(error_message)
-
-        # Load and validate data from various sources
-        logger.info(
-            json.dumps(
-                {
-                    "event": "loading_payment_data",
-                    "data_source": (
-                        data_file_path
-                        if isinstance(data_file_path, str)
-                        else "python_object"
-                    ),
-                }
-            )
+        _validate_inputs(
+            xml_message_type, xml_template_file_path, xsd_schema_file_path
         )
-
-        try:
-            data = load_payment_data(data_file_path)
-            logger.info(
-                json.dumps(
-                    {
-                        "event": "data_loaded",
-                        "record_count": len(data),
-                        "duration_ms": int((time.time() - start_time) * 1000),
-                    }
-                )
-            )
-        except (FileNotFoundError, ValueError) as e:
-            logger.error(
-                json.dumps(
-                    {
-                        "event": "data_load_error",
-                        "error": str(e),
-                        "duration_ms": int((time.time() - start_time) * 1000),
-                    }
-                )
-            )
-            raise
-
-        # Register the namespace prefixes and URIs
-        logger.info(
-            json.dumps(
-                {
-                    "event": "registering_namespaces",
-                    "message_type": xml_message_type,
-                }
-            )
-        )
-        register_namespaces(xml_message_type)
-
-        # Generate XML
-        gen_start = time.time()
-        logger.info(
-            json.dumps(
-                {
-                    "event": "generating_xml",
-                    "message_type": xml_message_type,
-                    "record_count": len(data),
-                }
-            )
-        )
-
-        generate_xml(
+        data = _load_data(data_file_path, start_time)
+        _register_message_namespaces(xml_message_type)
+        gen_duration = _generate_and_log(
             data,
             xml_message_type,
             xml_template_file_path,
             xsd_schema_file_path,
         )
 
-        gen_duration = int((time.time() - gen_start) * 1000)
-
-        # Confirm success
+        # Confirm success (template existence check retained for backward compatibility)
         if os.path.exists(xml_template_file_path):
             total_duration = int((time.time() - start_time) * 1000)
             context_logger.info(
