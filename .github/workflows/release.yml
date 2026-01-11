@@ -48,3 +48,12 @@ jobs:
           draft: false
           prerelease: false
           files: dist/*
+
+  docs:
+    name: Deploy Documentation
+    needs: release
+    uses: ./.github/workflows/docs.yml
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
