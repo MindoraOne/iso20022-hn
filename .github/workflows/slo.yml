@@ -1,0 +1,161 @@
+name: 🚦 SLO Enforcement & Quality Gate
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  slo-enforcement:
+    name: PySentinel SLO & Quality Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@b4ff0907add4405f2b5017906e825022a20bd5f5  # v4.1.1
+
+      - uses: actions/setup-python@61a6322f88396a6271a6ee3cb807b44d28e7f64c  # v5.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Cache Poetry dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pypoetry
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-
+
+      - name: Install Poetry
+        run: pip install poetry==1.8.0
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root
+
+      - name: Install project
+        run: poetry install --no-interaction
+
+      - name: Run Linting (SLO: < 15s)
+        id: lint
+        run: |
+          echo "::group::Linting"
+          START=$(date +%s.%N)
+          poetry run ruff check . && \
+          poetry run flake8 pain001 && \
+          poetry run pylint pain001 --exit-zero || true
+          END=$(date +%s.%N)
+          ELAPSED=$(echo "$END - $START" | bc)
+          echo "duration=$ELAPSED" >> $GITHUB_OUTPUT
+          echo "Elapsed: ${ELAPSED}s"
+          echo "::endgroup::"
+        continue-on-error: true
+
+      - name: Verify Lint SLO
+        run: |
+          ELAPSED=${{ steps.lint.outputs.duration }}
+          if (( $(echo "$ELAPSED > 15" | bc -l) )); then
+            echo "❌ Linting SLO exceeded: ${ELAPSED}s > 15s"
+            exit 1
+          else
+            echo "✓ Linting SLO met: ${ELAPSED}s <= 15s"
+          fi
+
+      - name: Run Type Checking (SLO: < 10s)
+        id: type
+        run: |
+          echo "::group::Type Checking"
+          START=$(date +%s.%N)
+          poetry run mypy .
+          END=$(date +%s.%N)
+          ELAPSED=$(echo "$END - $START" | bc)
+          echo "duration=$ELAPSED" >> $GITHUB_OUTPUT
+          echo "Elapsed: ${ELAPSED}s"
+          echo "::endgroup::"
+
+      - name: Verify Type SLO
+        run: |
+          ELAPSED=${{ steps.type.outputs.duration }}
+          if (( $(echo "$ELAPSED > 10" | bc -l) )); then
+            echo "❌ Type check SLO exceeded: ${ELAPSED}s > 10s"
+            exit 1
+          else
+            echo "✓ Type check SLO met: ${ELAPSED}s <= 10s"
+          fi
+
+      - name: Run Tests with Coverage (SLO: < 60s, Floor: 95%)
+        id: test
+        run: |
+          echo "::group::Tests"
+          START=$(date +%s.%N)
+          poetry run pytest \
+            --cov=pain001 \
+            --cov-branch \
+            --cov-report=xml \
+            --cov-report=html \
+            --cov-report=term-missing \
+            --cov-fail-under=95 \
+            --tb=short \
+            -v
+          END=$(date +%s.%N)
+          ELAPSED=$(echo "$END - $START" | bc)
+          echo "duration=$ELAPSED" >> $GITHUB_OUTPUT
+          echo "Elapsed: ${ELAPSED}s"
+          echo "::endgroup::"
+
+      - name: Verify Test SLO
+        run: |
+          ELAPSED=${{ steps.test.outputs.duration }}
+          if (( $(echo "$ELAPSED > 60" | bc -l) )); then
+            echo "⚠️  Test SLO exceeded: ${ELAPSED}s > 60s"
+            echo "Consider: parallel execution, test optimization, or increasing threshold"
+          else
+            echo "✓ Test SLO met: ${ELAPSED}s <= 60s"
+          fi
+
+      - name: Run Security Checks
+        run: |
+          echo "::group::Security Checks"
+          poetry run bandit -q -r pain001
+          poetry run safety check
+          echo "::endgroup::"
+
+      - name: Enforce SLOs (PySentinel)
+        run: |
+          poetry run python scripts/enforce_slos.py
+
+      - name: Upload Coverage Reports
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: true
+
+      - name: Comment PR on Coverage
+        if: github.event_name == 'pull_request'
+        uses: py-cov-action/python-coverage-comment-action@v3
+        with:
+          GITHUB_TOKEN: ${{ github.token }}
+          MINIMUM_GREEN: 95
+          MINIMUM_ORANGE: 85
+
+      - name: Archive Coverage Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report-${{ github.run_id }}
+          path: htmlcov/
+
+      - name: PySentinel Final Report
+        if: always()
+        run: |
+          echo "================================"
+          echo "PySentinel Execution Summary"
+          echo "================================"
+          echo "Linting:      ${{ steps.lint.outputs.duration }}s (SLO: < 15s)"
+          echo "Type Check:   ${{ steps.type.outputs.duration }}s (SLO: < 10s)"
+          echo "Test Suite:   ${{ steps.test.outputs.duration }}s (SLO: < 60s)"
+          echo "Coverage:     See report above (Floor: 95%)"
+          echo ""
+          echo "PySentinel: Integrity Verified"

@@ -90,8 +90,8 @@ processing with confidence that every file is ISO 20022-compliant.**
 
 ```mermaid
 flowchart LR
-    A["CSV/SQLite
-    Data File"] -->|Load & Validate| B["Pain001
+    A["CSV / SQLite / Python
+    Data Source"] -->|Load & Validate| B["Pain001
     Library"]
     B -->|Generate XML| C["ISO 20022
     Payment File"]
@@ -706,11 +706,13 @@ Mandatory validation is the core principle of Pain001. It ensures:
 flowchart TD
     Start([1. Load Data Source]) --> DataType{Data Type?}
     
-    DataType -->|CSV| LoadData[Load CSV File]
-    DataType -->|SQLite| LoadData
-    DataType -->|Python| LoadData
+    DataType -->|CSV| LoadCSV[Load CSV File]
+    DataType -->|SQLite| LoadDB[Load SQLite Database]
+    DataType -->|Python| LoadPython[Load Python Dict/List]
     
-    LoadData --> Stage1[2. Automatic Data Validation]
+    LoadCSV --> Stage1[2. Automatic Data Validation]
+    LoadDB --> Stage1
+    LoadPython --> Stage1
     
     Stage1 --> CheckReq[Check Required Fields]
     CheckReq --> CheckTypes[Validate Data Types]

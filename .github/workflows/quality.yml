@@ -1,4 +1,4 @@
-name: quality
+name: 🧬 Quality Benchmarks
 
 on:
   push:
@@ -15,14 +15,14 @@ jobs:
     timeout-minutes: 15
     if: github.event_name != 'schedule'
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
         with:
           python-version: "3.9"
-      - uses: abatilo/actions-poetry@v3
+      - uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1
       - run: poetry install --no-interaction
-      - run: make mutate-fast || true  # Continue on failure, upload results
-      - uses: actions/upload-artifact@v4
+      - run: poetry run make mutate-fast || true  # Continue on failure, upload results
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         if: always()
         with:
           name: mutation-fast-results
@@ -37,14 +37,14 @@ jobs:
     timeout-minutes: 30
     if: github.event_name == 'schedule'
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
         with:
           python-version: "3.9"
-      - uses: abatilo/actions-poetry@v3
+      - uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1
       - run: poetry install --no-interaction
-      - run: make mutate || true
-      - uses: actions/upload-artifact@v4
+      - run: poetry run make mutate || true
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         if: always()
         with:
           name: mutation-full-results
@@ -52,6 +52,8 @@ jobs:
             .mutmut-cache/
             .coverage
             htmlcov/
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        if: always()
         with:
           name: complexity-report
           path: |
@@ -62,14 +64,14 @@ jobs:
     runs-on: ubuntu-latest
     name: Performance Benchmarks
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
         with:
           python-version: "3.9"
-      - uses: abatilo/actions-poetry@v3
+      - uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1
       - run: poetry install --no-interaction
-      - run: make perf
-      - uses: actions/upload-artifact@v4
+      - run: poetry run make perf
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: benchmarks
           path: |
@@ -80,14 +82,14 @@ jobs:
     name: Mutation Testing
     timeout-minutes: 30  # Reduced timeout with optimizations
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
         with:
           python-version: "3.9"
-      - uses: abatilo/actions-poetry@v3
+      - uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1
       - run: poetry install --no-interaction
-      - run: make mutate || true  # Continue on failure
-      - uses: actions/upload-artifact@v4
+      - run: poetry run make mutate || true  # Continue on failure
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         if: always()  # Upload even if mutation testing fails/times out
         with:
           name: mutation-report
@@ -97,14 +99,14 @@ jobs:
     runs-on: ubuntu-latest
     name: Coverage Report
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
         with:
           python-version: "3.9"
-      - uses: abatilo/actions-poetry@v3
+      - uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1
       - run: poetry install --no-interaction
-      - run: make cov
-      - uses: codecov/codecov-action@v4
+      - run: poetry run make cov
+      - uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
         with:
           file: ./coverage.xml
           fail_ci_if_error: true
@@ -114,10 +116,10 @@ jobs:
     runs-on: ubuntu-latest
     name: Heavy Lint (flake8/pylint)
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
         with:
           python-version: "3.9"
-      - uses: abatilo/actions-poetry@v3
+      - uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1
       - run: poetry install --no-interaction
-      - run: make lint
+      - run: poetry run make lint

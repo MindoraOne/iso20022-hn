@@ -1,4 +1,4 @@
-name: nightly
+name: 🌙 Nightly Quality
 
 on:
   schedule:
