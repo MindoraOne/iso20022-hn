@@ -1055,7 +1055,7 @@ We would like to extend a big thank you to all the awesome contributors of
 [07]: https://pypi.org/project/pain001/
 
 [banner]: https://kura.pro/pain001/images/banners/banner-pain001.svg 'Pain001, A Python Library for Automating ISO 20022-Compliant Payment Files Using CSV Or SQlite Data Files.'
-[codecov-badge]: https://codecov.io/github/sebastienrousseau/pain001/graph/badge.svg?token=AaUxKfRiou 'Codecov badge'
+[codecov-badge]: https://img.shields.io/codecov/c/github/sebastienrousseau/pain001?style=for-the-badge 'Codecov badge'
 [docs-badge]: https://img.shields.io/badge/docs-pain001.com-blue?style=for-the-badge 'Documentation badge'
 [license-badge]: https://img.shields.io/pypi/l/pain001?style=for-the-badge 'License badge'
 [pypi-badge]: https://img.shields.io/pypi/v/pain001?style=for-the-badge 'PyPI version badge'
