@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.43] - 2026-01-11
+
+### Fixed
+
+- **CI/CD Pipeline** - Fixed PyPI authentication in release workflow:
+  - Updated TWINE_PASSWORD secret reference from `PYPI_TOKEN` to `PYPI_API_TOKEN`
+  - Resolves 403 Forbidden error during package publication
+  - Enables successful PyPI uploads
+
+### Notes
+
+- No code changes in this release
+- Purely CI/CD workflow authentication fix
+- All v0.0.42 functionality fully preserved
+
+---
+
+## [0.0.42] - 2026-01-11
+
+### Fixed
+
+- **CI/CD Pipeline** - Fixed duplicate workflow executions during releases:
+  - Removed tag trigger from docs workflow to prevent parallel runs
+  - Docs now only triggered via workflow_call from release workflow
+  - Prevents race conditions and resource waste
+
+- **Documentation** - Fixed Mermaid diagram syntax:
+  - Replaced HTML `<br/>` tags with quoted multiline strings
+  - Diagram now renders correctly on GitHub
+  - Improved Markdown formatting
+
+### Notes
+
+- All v0.0.41 functionality fully preserved
+- Purely CI/CD workflow optimization
+
+---
+
 ## [0.0.37] - 2026-01-11
 
 ### Fixed

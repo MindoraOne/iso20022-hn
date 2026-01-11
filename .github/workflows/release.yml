@@ -2,23 +2,14 @@ name: release
 
 on:
   push:
-    branches: [main]
     tags: ["v*"]
-
-permissions:
-  contents: write
-  issues: write
-  pull-requests: write
 
 jobs:
   release:
-    name: Build and Publish Package
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -35,25 +26,5 @@ jobs:
       - name: Publish to PyPI
         env:
           TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-        run: twine upload --skip-existing dist/*
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        if: success()
-        with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
-          body_path: releases/${{ github.ref_name }}.md
-          draft: false
-          prerelease: false
-          files: dist/*
-
-  docs:
-    name: Deploy Documentation
-    needs: release
-    uses: ./.github/workflows/docs.yml
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: twine upload dist/*
