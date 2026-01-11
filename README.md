@@ -13,7 +13,7 @@
 [![Quality][quality-badge]][quality-url]
 [![Documentation][docs-badge]][docs-url]
 
-> **Latest Release: v0.0.37** - Maintenance release with CI/CD fixes and code quality improvements. All v0.0.36 functionality preserved with enhanced stability. [See what's new →](https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.37)
+> **Latest Release: v0.0.38** - Professional documentation overhaul with PyData Sphinx theme, comprehensive guides, and enterprise-grade documentation. [See what's new →](https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.38)
 
 ## Overview
 
@@ -1057,7 +1057,7 @@ We would like to extend a big thank you to all the awesome contributors of
 [banner]: https://kura.pro/pain001/images/banners/banner-pain001.svg 'Pain001, A Python Library for Automating ISO 20022-Compliant Payment Files Using CSV Or SQlite Data Files.'
 [codecov-badge]: https://img.shields.io/codecov/c/github/sebastienrousseau/pain001?style=for-the-badge 'Codecov badge'
 [docs-badge]: https://img.shields.io/github/actions/workflow/status/sebastienrousseau/pain001/docs.yml?branch=main&label=Docs&style=for-the-badge 'Documentation badge'
-[docs-url]: https://sebastienrousseau.github.io/pain001/
+[docs-url]: https://sebastienrousseau.com/pain001/
 [license-badge]: https://img.shields.io/pypi/l/pain001?style=for-the-badge 'License badge'
 [pypi-badge]: https://img.shields.io/pypi/v/pain001?style=for-the-badge 'PyPI version badge'
 [pypi-downloads-badge]: https://img.shields.io/pypi/dm/pain001.svg?style=for-the-badge 'PyPI Downloads badge'

@@ -1,53 +1,167 @@
-.. Pain001 documentation master file, created by
-   sphinx-quickstart on Sun May 19 21:59:47 2024.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. Pain001 documentation master file
 
-Welcome to Pain001's documentation!
-===================================
+========================================
+Pain001: ISO 20022-Compliant Payment Files
+========================================
 
-Pain001 is an open-source Python library for automating ISO 20022-compliant payment file creation 
-using CSV or SQLite data files. It simplifies the generation of payment initiation files for 
-SEPA and international payments.
+Welcome to **Pain001** — a powerful Python library for automating ISO 20022-compliant payment file creation.
 
-Features
---------
+Pain001 simplifies payment processing by generating standardized payment initiation files (pain.001) directly from CSV or SQLite data sources, with mandatory validation and enterprise-grade reliability.
 
-* **ISO 20022 Compliance**: Generate payment files compliant with pain.001.001.03 through pain.001.001.09
-* **Multiple Data Sources**: Support for CSV files, SQLite databases, and Python data structures
-* **Automatic Validation**: Built-in XSD schema validation for generated XML files
-* **Type Safety**: Full type hints for better IDE support and type checking
-* **Secure by Design**: Uses defusedxml to prevent XXE attacks and XML bombs
-* **Comprehensive Testing**: 97% test coverage with 150+ tests
+.. grid:: 2
+   :gutter: 2
 
-Quick Start
------------
+   .. grid-item-card:: 🚀 Quick Start
+      :link: installation
+      :link-type: doc
 
-Installation::
+      Get up and running in minutes with pip install and a simple example.
 
-    pip install pain001
+   .. grid-item-card:: 📚 User Guide
+      :link: usage
+      :link-type: doc
 
-Basic usage::
+      Learn how to use Pain001 with CSV data, databases, and custom configurations.
 
-    from pain001 import main
-    
-    main(
-        xml_message_type='pain.001.001.03',
-        xml_template_file_path='template.xml',
-        xsd_schema_file_path='schema.xsd',
-        data_file_path='payments.csv'
-    )
+   .. grid-item-card:: ⚙️ API Reference
+      :link: modules
+      :link-type: doc
+
+      Complete API documentation with all classes, functions, and methods.
+
+   .. grid-item-card:: 🔧 Configuration
+      :link: configuration
+      :link-type: doc
+
+      Configure Pain001 for your specific payment processing needs.
+
+Key Features
+============
+
+.. rst-class:: feature-grid
+
+* **🏦 ISO 20022 Compliance** — Generate files compliant with pain.001.001.03 through pain.001.001.11
+* **📊 Multiple Data Sources** — Support for CSV files, SQLite databases, and Python data structures
+* **✅ Automatic Validation** — Built-in XSD schema validation for generated XML files
+* **🔒 Secure by Design** — Uses defusedxml to prevent XXE attacks and SQL injection protection
+* **🧪 Fully Tested** — 98.57% test coverage with 341+ comprehensive tests
+* **📦 Type-Safe** — Full type hints for better IDE support and mypy compatibility
+* **🚀 Production-Ready** — Used in production for SEPA and international payments
+* **💼 Enterprise Grade** — Robust error handling, comprehensive logging, and detailed reporting
+
+Supported ISO 20022 Versions
+=============================
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 15 20 45
+
+   * - Version
+     - Status
+     - CSV Fields
+     - Primary Use Case
+   * - pain.001.001.03
+     - ✅ Stable
+     - 42
+     - SEPA credit transfers
+   * - pain.001.001.04
+     - ✅ Stable
+     - 47
+     - Non-SEPA international payments
+   * - pain.001.001.05
+     - ✅ Stable
+     - 47
+     - Enhanced global payments
+   * - pain.001.001.06
+     - ✅ Stable
+     - 44
+     - Instant SEPA payments
+   * - pain.001.001.07
+     - ✅ Stable
+     - 44
+     - Large payment requests (RLP/RTP)
+   * - pain.001.001.08
+     - ✅ Stable
+     - 44
+     - TARGET instant settlement
+   * - pain.001.001.09
+     - ✅ Stable
+     - 23
+     - Modern simplified structure
+   * - pain.001.001.10
+     - ✅ Stable
+     - 23
+     - Enhanced compliance & validation
+   * - pain.001.001.11
+     - ✅ Latest
+     - 23
+     - Advanced features & future-proof
+
+Why Pain001?
+============
+
+**Reduce Complexity**
+    Payment processing involves complex ISO 20022 standards and multiple validation steps. Pain001 handles all of this automatically.
+
+**Ensure Compliance**
+    Every generated file is validated against official XSD schemas, ensuring 100% compliance with payment networks.
+
+**Save Time**
+    Automated generation eliminates manual file creation and validation, reducing processing time from hours to minutes.
+
+**Improve Reliability**
+    With enterprise-grade error handling and comprehensive testing, Pain001 ensures consistent, reliable payment processing.
+
+**Scale with Confidence**
+    Process thousands of payments with the same confidence and reliability as a single payment.
+
+Getting Started in 3 Steps
+==========================
+
+1. **Install**
+
+   .. code-block:: bash
+
+      pip install pain001
+
+2. **Load Your Data**
+
+   .. code-block:: python
+
+      from pain001 import main
+
+      main(
+          xml_message_type='pain.001.001.03',
+          xml_template_file_path='template.xml',
+          xsd_schema_file_path='schema.xsd',
+          data_file_path='payments.csv'
+      )
+
+3. **Get Validated Payment Files**
+
+   Your ISO 20022-compliant XML payment file is generated and validated automatically.
 
 Contents
---------
+========
 
 .. toctree::
    :maxdepth: 2
-   :caption: API Reference:
+   :caption: Documentation
 
+   installation
+   usage
+   configuration
+   examples
    modules
 
-Indices and tables
+.. toctree::
+   :maxdepth: 2
+   :caption: Additional Resources
+
+   faq
+   glossary
+
+Indices and Tables
 ==================
 
 * :ref:`genindex`

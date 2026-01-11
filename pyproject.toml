@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pain001"
-version = "0.0.37"
+version = "0.0.38"
 description = "Pain001 is a Python Library for Automating ISO 20022-Compliant Payment Files Using CSV Data."
 authors = ["Sebastien Rousseau <sebastian.rousseau@gmail.com>"]
 license = "Apache Software License"
@@ -52,8 +52,10 @@ optional = true
 
 [tool.poetry.group.docs.dependencies]
 sphinx = "^7.0.0"
-sphinx-rtd-theme = "^1.0.0"
+pydata-sphinx-theme = "^0.15.0"
 sphinx-autodoc-typehints = "^1.0.0"
+sphinx-design = "^0.6.0"
+myst-parser = "^2.0.0"
 
 [build-system]
 requires = ["poetry-core"]
