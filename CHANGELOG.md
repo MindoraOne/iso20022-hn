@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.37] - 2026-01-11
+
+### Fixed
+
+- **CI/CD Pipeline** - Fixed GitHub Actions version extraction failure:
+  - Changed `setup.cfg` version from dynamic `attr: pain001.__version__` to static `0.0.37`
+  - Enables automated releases and packaging workflows
+  - Resolves HTTP 403 errors during PyPI upload
+
+- **Code Quality** - Refactored `pain001/xml/generate_xml.py` for maintainability:
+  - Reduced cyclomatic complexity from 22 to <18 (flake8 compliant)
+  - Extracted data preparation logic into separate helper functions
+  - Replaced nested if-elif chains with dictionary dispatch pattern
+  - Improved code readability and testability
+
+- **Test Suite** - Fixed CLI test assertions:
+  - Added ANSI colour code stripping in `tests/test_main.py`
+  - Tests now handle Rich console output correctly
+  - All 341 tests passing with 98.57% coverage
+
+### Notes
+
+- All v0.0.36 functionality fully preserved
+- No breaking changes to public API
+- Complete backward compatibility maintained
+
+---
+
 ## [0.0.36] - 2026-01-11
 
 ### Added

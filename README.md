@@ -13,7 +13,7 @@
 [![Quality][quality-badge]][quality-url]
 [![Documentation][docs-badge]][00]
 
-> **Latest Release: v0.0.36** - Added support for pain.001.001.10 and pain.001.001.11 ISO 20022 message formats. [See what's new →](https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.36)
+> **Latest Release: v0.0.37** - Maintenance release with CI/CD fixes and code quality improvements. All v0.0.36 functionality preserved with enhanced stability. [See what's new →](https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.37)
 
 ## Overview
 
@@ -34,7 +34,7 @@ that initiates a customer payment.
 - **Mandatory Data Validation:** Ensures all payment files are ISO 20022-compliant before creation
 - **Multi-source Support:** Works with CSV files, SQLite databases, and Python data structures
 - **Automatic XSD Validation:** Validates generated XML against ISO 20022 schemas
-- **Comprehensive Testing:** 96% test coverage with 323 tests ensuring reliability
+- **Comprehensive Testing:** 98.57% test coverage with 341 tests ensuring reliability
 - **Secure by Design:** Uses `defusedxml` to prevent XXE attacks and implements SQL injection protection
 - **Type-Safe:** Full type hints for better IDE support and type checking with mypy
 - **Robust Error Handling:** Specific exception types for precise error handling and debugging
