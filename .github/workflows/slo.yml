@@ -2,7 +2,7 @@ name: 🚦 SLO Enforcement & Quality Gate
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, "feat/*"]
   pull_request:
     branches: [main, develop]
 
@@ -20,7 +20,7 @@ jobs:
           python-version: "3.12"
 
       - name: Cache Poetry dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@704facf57c6b374752e81f440db8c5d560b1f20a  # v4.1.1
         with:
           path: ~/.cache/pypoetry
           key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
@@ -125,7 +125,7 @@ jobs:
           poetry run python scripts/enforce_slos.py
 
       - name: Upload Coverage Reports
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de  # v4.0.1
         with:
           file: ./coverage.xml
           flags: unittests
@@ -141,7 +141,7 @@ jobs:
           MINIMUM_ORANGE: 85
 
       - name: Archive Coverage Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v4.3.1
         if: always()
         with:
           name: coverage-report-${{ github.run_id }}
