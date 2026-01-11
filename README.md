@@ -1063,5 +1063,5 @@ We would like to extend a big thank you to all the awesome contributors of
 [python-versions-badge]: https://img.shields.io/pypi/pyversions/pain001.svg?style=for-the-badge 'Python versions badge'
 [quality-badge]: https://img.shields.io/github/actions/workflow/status/sebastienrousseau/pain001/quality.yml?branch=main&label=Quality&style=for-the-badge 'Code quality badge'
 [quality-url]: https://github.com/sebastienrousseau/pain001/actions/workflows/quality.yml
-[tests-badge]: https://img.shields.io/github/actions/workflow/status/sebastienrousseau/pain001/tests.yml?branch=main&label=Tests&style=for-the-badge 'Tests badge'
-[tests-url]: https://github.com/sebastienrousseau/pain001/actions/workflows/tests.yml
+[tests-badge]: https://img.shields.io/github/actions/workflow/status/sebastienrousseau/pain001/ci.yml?branch=main&label=Tests&style=for-the-badge 'Tests badge'
+[tests-url]: https://github.com/sebastienrousseau/pain001/actions/workflows/ci.yml
