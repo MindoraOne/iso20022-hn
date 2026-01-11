@@ -9,24 +9,6 @@ on:
     - cron: "0 2 * * *"  # Daily 02:00 UTC
 
 jobs:
-  sbom:
-    runs-on: ubuntu-latest
-    name: Generate SBOM
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.9"
-      - uses: abatilo/actions-poetry@v3
-      - run: poetry install --no-interaction
-      - run: |
-          pip install cyclonedx-bom
-          python -m cyclonedx_bom -o sbom.xml -f xml
-      - uses: actions/upload-artifact@v4
-        with:
-          name: sbom
-          path: sbom.xml
-
   vulnerability-scan:
     runs-on: ubuntu-latest
     name: Vulnerability Scan
