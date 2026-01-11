@@ -91,6 +91,8 @@ def main(
     data_file_path: Optional[str],
     config_file: Optional[str],
 ) -> None:
+    # TODO: add a dry-run/validate-only flag that skips XML generation and reports validation results.
+    # TODO: replace print+sys.exit with structured error handling shared with library API.
     # Check that the required arguments are provided first
     if not xml_message_type:
         print("The XML message type is required.")

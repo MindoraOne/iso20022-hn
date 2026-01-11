@@ -62,6 +62,7 @@ def load_payment_data(
         ...     'id': 'MSG001', 'amount': '1000.00', ...
         ... })
     """
+    # TODO: add streaming/chunked loaders for large CSV/DB sources to reduce memory usage.
     # Handle file path (existing behavior - backward compatible)
     if isinstance(data_source, str):
         return _load_from_file(data_source)

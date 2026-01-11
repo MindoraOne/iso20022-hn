@@ -78,6 +78,7 @@ def process_files(
         >>> process_files('pain.001.001.03', 'template.xml', 'schema.xsd', data)
     """
 
+    # TODO: split this orchestration into smaller helpers (validate inputs, load data, render, validate output)
     # Initialize context and timing
     context_logger = Context.get_instance().get_logger()
     start_time = time.time()

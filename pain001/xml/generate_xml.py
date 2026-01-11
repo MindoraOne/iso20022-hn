@@ -276,6 +276,7 @@ def generate_xml(
     Returns:
         None
     """
+    # TODO: centralize this mapping and required fields in a single registry object.
     # Define a mapping between XML types and data preparation functions
     xml_data_preparers = {
         "pain.001.001.03": _prepare_xml_data_v03,
@@ -306,6 +307,7 @@ def generate_xml(
     preparer = xml_data_preparers[payment_initiation_message_type]
     xml_data = preparer(data)
 
+    # TODO: restrict template loader to a trusted templates directory and cache env per run.
     # Create a Jinja2 environment and load template
     env = Environment(loader=FileSystemLoader("."), autoescape=True)
     template = env.get_template(xml_file_path)
