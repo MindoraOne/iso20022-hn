@@ -13,7 +13,7 @@
 [![Quality][quality-badge]][quality-url]
 [![Documentation][docs-badge]][docs-url]
 
-> **Latest Release: v0.0.39** - Hotfix release correcting documentation badge URL. Professional documentation with PyData Sphinx theme now properly linked. [See what's new →](https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.39)
+> **Latest Release: v0.0.40** - Quality and configuration improvements. Modernized Pylint config, fixed workflow triggers, and enhanced mutation testing. [See what's new →](https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.40)
 
 ## Overview
 

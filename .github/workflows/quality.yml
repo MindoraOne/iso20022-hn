@@ -1,5 +1,14 @@
 name: quality
 
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday at midnight UTC
+
+jobs:
   mutation_fast:
     runs-on: ubuntu-latest
     name: Mutation Testing (Fast)
