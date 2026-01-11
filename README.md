@@ -13,7 +13,7 @@
 [![Quality][quality-badge]][quality-url]
 [![Documentation][docs-badge]][docs-url]
 
-> **Latest Release: v0.0.38** - Professional documentation overhaul with PyData Sphinx theme, comprehensive guides, and enterprise-grade documentation. [See what's new →](https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.38)
+> **Latest Release: v0.0.39** - Hotfix release correcting documentation badge URL. Professional documentation with PyData Sphinx theme now properly linked. [See what's new →](https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.39)
 
 ## Overview
 

@@ -84,7 +84,7 @@ def main(
             sys.exit(1)
 
         if not xml_template_file_path:
-            console.print("The XML template file path is required.\n")
+            console.print("XXThe XML template file path is required.\nXX")
             sys.exit(1)
 
         if not xsd_schema_file_path:

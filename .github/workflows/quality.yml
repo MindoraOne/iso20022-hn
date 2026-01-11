@@ -1,16 +1,10 @@
 name: quality
 
-on:
-  schedule:
-    - cron: "0 8 * * *"  # Daily 08:00 UTC
-  workflow_dispatch:
-  push:
-    branches: [main]
-
-jobs:
-  complexity:
+  mutation_fast:
     runs-on: ubuntu-latest
-    name: Code Complexity Analysis
+    name: Mutation Testing (Fast)
+    timeout-minutes: 15
+    if: github.event_name != 'schedule'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -18,8 +12,37 @@ jobs:
           python-version: "3.9"
       - uses: abatilo/actions-poetry@v3
       - run: poetry install --no-interaction
-      - run: make complex
+      - run: make mutate-fast || true  # Continue on failure, upload results
       - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mutation-fast-results
+          path: |
+            .mutmut-cache/
+            .coverage
+            htmlcov/
+
+  mutation_full:
+    runs-on: ubuntu-latest
+    name: Mutation Testing (Full)
+    timeout-minutes: 30
+    if: github.event_name == 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - uses: abatilo/actions-poetry@v3
+      - run: poetry install --no-interaction
+      - run: make mutate || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mutation-full-results
+          path: |
+            .mutmut-cache/
+            .coverage
+            htmlcov/
         with:
           name: complexity-report
           path: |

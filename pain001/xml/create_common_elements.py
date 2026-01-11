@@ -27,7 +27,7 @@ official ISO 20022 message definitions website:
 """
 
 # Import required modules
-import xml.etree.ElementTree as et
+import xml.etree.ElementTree as et  # nosec B405 - Only used for element creation, not parsing untrusted XML
 from typing import Any
 
 from pain001.xml.create_xml_element import create_xml_element

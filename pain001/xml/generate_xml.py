@@ -319,7 +319,7 @@ def generate_xml(
     )
 
     # Write the XML content to the file
-    with open(updated_xml_file_path, "w") as xml_file:
+    with open(updated_xml_file_path, "w", encoding="utf-8") as xml_file:
         xml_file.write(xml_content)
 
     print(f"A new XML file has been created at `{updated_xml_file_path}`")

@@ -1,4 +1,4 @@
-.PHONY: format lint type test cov sec pr check perf complex mutate docs clean help
+.PHONY: format lint type test cov sec pr check perf complex mutate mutate-fast docs clean help
 
 # Help target
 help:
@@ -60,8 +60,17 @@ complex:
 mutate:
 	poetry run mutmut run --paths-to-mutate=pain001 --tests-dir=tests --runner="python -m pytest -x --no-cov -q" --use-coverage
 
+# Faster mutation testing limited to core modules for CI push events
+mutate-fast:
+	poetry run mutmut run \
+		--paths-to-mutate=pain001/core.py,pain001/xml \
+		--tests-dir=tests \
+		--runner="python -m pytest -x --no-cov -q" \
+		--use-coverage
+
 docs:
-	cd docs && poetry run sphinx-build -b html . _build/html
+	poetry install --with docs -q
+	poetry run sphinx-build -b html docs docs/_build/html
 
 clean:
 	rm -rf build/ dist/ *.egg-info htmlcov/ .coverage .pytest_cache/ .mypy_cache/ .radon-rc sbom.xml LICENSES_REPORT.md licenses.json
