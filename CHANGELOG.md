@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.44] - 2026-01-11
+
+### Changed
+
+- **Core Refactoring** - Split monolithic `process_files()` function into focused helpers (Resolves #80):
+  - Extracted `_validate_inputs()`: Validates message type and required file paths with structured logging
+  - Extracted `_load_data()`: Handles CSV/DB/Python data loading with timing and record count logging
+  - Extracted `_register_message_namespaces()`: Manages XML namespace registration with logging
+  - Extracted `_generate_and_log()`: Orchestrates XML generation and returns generation duration
+  - Simplified `process_files()`: Now calls focused helpers, improving readability and testability
+  - Preserved all existing behavior, logging, error handling, and backward compatibility
+
+### Quality Assurance
+
+- **Code Quality**: Refactor maintains 100% branch coverage of modified code
+- **Test Coverage**: 341 tests passing with 98.59% total coverage (exceeds 95% requirement)
+- **Type Hints**: Full strict typing across all new and refactored functions
+- **Linting**: All linters pass (ruff, black, isort, mypy)
+- **Performance**: No performance degradation; generation duration timing preserved
+
+### Notes
+
+- All v0.0.43 functionality fully preserved
+- Breaking changes: None (all existing code paths unchanged)
+- Backward compatibility: 100% maintained
+
+---
+
 ## [0.0.43] - 2026-01-11
 
 ### Fixed
