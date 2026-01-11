@@ -13,7 +13,7 @@
 [![Quality][quality-badge]][quality-url]
 [![Documentation][docs-badge]][docs-url]
 
-> **Latest Release: v0.0.41** - Release workflow improvements. Automated GitHub release creation after successful PyPI upload with duplicate handling. [See what's new →](https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.41)
+> **Latest Release: v0.0.42** - Final workflow fixes. Prevented duplicate documentation deployments and ensured single workflow execution path. [See what's new →](https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.42)
 
 ## Overview
 
@@ -89,15 +89,20 @@ processing with confidence that every file is ISO 20022-compliant.**
 ### Payment Processing Flow
 
 ```mermaid
-%%{init: {'theme':'default'}}%%
 flowchart LR
-    A[CSV/SQLite<br/>Data File] -->|Load & Validate| B[Pain001<br/>Library]
-    B -->|Generate XML| C[ISO 20022<br/>Payment File]
+    A["CSV/SQLite
+    Data File"] -->|Load & Validate| B["Pain001
+    Library"]
+    B -->|Generate XML| C["ISO 20022
+    Payment File"]
     C -->|XSD Validation| D{Valid?}
-    D -->|Yes| E[Submit to Bank<br/>via SWIFT/SEPA]
-    D -->|No| F[Error Report<br/>& Fix Data]
+    D -->|Yes| E["Submit to Bank
+    via SWIFT/SEPA"]
+    D -->|No| F["Error Report
+    & Fix Data"]
     F -->|Retry| A
-    E --> G[Payment<br/>Processed]
+    E --> G["Payment
+    Processed"]
 ```
 
 ## Table of Contents
