@@ -46,6 +46,7 @@ jobs:
   mutation:
     runs-on: ubuntu-latest
     name: Mutation Testing
+    timeout-minutes: 30  # Reduced timeout with optimizations
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -53,8 +54,9 @@ jobs:
           python-version: "3.9"
       - uses: abatilo/actions-poetry@v3
       - run: poetry install --no-interaction
-      - run: make mutate || true
+      - run: make mutate || true  # Continue on failure
       - uses: actions/upload-artifact@v4
+        if: always()  # Upload even if mutation testing fails/times out
         with:
           name: mutation-report
           path: htmlcov/mutmut.html

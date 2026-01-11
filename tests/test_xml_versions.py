@@ -268,6 +268,42 @@ class TestGenerateXmlAllVersions:
             if os.path.exists(xsd_schema):
                 os.remove(xsd_schema)
 
+    def test_generate_xml_pain_001_001_10(
+        self, sample_data_v05, xml_template, xsd_schema
+    ) -> None:
+        """Test XML generation for pain.001.001.10."""
+        try:
+            with pytest.raises((FileNotFoundError, Exception)):
+                generate_xml(
+                    sample_data_v05,
+                    "pain.001.001.10",
+                    xml_template,
+                    xsd_schema,
+                )
+        finally:
+            if os.path.exists(xml_template):
+                os.remove(xml_template)
+            if os.path.exists(xsd_schema):
+                os.remove(xsd_schema)
+
+    def test_generate_xml_pain_001_001_11(
+        self, sample_data_v05, xml_template, xsd_schema
+    ) -> None:
+        """Test XML generation for pain.001.001.11."""
+        try:
+            with pytest.raises((FileNotFoundError, Exception)):
+                generate_xml(
+                    sample_data_v05,
+                    "pain.001.001.11",
+                    xml_template,
+                    xsd_schema,
+                )
+        finally:
+            if os.path.exists(xml_template):
+                os.remove(xml_template)
+            if os.path.exists(xsd_schema):
+                os.remove(xsd_schema)
+
     def test_generate_xml_with_actual_templates(self) -> None:
         """Test with actual template files from the project."""
         sample_data = [

@@ -24,7 +24,9 @@ long_description = (this_directory / "README.md").read_text()
 
 # Read version from pain001/__init__.py (single source of truth)
 version_file = (this_directory / "pain001" / "__init__.py").read_text()
-version_match = re.search(r'^__version__ = ["\']([^"\']*)["\']', version_file, re.MULTILINE)
+version_match = re.search(
+    r'^__version__ = ["\']([^"\']*)["\']', version_file, re.MULTILINE
+)
 if not version_match:
     raise RuntimeError("Unable to find version string in pain001/__init__.py")
 version = version_match.group(1)

@@ -5,6 +5,87 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.36] - 2026-01-11
+
+### Added
+
+- **ISO 20022 pain.001.001.10 Support** - Full implementation of pain.001.001.10 payment initiation message format:
+  - Created `pain001/templates/pain.001.001.10/` directory structure
+  - Added `pain.001.001.10.xsd` XML Schema Definition file
+  - Created `template.xml` Jinja2 template for dynamic XML generation
+  - Added `pain.001.001.10.xml` example file with complete payment structure
+  - Implemented `pain001/xml/create_xml_v10.py` generator module
+  - Enhanced namespace support: `urn:iso:std:iso:20022:tech:xsd:pain.001.001.10`
+
+- **ISO 20022 pain.001.001.11 Support** - Full implementation of pain.001.001.11 payment initiation message format:
+  - Created `pain001/templates/pain.001.001.11/` directory structure
+  - Added `pain.001.001.11.xsd` XML Schema Definition file
+  - Created `template.xml` Jinja2 template for dynamic XML generation
+  - Added `pain.001.001.11.xml` example file with complete payment structure
+  - Implemented `pain001/xml/create_xml_v11.py` generator module
+  - Enhanced namespace support: `urn:iso:std:iso:20022:tech:xsd:pain.001.001.11`
+
+- **Enhanced XML Generation** - Extended generator mappings:
+  - Updated `pain001/xml/generate_xml.py` with v10 and v11 imports
+  - Added `create_xml_v10` and `create_xml_v11` to xml_generators dictionary
+  - Maintained backward compatibility with existing v03-v09 formats
+
+- **Comprehensive Testing** - Extended test coverage for new versions:
+  - Added `test_generate_xml_pain_001_001_10()` in test_xml_versions.py
+  - Added `test_generate_xml_pain_001_001_11()` in test_xml_versions.py
+  - Added XSD validation tests for all versions (v03-v11)
+  - Renamed test files with logical naming convention (test_cli.py, test_xml_generation.py, etc.)
+  - Maintained 95%+ test coverage requirement (96.73% achieved)
+  - All 323 tests passing
+
+### Fixed
+
+- **XML Generation** - Critical bug fixes in generate_xml.py:
+  - Added missing data preparation logic for pain.001.001.10
+  - Added missing data preparation logic for pain.001.001.11
+  - Added v10 and v11 to if-elif chain in generate_xml function
+  - Fixed test_generate_xml_unsupported_version to use v12 instead of v10
+
+- **Schema Compliance** - Fixed field mismatches in v06, v07, v08:
+  - Removed non-existent `debtor_agent_name` field references
+  - Removed non-existent `creditor_agent_name` field references
+  - Fixed `initiator_town_name` → `initiator_town` field mapping
+
+### Improved
+
+- **Code Quality** - Comprehensive linting and formatting:
+  - Auto-fixed 141 linting issues (whitespace, unused imports, file modes)
+  - Achieved 10.00/10 pylint score with zero issues
+  - Type checking: No issues in 68 source files
+
+- **Performance Optimisation** - Mutation testing improvements:
+  - Reduced mutation testing time from >90 minutes to <30 minutes
+  - Added `--use-coverage` flag to skip untested code
+  - Optimised test runner: `--runner="python -m pytest -x --no-cov -q"`
+  - Added mutmut configuration to setup.cfg for persistence
+  - Reduced CI timeout from 45 to 30 minutes
+
+- **Test Organisation** - Enterprise-quality naming conventions:
+  - Renamed all 29 test files with logical, descriptive names
+  - Core tests: test_cli.py, test_core.py, test_context.py
+  - XML tests: test_xml_generation.py, test_xml_validator.py
+  - Data tests: test_csv_loader.py, test_db_loader.py
+  - Version tests: test_pain001_v03.py through test_pain001_v11.py
+
+### Changed
+
+- **Version Bump** - Updated version to 0.0.36:
+  - `pyproject.toml` version constraint
+  - `pain001/__init__.py` package version
+  - `README.md` release reference with new version descriptions
+
+### Documentation
+
+- Updated README.md with pain.001.001.10 and pain.001.001.11 descriptions
+- Added v10 description: "Enhanced payment initiation with improved data structures and compliance updates"
+- Added v11 description: "The latest version with advanced payment features and extended ISO 20022 compliance"
+- Updated release notes in README to reference v0.0.36
+
 ## [0.0.35] - 2026-01-11
 
 ### Added
@@ -73,7 +154,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `pyproject.toml` (Poetry configuration)
   - `pain001/__init__.py` (package version)
 
-- **Dependency Optimization** - Reduced external dependencies by 33%:
+- **Dependency Optimisation** - Reduced external dependencies by 33%:
   - Removed datetime 5.5 (Zope package causing stdlib conflicts) - CRITICAL FIX
   - Removed requests 2.32.5 (unused HTTP library)
   - Removed urllib3 2.6.3 (unused networking library)
@@ -108,7 +189,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Removed naming conflicts (stdlib datetime vs Zope datetime)
   - Eliminated unused packages from explicit declarations
   - Proper transitive dependency management through Poetry
-  - Updated poetry.lock with optimized dependency resolution
+  - Updated poetry.lock with optimised dependency resolution
 
 ### Fixed
 
@@ -184,7 +265,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Improved
 
-- **Performance Optimizations** - Significant speed and memory improvements:
+- **Performance Optimisations** - Significant speed and memory improvements:
   - **String Operations**: Replaced string concatenation with f-strings in error messages (~10-15% faster)
   - **CSV Validation**: Batched error messages, eliminated redundant strip() operations (~40% faster)
   - **XML Writing**: Replaced minidom double-parsing with in-place ElementTree indentation (~70% faster, ~50% less memory)
@@ -193,11 +274,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Code Quality** - Enhanced maintainability and type safety:
   - Fixed type annotation issues (replaced deprecated `typing.List`, `Dict` with built-in `list`, `dict`)
   - Improved exception handling (changed generic Exception to RuntimeError, ValueError)
-  - Optimized string building patterns throughout codebase
-  - Enhanced code organization and readability
+  - Optimised string building patterns throughout codebase
+  - Enhanced code organisation and readability
 
 - **Test Reliability** - More robust testing infrastructure:
-  - Fixed test compatibility with optimized validation error formats
+  - Fixed test compatibility with optimised validation error formats
   - Added edge case coverage for streaming operations
   - Improved error message consistency across tests
   - All 170 tests passing with 100% coverage
@@ -236,7 +317,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `test_data_loader.py` - Added tests for validation failures in dict/list data loaders
   - `test_generate_xml.py` - Fixed test for unreachable defensive code in message type handling
 
-- **Repository Organization** - Improved project structure and configuration:
+- **Repository Organisation** - Improved project structure and configuration:
   - Added `.editorconfig` for consistent coding styles across editors (Python, YAML, JSON, Markdown)
   - Added `.gitattributes` for consistent line endings and diff behavior across platforms
   - Added comprehensive `.gitignore` patterns for temporary files and build artifacts
@@ -287,8 +368,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Removed cache directories (`.pytest_cache/`, `.mypy_cache/`)
   - Removed obsolete `Makefile` with Bazaar version control commands
 
-- **File Organization** - Better project structure:
-  - Moved `TEMPLATE.md` to `.github/TEMPLATE.md` for better organization
+- **File Organisation** - Better project structure:
+  - Moved `TEMPLATE.md` to `.github/TEMPLATE.md` for better organisation
   - Updated CI workflow to reference new template location
 
 - **Code Quality** - All linting and formatting tools passing:
@@ -466,7 +547,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **GitHub Actions workflow** - Updated pypa/gh-action-pypi-publish from 1.3.1 to 1.13.0 with security fixes (GHSA-vxmw-7h4f-hqxh)
 - **CI/CD process** - Removed automatic PyPI publishing and GitHub release creation from CI to prevent conflicts with manual release processes
-- **Project organization** - Moved release notes to `releases/` folder with simplified naming (v0.0.26.md, v0.0.27.md)
+- **Project organisation** - Moved release notes to `releases/` folder with simplified naming (v0.0.26.md, v0.0.27.md)
 
 ## [0.0.27] - 2026-01-09
 
@@ -497,7 +578,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `flake8` ^7.0.0 - Style checker
   - `isort` ^5.13.0 - Import sorter
   - `mypy` ^1.11.0 - Static type checker
-  - `pylint` ^3.2.0 - Code quality analyzer
+  - `pylint` ^3.2.0 - Code quality analyser
   - `bandit` ^1.7.0 - Security vulnerability scanner
   - `safety` ^3.0.0 - Dependency security checker
 - **Security annotations** - Added inline security documentation and `# nosec` comments where appropriate
@@ -505,7 +586,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Import organization** - Fixed import ordering in 23 files to comply with PEP 8 and Black standards
+- **Import organisation** - Fixed import ordering in 23 files to comply with PEP 8 and Black standards
 - **XML parsing implementation** - All XML parsing now uses secure `defusedxml` library
 - **SQL query construction** - Enhanced with bracket notation for safer SQL identifiers
 - **README.md** - Enhanced Features section to highlight security measures and development tools

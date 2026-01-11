@@ -115,9 +115,6 @@ pyvenv.cfg
 .vscode/
 .vscode/settings.json
 
-# GitHub Copilot Agents (local only)
-.github/agents/
-
 # Temporary files
 *.tmp
 *.bak

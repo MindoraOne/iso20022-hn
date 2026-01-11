@@ -58,7 +58,7 @@ complex:
 	poetry run radon mi pain001
 
 mutate:
-	poetry run mutmut run --paths-to-mutate=pain001 --tests-dir=tests
+	poetry run mutmut run --paths-to-mutate=pain001 --tests-dir=tests --runner="python -m pytest -x --no-cov -q" --use-coverage
 
 docs:
 	cd docs && poetry run sphinx-build -b html . _build/html

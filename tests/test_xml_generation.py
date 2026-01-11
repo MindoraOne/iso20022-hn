@@ -25,6 +25,8 @@ from pain001.xml.create_xml_v6 import create_xml_v6
 from pain001.xml.create_xml_v7 import create_xml_v7
 from pain001.xml.create_xml_v8 import create_xml_v8
 from pain001.xml.create_xml_v9 import create_xml_v9
+from pain001.xml.create_xml_v10 import create_xml_v10
+from pain001.xml.create_xml_v11 import create_xml_v11
 
 
 class TestXMLCreation(unittest.TestCase):
@@ -166,7 +168,7 @@ class TestXMLCreation(unittest.TestCase):
             "initiator_street_name": "Street 6",
             "initiator_building_number": "6",
             "initiator_postal_code": "12346",
-            "initiator_town_name": "Town 6",
+            "initiator_town": "Town 6",
             "initiator_country": "DE",
             "ultimate_debtor_name": "Ultimate Debtor 6",
             "service_level_code": "SEPA",
@@ -182,7 +184,6 @@ class TestXMLCreation(unittest.TestCase):
             "debtor_town": "Town 6",
             "debtor_country": "DE",
             "debtor_account_IBAN": "DE123456780",
-            "debtor_agent_name": "Agent",
             "debtor_agent_BIC": "DEUTDEFG",
             "charge_bearer": "SLEV",
             "payment_instruction_id": "PID123",
@@ -197,7 +198,6 @@ class TestXMLCreation(unittest.TestCase):
             "creditor_country": "DE",
             "creditor_account_IBAN": "DE123456780",
             "creditor_agent_BICFI": "NOLADE21KIF",
-            "creditor_agent_name": "Creditor Agent",
             "purpose_code": "GDDS",
             "reference_number": "RF124",
             "reference_date": "2023-03-11T15:30:47.000Z",
@@ -212,7 +212,7 @@ class TestXMLCreation(unittest.TestCase):
             "initiator_street_name": "Street 7",
             "initiator_building_number": "7",
             "initiator_postal_code": "12347",
-            "initiator_town_name": "Town 7",
+            "initiator_town": "Town 7",
             "initiator_country": "DE",
             "ultimate_debtor_name": "Ultimate Debtor 7",
             "service_level_code": "SEPA",
@@ -228,7 +228,6 @@ class TestXMLCreation(unittest.TestCase):
             "debtor_town": "Town 7",
             "debtor_country": "DE",
             "debtor_account_IBAN": "DE123456781",
-            "debtor_agent_name": "Agent",
             "debtor_agent_BIC": "DEUTDEFH",
             "charge_bearer": "SLEV",
             "payment_instruction_id": "PID123",
@@ -243,7 +242,6 @@ class TestXMLCreation(unittest.TestCase):
             "creditor_country": "DE",
             "creditor_account_IBAN": "DE123456781",
             "creditor_agent_BICFI": "NOLADE21KIG",
-            "creditor_agent_name": "Creditor Agent",
             "purpose_code": "GDDS",
             "reference_number": "RF125",
             "reference_date": "2023-03-12T15:30:47.000Z",
@@ -258,7 +256,7 @@ class TestXMLCreation(unittest.TestCase):
             "initiator_street_name": "Street 8",
             "initiator_building_number": "8",
             "initiator_postal_code": "12348",
-            "initiator_town_name": "Town 8",
+            "initiator_town": "Town 8",
             "initiator_country": "DE",
             "ultimate_debtor_name": "Ultimate Debtor 8",
             "service_level_code": "SEPA",
@@ -274,7 +272,6 @@ class TestXMLCreation(unittest.TestCase):
             "debtor_town": "Town 8",
             "debtor_country": "DE",
             "debtor_account_IBAN": "DE123456782",
-            "debtor_agent_name": "Agent",
             "debtor_agent_BIC": "DEUTDEFH",
             "charge_bearer": "SLEV",
             "payment_instruction_id": "PID123",
@@ -288,7 +285,6 @@ class TestXMLCreation(unittest.TestCase):
             "creditor_town": "Town 8",
             "creditor_country": "DE",
             "creditor_account_IBAN": "DE123456782",
-            "creditor_agent_name": "Creditor Agent",
             "creditor_agent_BICFI": "NOLADE21KIH",
             "purpose_code": "GDDS",
             "reference_number": "RF126",
@@ -307,6 +303,96 @@ class TestXMLCreation(unittest.TestCase):
             "initiator_country_code": "DE",
             "payment_id": "PID123",
             "payment_method": "pain.001.001.09",  # Set to "pain.001.001.09"
+            "batch_booking": "true",
+            "requested_execution_date": "2023-05-21",
+            "debtor_name": "Debtor",
+            "debtor_street_name": "Street",
+            "debtor_building_number": "1",
+            "debtor_postal_code": "12345",
+            "debtor_town_name": "Town",
+            "debtor_country_code": "DE",
+            "debtor_account_IBAN": "DE123456789",
+            "debtor_agent_BIC": "DEUTDEFF",
+            "charge_bearer": "SLEV",
+            "transactions": [
+                {
+                    "payment_id": "PID123",
+                    "payment_amount": "1500",
+                    "payment_currency": "EUR",
+                    "charge_bearer": "SLEV",
+                    "creditor_agent_name": "Creditor Agent",
+                    "creditor_agent_BIC": "NOLADE21KIE",
+                    "creditor_name": "Creditor",
+                    "creditor_street_name": "Street",
+                    "creditor_building_number": "1",
+                    "creditor_postal_code": "12345",
+                    "creditor_town_name": "Town",
+                    "creditor_country_code": "DE",
+                    "creditor_account_IBAN": "DE123456789",
+                    "purpose_code": "Code",
+                    "reference_number": "123456789",
+                    "reference_date": "2023-05-21",
+                }
+            ],
+        }
+
+        self.row_v10 = {
+            "id": "1",
+            "date": "2023-03-10T15:30:47.000Z",
+            "nb_of_txs": "2",
+            "initiator_name": "Initiator V10",
+            "initiator_street_name": "Street",
+            "initiator_building_number": "1",
+            "initiator_postal_code": "12345",
+            "initiator_town_name": "Town",
+            "initiator_country_code": "DE",
+            "payment_id": "PID123",
+            "payment_method": "pain.001.001.10",
+            "batch_booking": "true",
+            "requested_execution_date": "2023-05-21",
+            "debtor_name": "Debtor",
+            "debtor_street_name": "Street",
+            "debtor_building_number": "1",
+            "debtor_postal_code": "12345",
+            "debtor_town_name": "Town",
+            "debtor_country_code": "DE",
+            "debtor_account_IBAN": "DE123456789",
+            "debtor_agent_BIC": "DEUTDEFF",
+            "charge_bearer": "SLEV",
+            "transactions": [
+                {
+                    "payment_id": "PID123",
+                    "payment_amount": "1500",
+                    "payment_currency": "EUR",
+                    "charge_bearer": "SLEV",
+                    "creditor_agent_name": "Creditor Agent",
+                    "creditor_agent_BIC": "NOLADE21KIE",
+                    "creditor_name": "Creditor",
+                    "creditor_street_name": "Street",
+                    "creditor_building_number": "1",
+                    "creditor_postal_code": "12345",
+                    "creditor_town_name": "Town",
+                    "creditor_country_code": "DE",
+                    "creditor_account_IBAN": "DE123456789",
+                    "purpose_code": "Code",
+                    "reference_number": "123456789",
+                    "reference_date": "2023-05-21",
+                }
+            ],
+        }
+
+        self.row_v11 = {
+            "id": "1",
+            "date": "2023-03-10T15:30:47.000Z",
+            "nb_of_txs": "2",
+            "initiator_name": "Initiator V11",
+            "initiator_street_name": "Street",
+            "initiator_building_number": "1",
+            "initiator_postal_code": "12345",
+            "initiator_town_name": "Town",
+            "initiator_country_code": "DE",
+            "payment_id": "PID123",
+            "payment_method": "pain.001.001.11",
             "batch_booking": "true",
             "requested_execution_date": "2023-05-21",
             "debtor_name": "Debtor",
@@ -489,6 +575,44 @@ class TestXMLCreation(unittest.TestCase):
         create_xml_v9(self.root, [self.row_v9])
         cstmr_cdt_trf_initn_element = self.root[0]
         self.assertEqual(cstmr_cdt_trf_initn_element.tag, "CstmrCdtTrfInitn")
+
+    def test_create_xml_v10(self) -> None:
+        """
+        Test create_xml_v10
+        """
+        create_xml_v10(self.root, [self.row_v10])
+        cstmr_cdt_trf_initn_element = self.root[0]
+        self.assertEqual(cstmr_cdt_trf_initn_element.tag, "CstmrCdtTrfInitn")
+
+    def test_create_xml_v11(self) -> None:
+        """
+        Test create_xml_v11
+        """
+        create_xml_v11(self.root, [self.row_v11])
+        cstmr_cdt_trf_initn_element = self.root[0]
+        self.assertEqual(cstmr_cdt_trf_initn_element.tag, "CstmrCdtTrfInitn")
+
+    def test_create_common_elements_v10(self) -> None:
+        """
+        Test create_common_elements for version 10
+        """
+        create_common_elements(self.root, self.row_v10, self.mapping)
+        self.assertEqual(len(self.root), 2)
+        self.assertEqual(self.root[0].tag, "PmtInfId")
+        self.assertEqual(self.root[0].text, "PID123")
+        self.assertEqual(self.root[1].tag, "PmtMtd")
+        self.assertEqual(self.root[1].text, "pain.001.001.10")
+
+    def test_create_common_elements_v11(self) -> None:
+        """
+        Test create_common_elements for version 11
+        """
+        create_common_elements(self.root, self.row_v11, self.mapping)
+        self.assertEqual(len(self.root), 2)
+        self.assertEqual(self.root[0].tag, "PmtInfId")
+        self.assertEqual(self.root[0].text, "PID123")
+        self.assertEqual(self.root[1].tag, "PmtMtd")
+        self.assertEqual(self.root[1].text, "pain.001.001.11")
 
 
 class TestGenerateXMLFunction(unittest.TestCase):
@@ -995,7 +1119,7 @@ class TestGenerateXMLFunction(unittest.TestCase):
         with self.assertRaises(SystemExit) as cm:
             generate_xml(
                 self.sample_data_v3,
-                "pain.001.001.10",  # Unsupported but similar format
+                "pain.001.001.12",  # Unsupported version
                 self.test_template_path,
                 self.test_xsd_path,
             )

@@ -84,6 +84,22 @@ pain001.xml.create\_xml\_v9 module
    :undoc-members:
    :show-inheritance:
 
+pain001.xml.create\_xml\_v10 module
+------------------------------------
+
+.. automodule:: pain001.xml.create_xml_v10
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pain001.xml.create\_xml\_v11 module
+------------------------------------
+
+.. automodule:: pain001.xml.create_xml_v11
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pain001.xml.generate\_updated\_xml\_file\_path module
 ------------------------------------------------------
 

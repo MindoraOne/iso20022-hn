@@ -30,6 +30,8 @@ from pain001.xml.create_xml_v6 import create_xml_v6
 from pain001.xml.create_xml_v7 import create_xml_v7
 from pain001.xml.create_xml_v8 import create_xml_v8
 from pain001.xml.create_xml_v9 import create_xml_v9
+from pain001.xml.create_xml_v10 import create_xml_v10
+from pain001.xml.create_xml_v11 import create_xml_v11
 from pain001.xml.generate_updated_xml_file_path import (
     generate_updated_xml_file_path,
 )
@@ -65,6 +67,8 @@ def generate_xml(
         "pain.001.001.07": create_xml_v7,
         "pain.001.001.08": create_xml_v8,
         "pain.001.001.09": create_xml_v9,
+        "pain.001.001.10": create_xml_v10,
+        "pain.001.001.11": create_xml_v11,
     }
 
     # Check if the provided payment_initiation_message_type exists in
@@ -503,6 +507,72 @@ def generate_xml(
                 ],
             }
 
+        elif payment_initiation_message_type == "pain.001.001.10":
+            xml_data_pain001_001_10 = {
+                "id": data[0]["id"],
+                "date": data[0]["date"],
+                "nb_of_txs": data[0]["nb_of_txs"],
+                "initiator_name": data[0]["initiator_name"],
+                "payment_id": data[0]["payment_id"],
+                "payment_method": data[0]["payment_method"],
+                "payment_nb_of_txs": data[0]["nb_of_txs"],
+                "requested_execution_date": data[0][
+                    "requested_execution_date"
+                ],
+                "debtor_name": data[0]["debtor_name"],
+                "debtor_account_IBAN": data[0]["debtor_account_IBAN"],
+                "debtor_agent_BIC": data[0]["debtor_agent_BIC"],
+                "charge_bearer": data[0]["charge_bearer"],
+                "transactions": [
+                    {
+                        "payment_id": row["payment_id"],
+                        "payment_amount": row["payment_amount"],
+                        "payment_currency": row.get("payment_currency", ""),
+                        "charge_bearer": row["charge_bearer"],
+                        "creditor_agent_BIC": row["creditor_agent_BIC"],
+                        "creditor_name": row["creditor_name"],
+                        "creditor_account_IBAN": row["creditor_account_IBAN"],
+                        "creditor_remittance_information": row[
+                            "remittance_information"
+                        ],
+                    }
+                    for row in data[0:]
+                ],
+            }
+
+        elif payment_initiation_message_type == "pain.001.001.11":
+            xml_data_pain001_001_11 = {
+                "id": data[0]["id"],
+                "date": data[0]["date"],
+                "nb_of_txs": data[0]["nb_of_txs"],
+                "initiator_name": data[0]["initiator_name"],
+                "payment_id": data[0]["payment_id"],
+                "payment_method": data[0]["payment_method"],
+                "payment_nb_of_txs": data[0]["nb_of_txs"],
+                "requested_execution_date": data[0][
+                    "requested_execution_date"
+                ],
+                "debtor_name": data[0]["debtor_name"],
+                "debtor_account_IBAN": data[0]["debtor_account_IBAN"],
+                "debtor_agent_BIC": data[0]["debtor_agent_BIC"],
+                "charge_bearer": data[0]["charge_bearer"],
+                "transactions": [
+                    {
+                        "payment_id": row["payment_id"],
+                        "payment_amount": row["payment_amount"],
+                        "payment_currency": row.get("payment_currency", ""),
+                        "charge_bearer": row["charge_bearer"],
+                        "creditor_agent_BIC": row["creditor_agent_BIC"],
+                        "creditor_name": row["creditor_name"],
+                        "creditor_account_IBAN": row["creditor_account_IBAN"],
+                        "creditor_remittance_information": row[
+                            "remittance_information"
+                        ],
+                    }
+                    for row in data[0:]
+                ],
+            }
+
         # Check if the payment initiation message type is "pain.001.001.03"
         if payment_initiation_message_type == "pain.001.001.03":
             # xml_data_pain001_001_03 = {}
@@ -531,6 +601,14 @@ def generate_xml(
         elif payment_initiation_message_type == "pain.001.001.09":
             # xml_data_pain001_001_09 = {}
             xml_data = xml_data_pain001_001_09
+        # Check if the payment initiation message type is "pain.001.001.10"
+        elif payment_initiation_message_type == "pain.001.001.10":
+            # xml_data_pain001_001_10 = {}
+            xml_data = xml_data_pain001_001_10
+        # Check if the payment initiation message type is "pain.001.001.11"
+        elif payment_initiation_message_type == "pain.001.001.11":
+            # xml_data_pain001_001_11 = {}
+            xml_data = xml_data_pain001_001_11
         else:  # pragma: no cover
             # Defensive code: This else block is unreachable because all types
             # in xml_generators are handled by the elif chain above. It serves
