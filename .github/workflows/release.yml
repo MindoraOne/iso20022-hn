@@ -3,6 +3,7 @@ name: release
 on:
   push:
     branches: [main]
+    tags: ["v*"]
 
 permissions:
   contents: write
@@ -11,9 +12,9 @@ permissions:
 
 jobs:
   release:
-    name: Semantic Release
+    name: Build and Publish Package
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, 'skip-release')"
+    if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - uses: actions/checkout@v4
         with:
@@ -23,17 +24,16 @@ jobs:
         with:
           python-version: "3.9"
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
       - name: Install dependencies
         run: |
-          npm install -g semantic-release @semantic-release/python @semantic-release/git @semantic-release/github @semantic-release/commit-analyzer @semantic-release/release-notes-generator
+          python -m pip install --upgrade pip
           pip install build twine
 
-      - name: Release
+      - name: Build package
+        run: python -m build
+
+      - name: Publish to PyPI
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-        run: npx semantic-release
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+        run: twine upload dist/*
