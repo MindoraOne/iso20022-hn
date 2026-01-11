@@ -120,17 +120,17 @@ The following table shows the standard CSV columns for pain.001.001.03:
    InitiatingParty, GrpHdr/InitgPty/Nm, String, Yes, Name of initiating party, Company XYZ
    InitiatingPartyId, GrpHdr/InitgPty/Id, String, Yes, ID of initiating party, INITIATOR001
    PaymentInformationId, PmtInf/PmtInfId, String, Yes, Unique payment batch ID, PMT001
-   BatchBooking, PmtInf/BtchBookg, Boolean, No, Enable batch booking, true/false
+   BatchBooking, PmtInf/BtchBookg, Boolean, No, Enable batch booking, "true/false"
    DebtorName, PmtInf/Dbtr/Nm, String, Yes, Name of debtor, Acme Corp
    DebtorId, PmtInf/Dbtr/Id, String, Yes, ID of debtor, DEBTOR001
    DebtorAccountNumber, PmtInf/DbtrAcct/Id/IBAN, String, Yes, IBAN of debtor, DE89370400440532013000
-   DebtorAgentBIC, PmtInf/DbtrAgt/BIC, String, No, BIC of debtor's bank, DEUTDEDBBER
+   DebtorAgentBIC, PmtInf/DbtrAgt/BIC, String, No, "BIC of debtors bank", DEUTDEDBBER
    TransactionId, CdtTrfTxnInf/PmtId/InstrId, String, Yes, Unique transaction ID, TXN001
    EndToEndId, CdtTrfTxnInf/PmtId/EndToEndId, String, Yes, End-to-end ID, E2E001
    Amount, CdtTrfTxnInf/Amt/InstdAmt, Decimal, Yes, Payment amount in EUR, 1000.00
    CreditorName, CdtTrfTxnInf/Cdtr/Nm, String, Yes, Name of creditor, Supplier ABC
    CreditorAccountNumber, CdtTrfTxnInf/CdtrAcct/Id/IBAN, String, Yes, IBAN of creditor, DE89370400440532013001
-   CreditorAgentBIC, CdtTrfTxnInf/CdtrAgt/BIC, String, No, BIC of creditor's bank, DEUTDEDBBER
+   CreditorAgentBIC, CdtTrfTxnInf/CdtrAgt/BIC, String, No, "BIC of creditors bank", DEUTDEDBBER
    RemittanceInfo, CdtTrfTxnInf/RmtInf/Ustrd, String, No, Payment reference, Invoice #123
 
 ISO 20022 Version-Specific Settings
