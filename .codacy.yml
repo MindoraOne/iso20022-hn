@@ -4,6 +4,8 @@
 
 exclude_paths:
   - ".github/copilot-instructions.md"  # Complex technical documentation
+  - ".github/agents/**"  # Agent configuration documentation
+  - "CONTRIBUTING.md"  # Contributor guidelines with technical examples
   - "docs/**"  # Sphinx documentation
   - "releases/**"  # Release notes
 
