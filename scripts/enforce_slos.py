@@ -119,19 +119,12 @@ def check_github_actions_durations() -> Optional[dict[str, float]]:
     return None
 
 
-def main() -> int:
-    """Main SLO validation routine.
+def _check_coverage_slos(failures: list[str]) -> None:
+    """Check coverage SLOs and update failures list.
 
-    Returns:
-        0 if all SLOs pass, 1 if any fail
+    Args:
+        failures: List to append failure messages to
     """
-    print("\n" + "=" * 70)
-    print("PySentinel SLO Enforcement Report")
-    print("=" * 70)
-
-    failures = []
-
-    # 1. Check coverage
     print("\n[1/3] Validating Coverage Floor...")
     print("-" * 70)
     coverage_file = Path("coverage.xml")
@@ -146,32 +139,47 @@ def main() -> int:
             status = "✓" if cov >= SLO_THRESHOLDS["coverage_floor"] else "✗"
             print(f"  {status} {module}: {cov:.2f}%")
 
-    # 2. Check .benchmark timing (from pytest-benchmark)
+
+def _check_benchmark_slos(failures: list[str]) -> None:
+    """Check performance benchmark SLOs and update failures list.
+
+    Args:
+        failures: List to append failure messages to
+    """
     print("\n[2/3] Checking Performance Benchmarks...")
     print("-" * 70)
     benchmark_file = Path(".benchmarks/results.json")
-    if benchmark_file.exists():
-        try:
-            with open(benchmark_file, encoding="utf-8") as f:
-                benchmarks = json.load(f)
-                for bench in benchmarks.get("benchmarks", []):
-                    name = bench.get("name", "unknown")
-                    mean_ms = bench.get("stats", {}).get("mean", 0) * 1000
-                    # XML generation should be < 500ms (per benchmark params)
-                    if "xml" in name.lower():
-                        if mean_ms < 500:
-                            print(f"  ✓ {name}: {mean_ms:.2f}ms < 500ms")
-                        else:
-                            print(f"  ✗ {name}: {mean_ms:.2f}ms >= 500ms")
-                            failures.append(
-                                f"Benchmark {name} exceeds 500ms SLO"
-                            )
-        except Exception as e:
-            print(f"  ⚠ Could not parse benchmark results: {e}")
-    else:
-        print("  ⚠ Benchmark results not found (optional)")
 
-    # 3. Summary and exit
+    if not benchmark_file.exists():
+        print("  ⚠ Benchmark results not found (optional)")
+        return
+
+    try:
+        with open(benchmark_file, encoding="utf-8") as f:
+            benchmarks = json.load(f)
+            for bench in benchmarks.get("benchmarks", []):
+                name = bench.get("name", "unknown")
+                mean_ms = bench.get("stats", {}).get("mean", 0) * 1000
+                # XML generation should be < 500ms (per benchmark params)
+                if "xml" in name.lower():
+                    if mean_ms < 500:
+                        print(f"  ✓ {name}: {mean_ms:.2f}ms < 500ms")
+                    else:
+                        print(f"  ✗ {name}: {mean_ms:.2f}ms >= 500ms")
+                        failures.append(f"Benchmark {name} exceeds 500ms SLO")
+    except Exception as e:
+        print(f"  ⚠ Could not parse benchmark results: {e}")
+
+
+def _print_summary(failures: list[str]) -> int:
+    """Print summary and return exit code.
+
+    Args:
+        failures: List of failure messages
+
+    Returns:
+        0 if no failures, 1 if failures exist
+    """
     print("\n[3/3] Summary")
     print("-" * 70)
 
@@ -185,6 +193,24 @@ def main() -> int:
         print("\n✓ All SLOs passed!")
         print("PySentinel: Integrity Verified.")
         return 0
+
+
+def main() -> int:
+    """Main SLO validation routine.
+
+    Returns:
+        0 if all SLOs pass, 1 if any fail
+    """
+    print("\n" + "=" * 70)
+    print("PySentinel SLO Enforcement Report")
+    print("=" * 70)
+
+    failures: list[str] = []
+
+    _check_coverage_slos(failures)
+    _check_benchmark_slos(failures)
+
+    return _print_summary(failures)
 
 
 if __name__ == "__main__":
