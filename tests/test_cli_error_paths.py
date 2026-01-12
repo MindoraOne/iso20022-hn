@@ -19,11 +19,10 @@
 import logging
 import os
 import tempfile
-from xml.etree import (
+from xml.etree import (  # nosec B405 - Only used for element creation, not parsing
     ElementTree as ET,
 )
 
-# nosec B405 - Only used for element creation, not parsing
 import pytest
 from click.testing import CliRunner
 
