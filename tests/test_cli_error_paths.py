@@ -20,7 +20,7 @@ import logging
 import os
 import tempfile
 from xml.etree import (  # nosec B405 - Only used for element creation, not parsing
-    ElementTree as ET,
+    ElementTree as ElementTree,  # noqa: N817 - Standard pattern for XML operations
 )
 
 import pytest
@@ -149,10 +149,10 @@ class TestXmlWriterEdgeCases:
         not parsing untrusted input. Only use defusedxml for parsing.
         """
         # Create a simple XML tree (element creation is safe)
-        root = ET.Element("root")
-        child1 = ET.SubElement(root, "child1")
+        root = ElementTree.Element("root")
+        child1 = ElementTree.SubElement(root, "child1")
         child1.text = "value1"
-        child2 = ET.SubElement(root, "child2")
+        child2 = ElementTree.SubElement(root, "child2")
         child2.text = "value2"
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -175,7 +175,7 @@ class TestXmlWriterEdgeCases:
         Note: ElementTree is safe here as we're creating XML elements,
         not parsing untrusted input. Only use defusedxml for parsing.
         """
-        root = ET.Element("test")
+        root = ElementTree.Element("test")
         root.text = "content"
 
         with tempfile.TemporaryDirectory() as tmpdir:
