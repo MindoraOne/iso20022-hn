@@ -152,7 +152,7 @@ def main() -> int:
     benchmark_file = Path(".benchmarks/results.json")
     if benchmark_file.exists():
         try:
-            with open(benchmark_file) as f:
+            with open(benchmark_file, encoding="utf-8") as f:
                 benchmarks = json.load(f)
                 for bench in benchmarks.get("benchmarks", []):
                     name = bench.get("name", "unknown")

@@ -18,7 +18,7 @@ class TestReadCoverageXml:
         coverage_file = tmp_path / "nonexistent.xml"
         total_cov, module_cov = read_coverage_xml(coverage_file)
         assert total_cov == 0.0
-        assert module_cov == {}
+        assert not module_cov
 
     def test_read_coverage_xml_invalid_file(self, tmp_path):
         """Test read_coverage_xml with invalid XML."""
@@ -26,7 +26,7 @@ class TestReadCoverageXml:
         coverage_file.write_text("invalid xml")
         total_cov, module_cov = read_coverage_xml(coverage_file)
         assert total_cov == 0.0
-        assert module_cov == {}
+        assert not module_cov
 
     def test_read_coverage_xml_valid_file(self, tmp_path):
         """Test read_coverage_xml with valid XML."""

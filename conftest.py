@@ -51,12 +51,12 @@ class SLOPlugin:
             self.type_monitor,
         ]
 
-    def pytest_configure(self, config: pytest.Config) -> None:
+    def pytest_configure(self, _config: pytest.Config) -> None:
         """Configure plugin at test start."""
         self.session_monitor.start()
 
     def pytest_sessionfinish(
-        self, session: pytest.Session, exitstatus: int
+        self, _session: pytest.Session, _exitstatus: int
     ) -> None:
         """Report SLOs after all tests finish."""
         self.session_monitor.stop()
