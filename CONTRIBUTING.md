@@ -94,7 +94,7 @@ tests/
 
 3. **Data Pipeline:**
    ```
-   CSV/SQLite/Python → Loader → Validator → Transformer → 
+   CSV/SQLite/Python → Loader → Validator → Transformer →
    XML Generator → Jinja2 Renderer → XSD Validator → File Write
    ```
 
@@ -133,13 +133,13 @@ def load_payment_data(
     data_source: str | list[dict[str, Any]] | dict[str, Any]
 ) -> list[dict[str, Any]]:
     """Load payment data from CSV, SQLite, list, or dict.
-    
+
     Args:
         data_source: File path (str) or Python data structure.
-    
+
     Returns:
         List of validated payment dictionaries.
-    
+
     Raises:
         FileNotFoundError: If file path doesn't exist.
         ValueError: If data structure is invalid.
@@ -179,9 +179,9 @@ def load_payment_data(
 def test_load_payment_data_from_csv() -> None:
     """Test loading payment data from CSV file."""
     csv_path = "tests/test_data/pain001_03_data.csv"
-    
+
     result = load_payment_data(csv_path)
-    
+
     assert isinstance(result, list)
     assert len(result) > 0
     assert all(isinstance(item, dict) for item in result)
@@ -193,9 +193,9 @@ def test_load_payment_data_from_list() -> None:
         {"id": "PAY001", "amount": 100.50, "currency": "EUR"},
         {"id": "PAY002", "amount": 200.00, "currency": "EUR"},
     ]
-    
+
     result = load_payment_data(data)
-    
+
     assert result == data  # Should be identical
 
 
@@ -320,7 +320,7 @@ poetry run make check
 # ✓ pytest --cov (coverage >= 95%)
 # ✓ bandit -r (security)
 # ✓ safety check (dependencies)
-# 
+#
 # Result: Exit code 0 ✓
 ```
 
@@ -437,7 +437,7 @@ git push origin feature/issue-NNN
 Title: Fix: Handle missing required fields in CSV validation
 
 ## Description
-This PR fixes issue #456 where missing IBAN/BIC fields in CSV 
+This PR fixes issue #456 where missing IBAN/BIC fields in CSV
 files cause unclear error messages.
 
 ## Changes
@@ -583,36 +583,36 @@ Before pushing your PR, verify ALL items:
   - [ ] All linters pass (ruff, black, isort, mypy)
   - [ ] All 385 tests passing
   - [ ] Security scan: 0 vulnerabilities
-  
+
 - [ ] **Type Safety**
   - [ ] All functions have full type hints
   - [ ] No `Any` without specific `# type: ignore[code]`
   - [ ] `poetry run mypy .` returns 0
-  
+
 - [ ] **Testing**
   - [ ] New code has 100% branch coverage
   - [ ] All 4 input sources tested (CSV, SQLite, list, dict)
   - [ ] All affected ISO versions tested (v03-v11)
   - [ ] Error paths tested (exceptions, edge cases)
-  
+
 - [ ] **Tollgates**
   - [ ] `poetry run make tollgates` PASSED
   - [ ] XSD validation: PASSED
   - [ ] Idempotency: PASSED
   - [ ] Environmental parity: PASSED
-  
+
 - [ ] **Documentation**
   - [ ] README.md updated (if feature/API change)
   - [ ] CHANGELOG.md updated (Unreleased section)
   - [ ] Docstrings added to all functions
   - [ ] Commit message follows format
-  
+
 - [ ] **Git**
   - [ ] `git status` shows only staged changes
   - [ ] No untracked files (use .gitignore)
   - [ ] Branch is up-to-date with upstream main
   - [ ] Commit message is descriptive
-  
+
 - [ ] **Backward Compatibility**
   - [ ] All 385 tests passing
   - [ ] All 4 input sources working
@@ -629,6 +629,6 @@ Your contributions make Pain001 better. We're grateful for your time and effort 
 
 ---
 
-**Last Updated**: January 2026  
-**Contact**: [@sebastienrousseau](https://github.com/sebastienrousseau)  
+**Last Updated**: January 2026
+**Contact**: [@sebastienrousseau](https://github.com/sebastienrousseau)
 **License**: Apache 2.0 & MIT
