@@ -20,10 +20,17 @@ Prevent supply chain attacks and ensure dependency integrity in payment processi
 
 ### 1. SBOM Generation (MANDATORY for Releases)
 ```bash
-# Generate SBOM in CycloneDX format
-poetry run cyclonedx-py -p
+# Option 1: Use Syft (external CLI - no GPL dependencies)
+curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh
+syft packages dir:. -o cyclonedx-json > sbom.json
 
-# Output: bom.json (Software Bill of Materials)
+# Option 2: Use pip-licenses for simple license audit
+poetry run pip-licenses --format=json --with-urls > licenses.json
+
+# Option 3: Use Trivy (Docker/GitHub Actions)
+trivy fs --format cyclonedx --output sbom.json .
+
+# Output: sbom.json (Software Bill of Materials)
 # Contains: All dependencies, versions, licenses, checksums
 ```
 
@@ -33,6 +40,8 @@ poetry run cyclonedx-py -p
 - Licenses identified for all packages
 - Checksums present
 
+**Note:** We use external SBOM tools instead of Python packages (e.g., cyclonedx-bom) to avoid GPL-licensed transitive dependencies (rfc3987). See Case Study below.
+
 ### 2. License Compliance (MANDATORY)
 ```bash
 # Check all dependency licenses
@@ -41,10 +50,13 @@ poetry run pip-licenses --format=markdown --with-urls \
 
 # Allowed licenses:
 # - MIT, Apache-2.0, BSD-3-Clause, BSD-2-Clause
-# - ISC, PSF, MPL-2.0, LGPL (library use only)
+# - ISC, PSF, MPL-2.0
+# - LGPL (acceptable for library use - no linking restrictions for Python)
+# - Multi-licensed (e.g., BSD/GPL/PSF - use non-copyleft option)
 
 # Forbidden licenses:
-# - GPL, AGPL (copyleft - incompatible with Apache 2.0)
+# - GPL v2+, GPL v3+ (strong copyleft - incompatible with Apache 2.0)
+# - AGPL (network copyleft - incompatible with Apache 2.0)
 # - SSPL (non-OSI approved)
 # - Commons Clause (restricts commercial use)
 ```
@@ -74,7 +86,10 @@ gh api /repos/sebastienrousseau/pain001/dependabot/alerts
 ### 4. Dependency Checksum Verification
 ```bash
 # Verify Poetry lock file integrity
-poetry lock --check
+poetry check  # Validates pyproject.toml and poetry.lock sync
+
+# Alternative: Verify lock file is up-to-date
+poetry lock --no-update  # Regenerate lock without updating versions
 
 # Verify pip package checksums
 poetry run pip hash requests==2.31.0
@@ -296,8 +311,10 @@ jobs:
       - name: Typosquatting Check
         run: poetry run python scripts/check_typosquatting.py
       
-      - name: Generate SBOM
-        run: poetry run cyclonedx-py -p -o bom.json
+      - name: Generate SBOM (using Syft)
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh
+          syft packages dir:. -o cyclonedx-json > bom.json
       
       - name: Upload SBOM
         uses: actions/upload-artifact@v3
@@ -321,3 +338,57 @@ jobs:
 - SBOM available for every release
 - No supply chain incidents
 - Dependency updates within SLA
+
+## Case Study: GPL License Violation (2026-01-12)
+
+**Incident:** Supply Chain tollgate discovered GPL v3+ license violation during validation.
+
+**Root Cause:**
+- `cyclonedx-bom` package added for SBOM generation
+- Pulled in `jsonschema[format]` as transitive dependency
+- `jsonschema[format]` includes `rfc3987` (GPL v3+ licensed)
+- GPL v3+ incompatible with pain001's Apache 2.0 license
+
+**Dependency Chain:**
+```
+pain001 (Apache 2.0)
+└── cyclonedx-bom ^4.0.0
+    └── cyclonedx-python-lib >=7.3.0
+        └── jsonschema[format] >=4.18,<5.0
+            └── rfc3987 * (GPL v3+)  ← VIOLATION
+```
+
+**Detection:**
+```bash
+$ poetry run pip-licenses --format=markdown | grep GPL
+| rfc3987 | 1.3.8 | GNU General Public License v3+ (GPLv3+) |
+```
+
+**Impact:**
+- 🔴 CRITICAL: Apache 2.0 + GPL v3+ = License conflict
+- 🔴 BLOCKING: Cannot release or deploy with this dependency
+- ⚠️ LEGAL: Potential copyright infringement if shipped
+
+**Resolution:**
+```bash
+# Remove GPL-problematic package
+poetry remove cyclonedx-bom
+
+# Result: Removed 23 packages including rfc3987
+# Alternative: Use external SBOM tools (syft, trivy)
+```
+
+**Lessons Learned:**
+1. ✅ **Tollgate worked**: Caught issue before production
+2. ✅ **Transitive deps matter**: Not just direct dependencies
+3. ✅ **External tools preferred**: Avoid pulling in heavy SBOM generators
+4. ⚠️ **Check before adding**: Always run license scan on new packages
+
+**Prevention:**
+- Always run `poetry run pip-licenses` before committing new dependencies
+- Use `--fail-on="GPL;AGPL"` in CI/CD to catch violations automatically
+- Prefer external CLI tools (syft, trivy) over Python packages for tooling
+- Document dependency justification in PR descriptions
+
+**Time to Resolution:** <10 minutes (detection to fix)
+**Cost Avoided:** Potential legal liability + emergency hotfix deployment
