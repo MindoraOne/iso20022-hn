@@ -90,6 +90,45 @@ If a quality gate fails and cannot be fixed via standard refactoring:
 4. **Docs Refresh:** Regenerate Sphinx docs (`make -C docs clean html`); verify README examples run without error.
 5. **Branch & PR:** Create feature branch `feature/<name>`, push, open PR with detailed description linking issue(s).
 
+### MANDATORY: Gate Enforcement Before Commit (Zero-Trust Enforcement)
+
+**THIS IS NON-NEGOTIABLE. NO EXCEPTIONS. NO BYPASSES.**
+
+Before executing ANY `git commit` command:
+
+1. **Announce the gate check:**
+   - State which gate(s) you are about to run
+   - Example: "Running poetry run make check (full quality gate)..."
+
+2. **Execute the full quality gate:**
+   ```bash
+   poetry run make check
+   ```
+
+3. **Report gate results explicitly:**
+   - State the exit code (must be 0)
+   - Report coverage percentage achieved (must be ≥ 95%)
+   - Confirm all checks passed: ruff, black, isort, mypy, pylint, bandit, safety
+   - Example format:
+     ```
+     ✓ Quality gate PASSED (exit code 0)
+     ✓ Coverage: 98.65% (exceeds 95% floor)
+     ✓ All linters passing: ruff, black, isort, mypy, pylint, bandit, safety
+     → SAFE TO COMMIT
+     ```
+
+4. **Only if gate passes (exit code 0):**
+   - Execute `git commit`
+   - Execute `git push`
+
+5. **If gate fails (exit code ≠ 0):**
+   - STOP. Do not commit.
+   - Fix the issue(s).
+   - Re-run gate.
+   - Repeat until gate passes.
+
+**Violation Consequence:** Committing before gate passes = failure of zero-trust model. This must NEVER happen.
+
 ## V. Resilience & Operations (Enterprise SLOs)
 
 ### Performance SLOs (Must Not Degrade)
