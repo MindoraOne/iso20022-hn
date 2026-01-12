@@ -1,13 +1,12 @@
 """Tests for enforce_slos.py script."""
 
-from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from scripts.enforce_slos import (
+    main,
     read_coverage_xml,
     validate_coverage,
     validate_slo,
-    main,
 )
 
 
@@ -32,10 +31,10 @@ class TestReadCoverageXml:
     def test_read_coverage_xml_valid_file(self, tmp_path):
         """Test read_coverage_xml with valid XML."""
         coverage_file = tmp_path / "coverage.xml"
-        xml_content = '''<?xml version="1.0" ?>
+        xml_content = """<?xml version="1.0" ?>
 <coverage line-rate="0.9765" branch-rate="0.9428">
     <package name="pain001" line-rate="0.95" branch-rate="0.94"/>
-</coverage>'''
+</coverage>"""
         coverage_file.write_text(xml_content)
         total_cov, module_cov = read_coverage_xml(coverage_file)
         assert total_cov == 97.65

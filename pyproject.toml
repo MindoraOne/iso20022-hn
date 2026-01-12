@@ -116,6 +116,7 @@ timeout = 5
 [tool.ruff]
 line-length = 79
 target-version = "py39"
+extend-exclude = [".github/*.md", "*.md", "docs/**/*.md", "releases/**/*.md"]
 
 [tool.ruff.lint]
 select = [
@@ -153,6 +154,7 @@ strict_equality = true
 exclude = [
     "pain001/templates/",
     "setup.py",
+    "scripts/",
 ]
 
 [[tool.mypy.overrides]]

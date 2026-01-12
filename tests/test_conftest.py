@@ -1,6 +1,5 @@
 """Tests for conftest pytest plugin."""
 
-import pytest
 from conftest import SLOMonitor, SLOPlugin
 
 
@@ -106,9 +105,9 @@ def test_pytest_addoption():
     from conftest import pytest_addoption
 
     # Create a mock parser
-    parser = type("Parser", (), {
-        "addoption": lambda self, *args, **kwargs: None
-    })()
+    parser = type(
+        "Parser", (), {"addoption": lambda self, *args, **kwargs: None}
+    )()
 
     # Just ensure it doesn't raise
     pytest_addoption(parser)
