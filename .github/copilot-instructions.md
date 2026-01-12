@@ -150,7 +150,47 @@ cd docs && make clean html && cd ..
 - Code snippets are syntax-highlighted correctly
 - Generated API docs reflect code changes
 
-#### Step 6: Codacy & Static Analysis (MANDATORY)
+#### Step 6: Codacy Pre-Flight Checks (MANDATORY Before Push)
+
+**Run these checks LOCALLY to catch Codacy issues BEFORE pushing:**
+
+```bash
+# 1. Check for insecure temp file usage (/tmp hardcoded paths)
+grep -r "/tmp/" tests/ pain001/ || echo "✓ No hardcoded /tmp paths"
+
+# 2. Check for unsafe XML imports (must use defusedxml for parsing)
+grep -r "from xml.etree import ElementTree" tests/ pain001/ | grep -v "nosec" | grep -v "# Safe: element creation only" || echo "✓ No unsafe XML imports"
+
+# 3. Check for imports inside functions
+grep -r "^[[:space:]]*from " tests/*.py pain001/**/*.py | grep -v "^tests.*:from\|^pain001.*:from" || echo "✓ No function-level imports"
+
+# 4. Run pylint to catch "too few public methods" and other issues
+poetry run pylint tests/test_*.py --disable=all --enable=R0903,W0404,C0411,C0412,C0413
+
+# 5. Run bandit security check
+poetry run bandit -r tests/ pain001/ -ll
+
+# 6. Check for trailing whitespace
+poetry run pylint tests/ pain001/ --disable=all --enable=C0303
+```
+
+**If ANY check fails:**
+- STOP immediately
+- Fix issues locally
+- Re-run checks
+- Only then proceed to commit
+
+**Common Codacy Violations & Fixes:**
+
+| Violation | Fix |
+|-----------|-----|
+| Insecure /tmp usage | Use `tempfile.TemporaryDirectory()` with context manager |
+| Unsafe XML import | Add `# nosec B405` if creating elements (not parsing), or use defusedxml |
+| Import inside function | Move import to module top |
+| Too few public methods | Add second public method or merge with another class |
+| Camelcase imported as acronym | Use proper casing: `ElementTree as ET` → add nosec comment |
+
+#### Step 7: Codacy Dashboard Verification (MANDATORY After Push)
 Verify via Codacy dashboard (`https://app.codacy.com/projects/`):
 - Code quality grade: A or B (no lower)
 - Code complexity: Within acceptable limits
@@ -165,7 +205,7 @@ Verify via Codacy dashboard (`https://app.codacy.com/projects/`):
 - Commit and push
 - Verify Codacy re-runs analysis successfully
 
-#### Step 7: Branch & PR Creation (MANDATORY)
+#### Step 8: Branch & PR Creation (MANDATORY)
 1. Create feature branch: `feature/<name>` or `fix/<issue-number>`
 2. Commit with clear message (see **Commit Message Format** below)
 3. Push to origin
@@ -176,7 +216,7 @@ Verify via Codacy dashboard (`https://app.codacy.com/projects/`):
    - Document breaking changes if any
    - Request reviewers
 
-#### Step 8: Final Pre-Push Check (MANDATORY)
+#### Step 9: Final Pre-Push Check (MANDATORY)
 Before `git push`:
 ```bash
 git status  # Verify all changes staged

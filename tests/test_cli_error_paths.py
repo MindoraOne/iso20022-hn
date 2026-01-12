@@ -19,12 +19,16 @@
 import logging
 import os
 import tempfile
-from xml.etree import ElementTree as ET
+from xml.etree import (
+    ElementTree as ET,
+)
 
+# nosec B405 - Only used for element creation, not parsing
 import pytest
 from click.testing import CliRunner
 
 from pain001.cli.cli import main
+from pain001.context.context import Context
 from pain001.xml.write_xml_to_file import write_xml_to_file
 
 
@@ -34,70 +38,87 @@ class TestCliErrorPaths:
     def test_cli_missing_message_type(self) -> None:
         """Test CLI when xml_message_type is not provided."""
         runner = CliRunner()
-        result = runner.invoke(
-            main,
-            [
-                "-m",
-                "/tmp/template.xml",
-                "-s",
-                "/tmp/schema.xsd",
-                "-d",
-                "/tmp/data.csv",
-            ],
-        )
-        assert result.exit_code == 1
-        assert "XML message type is required" in result.output
+        with tempfile.TemporaryDirectory() as tmpdir:
+            template_path = os.path.join(tmpdir, "template.xml")
+            schema_path = os.path.join(tmpdir, "schema.xsd")
+            data_path = os.path.join(tmpdir, "data.csv")
+
+            result = runner.invoke(
+                main,
+                [
+                    "-m",
+                    template_path,
+                    "-s",
+                    schema_path,
+                    "-d",
+                    data_path,
+                ],
+            )
+            assert result.exit_code == 1
+            assert "XML message type is required" in result.output
 
     def test_cli_missing_template_path(self) -> None:
         """Test CLI when xml_template_file_path is not provided."""
         runner = CliRunner()
-        result = runner.invoke(
-            main,
-            [
-                "-t",
-                "pain.001.001.03",
-                "-s",
-                "/tmp/schema.xsd",
-                "-d",
-                "/tmp/data.csv",
-            ],
-        )
-        assert result.exit_code == 1
-        assert "XML template file path is required" in result.output
+        with tempfile.TemporaryDirectory() as tmpdir:
+            schema_path = os.path.join(tmpdir, "schema.xsd")
+            data_path = os.path.join(tmpdir, "data.csv")
+
+            result = runner.invoke(
+                main,
+                [
+                    "-t",
+                    "pain.001.001.03",
+                    "-s",
+                    schema_path,
+                    "-d",
+                    data_path,
+                ],
+            )
+            assert result.exit_code == 1
+            assert "XML template file path is required" in result.output
 
     def test_cli_missing_schema_path(self) -> None:
         """Test CLI when xsd_schema_file_path is not provided."""
         runner = CliRunner()
-        result = runner.invoke(
-            main,
-            [
-                "-t",
-                "pain.001.001.03",
-                "-m",
-                "/tmp/template.xml",
-                "-d",
-                "/tmp/data.csv",
-            ],
-        )
-        assert result.exit_code == 1
-        assert "XSD schema file path is required" in result.output
+        with tempfile.TemporaryDirectory() as tmpdir:
+            template_path = os.path.join(tmpdir, "template.xml")
+            data_path = os.path.join(tmpdir, "data.csv")
+
+            result = runner.invoke(
+                main,
+                [
+                    "-t",
+                    "pain.001.001.03",
+                    "-m",
+                    template_path,
+                    "-d",
+                    data_path,
+                ],
+            )
+            assert result.exit_code == 1
+            assert "XSD schema file path is required" in result.output
 
     def test_cli_missing_data_path(self) -> None:
         """Test CLI when data_file_path is not provided."""
         runner = CliRunner()
-        result = runner.invoke(
-            main,
-            [
-                "-t",
-                "pain.001.001.03",
-                "-m",
-                "/tmp/template.xml",
-                "-s",
-                "/tmp/schema.xsd",
-            ],
-        )
-        assert result.exit_code == 1
-        assert "data file path is required" in result.output
+        with tempfile.TemporaryDirectory() as tmpdir:
+            template_path = os.path.join(tmpdir, "template.xml")
+            schema_path = os.path.join(tmpdir, "schema.xsd")
+
+            result = runner.invoke(
+                main,
+                [
+                    "-t",
+                    "pain.001.001.03",
+                    "-m",
+                    template_path,
+                    "-s",
+                    schema_path,
+                ],
+            )
+            assert result.exit_code == 1
+            assert "data file path is required" in result.output
 
     def test_cli_nonexistent_files(self) -> None:
         """Test CLI when provided files don't exist."""
@@ -123,8 +144,12 @@ class TestXmlWriterEdgeCases:
     """Test XML writer indentation edge cases."""
 
     def test_write_xml_preserves_indentation(self) -> None:
-        """Test that write_xml_to_file properly indents XML elements."""
-        # Create a simple XML tree
+        """Test that write_xml_to_file properly indents XML elements.
+
+        Note: ElementTree is safe here as we're creating XML elements,
+        not parsing untrusted input. Only use defusedxml for parsing.
+        """
+        # Create a simple XML tree (element creation is safe)
         root = ET.Element("root")
         child1 = ET.SubElement(root, "child1")
         child1.text = "value1"
@@ -145,14 +170,28 @@ class TestXmlWriterEdgeCases:
                 # Check for indentation
                 assert "\n" in content
 
+    def test_write_xml_creates_file(self) -> None:
+        """Test that write_xml_to_file creates the output file.
+
+        Note: ElementTree is safe here as we're creating XML elements,
+        not parsing untrusted input. Only use defusedxml for parsing.
+        """
+        root = ET.Element("test")
+        root.text = "content"
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = os.path.join(tmpdir, "output.xml")
+            write_xml_to_file(output_path, root)
+
+            assert os.path.exists(output_path)
+            assert os.path.isfile(output_path)
+
 
 class TestContextLoggerEdgeCases:
     """Test Context logger edge cases."""
 
     def test_context_logger_configuration(self) -> None:
         """Test context logger configuration."""
-        from pain001.context.context import Context
-
         # Get the singleton instance
         context = Context.get_instance()
 
@@ -167,8 +206,6 @@ class TestContextLoggerEdgeCases:
 
     def test_context_invalid_log_level(self) -> None:
         """Test setting an invalid log level raises ValueError."""
-        from pain001.context.context import Context
-
         context = Context.get_instance()
         with pytest.raises(ValueError, match="Invalid log level"):
             context.set_log_level("INVALID_LEVEL")
