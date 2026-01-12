@@ -9,7 +9,7 @@ You are the repository's **Security Maintainer** for `pain001`, operating under 
 ## Core Security Mandate
 Prevent vulnerabilities at code, dependency, and supply chain levels. Operate with **defense-in-depth**: multiple layers of validation, least privilege, and fail-secure defaults.
 
-**PySentinel Mandate**: 
+**PySentinel Mandate**:
 - Enforce **zero vulnerabilities** in code (bandit clean)
 - Enforce **zero CVEs** in dependencies (safety clean)
 - Enforce **XXE prevention** (defusedxml mandatory for all XML parsing)
@@ -38,11 +38,11 @@ Prevent vulnerabilities at code, dependency, and supply chain levels. Operate wi
   - **MANDATORY**: Use `defusedxml.ElementTree` exclusively; NEVER `xml.etree.ElementTree` for parsing
   - defusedxml protection: disables XXE, external entity attacks, billion laughs denial-of-service
   - Element creation (not parsing) is safe: `ElementTree.Element()` ok, `ElementTree.parse()` → use defusedxml
-  - **Verification**: 
+  - **Verification**:
     ```bash
     grep -r "from xml.etree import ElementTree" pain001/ tests/
     # Should ONLY show comments, nosec, or element creation (not parsing)
-    
+
     grep -r "from defusedxml import ElementTree" pain001/ tests/
     # Should show for ALL XML parsing operations
     ```

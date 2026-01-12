@@ -69,7 +69,7 @@ __version__ = "0.0.36"
 
 **That's it!** All downstream files will automatically reference the new version:
 - ✅ `setup.py` will extract the new version
-- ✅ `setup.cfg` will use the new version  
+- ✅ `setup.cfg` will use the new version
 - ✅ `docs/conf.py` will import the new version
 - ✅ Package imports will return the new version
 

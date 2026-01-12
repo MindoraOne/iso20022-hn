@@ -70,7 +70,7 @@ Keep the dependency tree **minimal, current, and secure**. Every dependency is a
 - Stdlib only provides MD5/SHA/DES (inadequate for payment processing)
 - No alternative provides equivalent security + performance
 
-**Maturity**: 
+**Maturity**:
 - Last commit: 3 days ago (actively maintained ✓)
 - GitHub stars: 3.2k (battle-tested ✓)
 - Python support: 3.7+ (meets our 3.9+ requirement ✓)
@@ -89,7 +89,7 @@ poetry run safety check --json | grep cryptography
 # Result: No CVEs found ✓
 ```
 
-**Size**: 
+**Size**:
 ```bash
 du -sh /path/to/site-packages/cryptography/
 # Result: 1.2MB (acceptable for security-critical library)
@@ -117,30 +117,30 @@ cryptography==41.0.0
 
 #### Minor Updates (e.g., 1.2.0 → 1.3.0)
 - **Process**: Review changelog; run `poetry update package --dry-run`
-- **Validation**: 
+- **Validation**:
   - Run `make check` (full quality gate)
   - Verify behavior tests still pass
   - Check if new features are worth adopting
 - **Risk**: Moderate; new features may introduce subtle behavior changes
-- **Action**: 
+- **Action**:
   - If no breaking changes and tests pass: merge
   - If behavior changed: add integration tests to verify new behavior
   - If uncertain: add to manual review queue, ask team
 
 #### Major Updates (e.g., 1.0.0 → 2.0.0)
 - **Process**: Check migration guide; do NOT auto-upgrade
-- **Review**: 
+- **Review**:
   - Read CHANGELOG for breaking changes
   - Check if pain001 API must change
   - Identify all call sites affected
   - Plan fallback if incompatibility discovered
-- **Validation**: 
+- **Validation**:
   - Implement changes in dedicated branch
   - Run full `make check` + `make perf` + `make complex`
   - Add tests for new behavior
   - Verify no performance regressions
 - **Risk**: High; breaking changes may require API updates or workarounds
-- **Action**: 
+- **Action**:
   - Require code review from lead maintainer
   - Document migration steps in PR
   - Plan communication if public APIs change
@@ -153,7 +153,7 @@ cryptography==41.0.0
   - Plan patch or workaround
   - If high/critical and no fix available: consider removing the dep
 - **Validation**: Run `make sec` to confirm CVE is resolved
-- **Timeline**: 
+- **Timeline**:
   - Critical (exploitable now): patch within 7 days
   - High (exploitable with effort): patch within 30 days
   - Medium: patch within 60 days
@@ -188,7 +188,7 @@ cryptography==41.0.0
 ### Automated Updates (Dependabot)
 1. Dependabot runs weekly: checks for pip and GitHub Actions updates
 2. Opens auto-PRs for new versions
-3. **Your role**: 
+3. **Your role**:
    - Review PR title and changelog
    - Run suggested commands (if any)
    - Check if behavior changed: run `make perf` if CPU-critical code uses the dep

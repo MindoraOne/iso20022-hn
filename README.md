@@ -644,7 +644,7 @@ def create_payment_file(data_file, output_dir='output'):
         xml_message_type = 'pain.001.001.03'
         xml_template = os.path.join(output_dir, 'payment.xml')
         xsd_schema = 'pain001/templates/pain.001.001.03/pain.001.001.03.xsd'
-        
+
         # Generate the payment file
         process_files(
             xml_message_type,
@@ -652,7 +652,7 @@ def create_payment_file(data_file, output_dir='output'):
             xsd_schema,
             data_file
         )
-        
+
         # Validate the generated file
         if validate_via_xsd(xml_template, xsd_schema):
             print(f"✓ Successfully created and validated: {xml_template}")
@@ -660,7 +660,7 @@ def create_payment_file(data_file, output_dir='output'):
         else:
             print(f"✗ Validation failed for: {xml_template}")
             return None
-            
+
     except FileNotFoundError as e:
         print(f"Error: File not found - {e}")
         return None
@@ -691,7 +691,7 @@ if __name__ == '__main__':
 Every time you load data (from CSV, SQLite, or Python objects), **Pain001** automatically validates:
 - ✓ All required fields are present
 - ✓ Data types are correct (strings, numbers, booleans)
-- ✓ Boolean values are valid ('true'/'false' or 'yes'/'no')  
+- ✓ Boolean values are valid ('true'/'false' or 'yes'/'no')
 - ✓ Field formats meet ISO 20022 standards
 
 **Stage 2: XSD Schema Validation (Automatic)**
@@ -751,41 +751,41 @@ Mandatory validation is the core principle of Pain001. It ensures:
 %%{init: {'theme':'default'}}%%
 flowchart TD
     Start([1. Load Data Source]) --> DataType{Data Type?}
-    
+
     DataType -->|CSV| LoadCSV[Load CSV File]
     DataType -->|SQLite| LoadDB[Load SQLite Database]
     DataType -->|Python| LoadPython[Load Python Dict/List]
-    
+
     LoadCSV --> Stage1[2. Automatic Data Validation]
     LoadDB --> Stage1
     LoadPython --> Stage1
-    
+
     Stage1 --> CheckReq[Check Required Fields]
     CheckReq --> CheckTypes[Validate Data Types]
     CheckTypes --> CheckBool[Verify Boolean Values]
     CheckBool --> CheckFormats[Check ISO 20022 Formats]
-    
+
     CheckFormats --> Valid1{All Checks<br/>Passed?}
-    
+
     Valid1 -->|No| ErrorData[ValueError Raised<br/>Fix Your Data]
     Valid1 -->|Yes| ValidData[Valid Data ✓]
-    
+
     ErrorData --> Start
-    
+
     ValidData --> Stage3[3. Generate XML File]
     Stage3 --> Stage4[4. XSD Schema Validation]
-    
+
     Stage4 --> CheckStruct[Validate XML Structure]
     CheckStruct --> CheckElem[Check Element Formatting]
     CheckElem --> CheckComp[Verify ISO 20022 Compliance]
-    
+
     CheckComp --> Valid2{XML Schema<br/>Valid?}
-    
+
     Valid2 -->|No| ErrorXML[Validation Failed<br/>Check Error Message]
     Valid2 -->|Yes| ValidXML[Valid XML ✓]
-    
+
     ErrorXML --> Start
-    
+
     ValidXML --> Success([5. Payment File Ready<br/>for Bank Submission ✓])
 ```
 
@@ -860,7 +860,7 @@ def generate_payment_file():
         # Define paths
         output_dir = 'output'
         os.makedirs(output_dir, exist_ok=True)
-        
+
         # Generate payment file
         main(
             xml_message_type='pain.001.001.03',
@@ -868,22 +868,22 @@ def generate_payment_file():
             xsd_schema_file_path='pain001/templates/pain.001.001.03/pain.001.001.03.xsd',
             data_file_path='my_payments.csv'
         )
-        
+
         print("✓ Payment file generated successfully!")
         print(f"✓ Location: {output_dir}/payment.xml")
         print("✓ File is ready for bank submission")
         return True
-        
+
     except ValueError as e:
         print(f"✗ Data validation error: {e}")
         print("→ Please check your CSV file for missing or invalid data")
         return False
-        
+
     except FileNotFoundError as e:
         print(f"✗ File not found: {e}")
         print("→ Please check all file paths are correct")
         return False
-        
+
     except Exception as e:
         print(f"✗ Unexpected error: {e}")
         return False

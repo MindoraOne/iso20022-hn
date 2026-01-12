@@ -402,7 +402,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added 10 new tests covering previously untested code paths
   - Total test count increased from 152 to 161 tests
   - Coverage improved from 97.08% to 100.00%
-  
+
 - **Enhanced Test Suite** - Comprehensive test coverage for all modules:
   - `test_main.py` - Added tests for missing XML template path validation and exception handling
   - `test_cli.py` - Added test for `__main__` entry point execution
