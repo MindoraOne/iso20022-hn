@@ -19,8 +19,8 @@
 import logging
 import os
 import tempfile
-from xml.etree import (  # nosec B405 - Only used for element creation, not parsing
-    ElementTree as ElementTree,  # noqa: N817 - Standard pattern for XML operations
+from xml.etree import (
+    ElementTree,  # nosec B405 - Only element creation, not parsing
 )
 
 import pytest
