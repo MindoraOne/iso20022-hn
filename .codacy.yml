@@ -1,0 +1,21 @@
+---
+# Codacy Configuration for Pain001
+# Excludes documentation files from strict Markdown linting
+
+exclude_paths:
+  - ".github/copilot-instructions.md"  # Complex technical documentation
+  - "docs/**"  # Sphinx documentation
+  - "releases/**"  # Release notes
+
+engines:
+  markdownlint:
+    enabled: true
+    exclude_paths:
+      - ".github/copilot-instructions.md"
+    rules:
+      # Relax line length for technical documentation
+      MD013:
+        enabled: false
+      # Allow inline HTML in Markdown
+      MD033:
+        enabled: false
