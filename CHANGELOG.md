@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Quality Assurance
 
 - **Code Quality**: Refactor maintains 100% branch coverage of modified code
-- **Test Coverage**: 341 tests passing with 98.59% total coverage (exceeds 95% requirement)
+- **Test Coverage**: 385 tests passing with 98.645% total coverage (exceeds 95% requirement)
 - **Type Hints**: Full strict typing across all new and refactored functions
 - **Linting**: All linters pass (ruff, black, isort, mypy)
 - **Performance**: No performance degradation; generation duration timing preserved
