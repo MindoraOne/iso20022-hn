@@ -16,9 +16,10 @@
 
 """Test coverage gaps to achieve 99%+ coverage."""
 
-import pytest
-
-from pain001.csv.validate_csv_data import _validate_datetime, _validate_field_type
+from pain001.csv.validate_csv_data import (
+    _validate_datetime,
+    _validate_field_type,
+)
 
 
 class TestCsvDateTimeValidation:

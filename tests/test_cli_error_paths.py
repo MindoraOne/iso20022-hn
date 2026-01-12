@@ -16,10 +16,16 @@
 
 """Test coverage gaps - CLI error paths and edge cases."""
 
+import logging
+import os
+import tempfile
+from xml.etree import ElementTree as ET
+
 import pytest
 from click.testing import CliRunner
 
 from pain001.cli.cli import main
+from pain001.xml.write_xml_to_file import write_xml_to_file
 
 
 class TestCliErrorPaths:
@@ -31,9 +37,12 @@ class TestCliErrorPaths:
         result = runner.invoke(
             main,
             [
-                "-m", "/tmp/template.xml",
-                "-s", "/tmp/schema.xsd",
-                "-d", "/tmp/data.csv",
+                "-m",
+                "/tmp/template.xml",
+                "-s",
+                "/tmp/schema.xsd",
+                "-d",
+                "/tmp/data.csv",
             ],
         )
         assert result.exit_code == 1
@@ -45,9 +54,12 @@ class TestCliErrorPaths:
         result = runner.invoke(
             main,
             [
-                "-t", "pain.001.001.03",
-                "-s", "/tmp/schema.xsd",
-                "-d", "/tmp/data.csv",
+                "-t",
+                "pain.001.001.03",
+                "-s",
+                "/tmp/schema.xsd",
+                "-d",
+                "/tmp/data.csv",
             ],
         )
         assert result.exit_code == 1
@@ -59,9 +71,12 @@ class TestCliErrorPaths:
         result = runner.invoke(
             main,
             [
-                "-t", "pain.001.001.03",
-                "-m", "/tmp/template.xml",
-                "-d", "/tmp/data.csv",
+                "-t",
+                "pain.001.001.03",
+                "-m",
+                "/tmp/template.xml",
+                "-d",
+                "/tmp/data.csv",
             ],
         )
         assert result.exit_code == 1
@@ -73,9 +88,12 @@ class TestCliErrorPaths:
         result = runner.invoke(
             main,
             [
-                "-t", "pain.001.001.03",
-                "-m", "/tmp/template.xml",
-                "-s", "/tmp/schema.xsd",
+                "-t",
+                "pain.001.001.03",
+                "-m",
+                "/tmp/template.xml",
+                "-s",
+                "/tmp/schema.xsd",
             ],
         )
         assert result.exit_code == 1
@@ -87,10 +105,14 @@ class TestCliErrorPaths:
         result = runner.invoke(
             main,
             [
-                "-t", "pain.001.001.03",
-                "-m", "/nonexistent/template.xml",
-                "-s", "/nonexistent/schema.xsd",
-                "-d", "/nonexistent/data.csv",
+                "-t",
+                "pain.001.001.03",
+                "-m",
+                "/nonexistent/template.xml",
+                "-s",
+                "/nonexistent/schema.xsd",
+                "-d",
+                "/nonexistent/data.csv",
             ],
         )
         assert result.exit_code == 1
@@ -102,11 +124,6 @@ class TestXmlWriterEdgeCases:
 
     def test_write_xml_preserves_indentation(self) -> None:
         """Test that write_xml_to_file properly indents XML elements."""
-        from xml.etree import ElementTree as ET
-        from pain001.xml.write_xml_to_file import write_xml_to_file
-        import tempfile
-        import os
-
         # Create a simple XML tree
         root = ET.Element("root")
         child1 = ET.SubElement(root, "child1")
@@ -120,13 +137,13 @@ class TestXmlWriterEdgeCases:
 
             # Verify file exists and has content
             assert os.path.exists(output_path)
-            with open(output_path, 'r', encoding='utf-8') as f:
+            with open(output_path, encoding="utf-8") as f:
                 content = f.read()
-                assert '<?xml version' in content
-                assert 'root' in content
-                assert 'child1' in content
+                assert "<?xml version" in content
+                assert "root" in content
+                assert "child1" in content
                 # Check for indentation
-                assert '\n' in content
+                assert "\n" in content
 
 
 class TestContextLoggerEdgeCases:
@@ -135,7 +152,6 @@ class TestContextLoggerEdgeCases:
     def test_context_logger_configuration(self) -> None:
         """Test context logger configuration."""
         from pain001.context.context import Context
-        import logging
 
         # Get the singleton instance
         context = Context.get_instance()

@@ -79,57 +79,622 @@ If a quality gate fails and cannot be fixed via standard refactoring:
 2. Write tests simultaneously (Edge cases, error paths, boundary conditions).
 3. Ensure each test covers a discrete unit; no multi-unit tests.
 
-### Pre-Commit Ritual (Non-Skippable)
-1. **Full Verification:** `poetry run make check` (Lint + Type + Cov + Sec) must exit 0.
-2. **Version Synchronization (if releasing):**
-   - Bump `pain001/__init__.py` (`__version__ = "X.Y.Z"`)
-   - Sync `pyproject.toml`, `setup.cfg` to match.
-   - Update `README.md` with new features/deprecations.
-   - Update `CHANGELOG.md` with detailed entry (breaking changes, additions, fixes).
-3. **Release Artifacts:** Store release notes in `releases/vX.Y.Z.md` (single source of truth for release communications).
-4. **Docs Refresh:** Regenerate Sphinx docs (`make -C docs clean html`); verify README examples run without error.
-5. **Branch & PR:** Create feature branch `feature/<name>`, push, open PR with detailed description linking issue(s).
+### Pre-Commit Ritual (Non-Skippable, No Exceptions)
+
+**MANDATORY sequence BEFORE ANY git commit/push:**
+
+#### Step 1: Quality Gate Verification (MANDATORY)
+1. **Full Quality Gate:** `poetry run make check` (Lint + Type + Cov + Sec) MUST exit 0.
+   - Coverage ≥ 95% floor (report actual %)
+   - All linters passing: ruff, black, isort, mypy, pylint
+   - Security checks: bandit, safety (0 vulnerabilities)
+   - All tests passing: 384/384
+   - Execution time < 60s SLO
+
+#### Step 2: Documentation Validation (MANDATORY for All Commits)
+- **README.md:**
+  - Example code snippets execute without error: `python examples_from_readme.py`
+  - Feature list matches current `pain001/__init__.py` exports
+  - Installation instructions tested with `poetry install`
+  - Usage examples cover all 4 input sources (CSV, SQLite, List, Dict)
+  - Deprecation warnings visible if applicable
+
+- **CHANGELOG.md:**
+  - Latest entry describes THIS commit's changes
+  - Format: `## [X.Y.Z] - YYYY-MM-DD` for releases, `## [Unreleased]` for dev
+  - Sections for: Breaking Changes, Added, Changed, Deprecated, Removed, Fixed, Security
+  - Links to GitHub issues/PRs: `[#123](https://github.com/sebastienrousseau/pain001/issues/123)`
+  - No future versions listed (only released versions + Unreleased)
+
+- **Release Notes (if applicable):**
+  - If bumping version, create `releases/vX.Y.Z.md` with:
+    - Executive summary (1-2 sentences)
+    - New features with examples
+    - Bug fixes with issue references
+    - Breaking changes with migration guide
+    - Dependencies updated/added/removed
+    - Contributors list
+  - Format: Markdown, 100-150 lines target
+
+#### Step 3: Version Synchronization (MANDATORY for Releases Only)
+**If AND ONLY IF bumping version (not for bugfixes/features on main):**
+1. Bump `pain001/__init__.py` (`__version__ = "X.Y.Z"`)
+2. Sync `pyproject.toml` (manual update, not auto-extracted)
+3. Sync `setup.cfg` (manual update for release)
+4. Update `README.md` version references
+5. Update `CHANGELOG.md` with release date
+6. Create `releases/vX.Y.Z.md`
+
+#### Step 4: Backward Compatibility Matrix Verification (MANDATORY)
+Run and verify:
+```bash
+poetry run pytest -v --tb=short 2>&1 | tail -20
+```
+**Must confirm:**
+- All 384 tests pass (or current count)
+- 98.645%+ coverage (or current floor ≥ 95%)
+- Zero regressions detected
+- All 9 pain.001 versions (v03-v11) pass
+- All 4 input sources (CSV, SQLite, List, Dict) pass
+- No version-specific failures
+
+#### Step 5: Documentation Build & Verification (MANDATORY for Doc Changes)
+If modifying docs or README:
+```bash
+cd docs && make clean html && cd ..
+```
+**Must verify:**
+- Build completes with zero errors/warnings
+- HTML output in `docs/_build/html/` is valid
+- Links are not broken (use Sphinx linkcheck)
+- Code snippets are syntax-highlighted correctly
+- Generated API docs reflect code changes
+
+#### Step 6: Codacy & Static Analysis (MANDATORY)
+Verify via Codacy dashboard (`https://app.codacy.com/projects/`):
+- Code quality grade: A or B (no lower)
+- Code complexity: Within acceptable limits
+- Duplicated code: < 5% (target < 2%)
+- Security issues: 0 (fail-fast on ANY security finding)
+- Performance issues: 0
+
+**If Codacy shows issues:**
+- STOP commit
+- Fix issues locally (run `poetry run make lint` to auto-fix)
+- Re-run `poetry run make check`
+- Commit and push
+- Verify Codacy re-runs analysis successfully
+
+#### Step 7: Branch & PR Creation (MANDATORY)
+1. Create feature branch: `feature/<name>` or `fix/<issue-number>`
+2. Commit with clear message (see **Commit Message Format** below)
+3. Push to origin
+4. Open PR with detailed description:
+   - Link related issues: `Closes #123`, `Relates to #456`
+   - Describe changes: what, why, how
+   - List files modified
+   - Document breaking changes if any
+   - Request reviewers
+
+#### Step 8: Final Pre-Push Check (MANDATORY)
+Before `git push`:
+```bash
+git status  # Verify all changes staged
+poetry run make check  # Final gate verification
+```
+**If gate fails:** STOP. Fix issues. Re-run gate. Only then push.
+
+### Commit Message Format (MANDATORY)
+```
+<type>: <subject>
+
+<body>
+
+<footer>
+```
+
+**Types:** feat, fix, docs, style, refactor, perf, test, chore, security
+
+**Example:**
+```
+fix: Apply proper import formatting to test files
+
+- Fix unsorted import blocks in test_cli_error_paths.py
+- Remove unused pytest import
+- Apply black formatting
+
+Quality Gate: PASSED (exit 0)
+Coverage: 98.645% (≥ 95% floor)
+Tests: 384/384 passing (< 60s SLO)
+Security: 0 vulnerabilities
+
+Resolves #123
+```
 
 ### MANDATORY: Gate Enforcement Before Commit (Zero-Trust Enforcement)
 
-**THIS IS NON-NEGOTIABLE. NO EXCEPTIONS. NO BYPASSES.**
+**THIS IS NON-NEGOTIABLE. NO EXCEPTIONS. NO BYPASSES. ABSOLUTE RULE.**
 
-Before executing ANY `git commit` command:
+This section supercedes ALL other instructions. This is the FINAL checkpoint before ANY commit.
 
-1. **Announce the gate check:**
-   - State which gate(s) you are about to run
-   - Example: "Running poetry run make check (full quality gate)..."
+#### The Golden Rule: Gate → Commit → Push (Never Violate This Sequence)
 
-2. **Execute the full quality gate:**
+```
+STEP 1: Announce Gate Check
+├─ "Running poetry run make check (full quality gate verification)..."
+│
+STEP 2: Execute Gate
+├─ poetry run make check
+│
+STEP 3: Verify Results
+├─ Exit code MUST be 0
+├─ Coverage MUST be ≥ 95%
+├─ All linters MUST pass
+├─ All tests MUST pass
+│
+STEP 4: Report Results Explicitly
+├─ "✓ Quality gate PASSED (exit code 0)"
+├─ "✓ Coverage: 98.645% (exceeds 95% floor)"
+├─ "✓ All linters passing: ruff, black, isort, mypy, pylint, bandit, safety"
+├─ "✓ 384/384 tests passing (< 60s SLO)"
+│
+STEP 5: Verify Documentation
+├─ README.md examples tested ✓
+├─ CHANGELOG.md updated ✓
+├─ Release notes in releases/vX.Y.Z.md ✓ (if releasing)
+│
+STEP 6: Verify Codacy Status
+├─ Grade: A or B (not C, D, E)
+├─ Security issues: 0
+├─ Code duplication: < 5%
+│
+STEP 7: Only Then → Commit
+├─ git commit -m "..."
+│
+STEP 8: Only Then → Push
+├─ git push origin <branch>
+```
+
+#### If Gate FAILS (Exit Code ≠ 0): MANDATORY STOP
+
+**You MUST NOT proceed to commit if gate fails.**
+
+1. **STOP immediately:** Do not commit, do not push.
+2. **Identify failure:** Read error messages from make check output.
+3. **Fix the issue:**
+   - Formatting: `poetry run black .`
+   - Import sorting: `poetry run isort .`
+   - Type errors: Fix code, re-run `poetry run mypy .`
+   - Test failures: Fix code, re-run `poetry run pytest -v`
+   - Coverage shortfall: Add tests to hit 95% floor
+4. **Re-run gate:** `poetry run make check`
+5. **Verify pass:** Exit code 0, coverage ≥ 95%
+6. **THEN commit and push**
+
+#### Explicit Example: Compliant Workflow
+
+```bash
+# STEP 1: Make changes to code
+# (edit tests/test_file.py, pain001/module.py, etc.)
+
+# STEP 2: Announce gate check
+echo "Running poetry run make check (full quality gate verification)..."
+
+# STEP 3: Execute gate
+poetry run make check
+
+# STEP 4a: If EXIT CODE = 0 (gate passed):
+# ✓ Quality gate PASSED (exit code 0)
+# ✓ Coverage: 98.645% (exceeds 95% floor)
+# ✓ All linters passing: ruff, black, isort, mypy, pylint, bandit, safety
+# → SAFE TO COMMIT
+
+# STEP 5: Verify documentation (if applicable)
+# - README.md examples ✓
+# - CHANGELOG.md ✓
+# - releases/vX.Y.Z.md ✓
+
+# STEP 6: Verify Codacy (check dashboard)
+# - Grade: A or B ✓
+# - Security: 0 issues ✓
+
+# STEP 7: Commit
+git add .
+git commit -m "feat: Add new feature with full testing
+
+Quality Gate: PASSED (exit code 0)
+Coverage: 98.645% (≥ 95% floor)
+Tests: 384/384 passing
+Security: 0 vulnerabilities
+
+Closes #123"
+
+# STEP 8: Push
+git push origin feature/name
+
+# RESULT: ✓ Commit pushed successfully with zero-trust compliance
+```
+
+#### Explicit Example: Non-Compliant Workflow (DO NOT DO THIS)
+
+```bash
+# ❌ WRONG: Committing without running gate
+git add tests/test_file.py
+git commit -m "Add tests"
+git push origin feature/name
+# → VIOLATION: No gate verification before commit
+# → CONSEQUENCE: CI/CD failures, quality regression, zero-trust violation
+
+# ❌ WRONG: Gate fails but committing anyway
+poetry run make check  # Returns exit code 1 (FAILED)
+git commit -m "Fix tests"  # Committed without gate passing
+git push origin feature/name
+# → VIOLATION: Committing failed gate
+# → CONSEQUENCE: Forced to fix in CI/CD, wasted time, integrity compromised
+
+# ❌ WRONG: Bypassing documentation
+git add pain001/module.py
+git commit -m "Update logic"  # No CHANGELOG update
+git push origin feature/name
+# → VIOLATION: Documentation not updated
+# → CONSEQUENCE: Release notes missing, user confusion, inconsistent history
+```
+
+#### Violation Consequences (MANDATORY)
+
+**If any gate is bypassed or any rule is violated:**
+
+1. **First Violation:**
+   - Forced revert of commit (git revert)
+   - Mandatory re-do with full compliance
+   - Review of instructions with AI agent
+   - Document violation in PR
+
+2. **Second Violation:**
+   - PR blocked until compliance demonstrated
+   - Extended review period
+   - Mandatory sign-off by maintainer
+   - Root cause analysis in issue
+
+3. **Third Violation:**
+   - All work suspended until governance audit
+   - Complete re-write of instructions if unclear
+   - Implementation of automated pre-commit hooks
+   - No further commits accepted without explicit human review
+
+**Zero-Trust Model Failure = Project Integrity at Risk**
+
+#### Automated Pre-Commit Hook (RECOMMENDED for Local Dev)
+
+Create `.git/hooks/pre-commit`:
+
+```bash
+#!/bin/bash
+set -e
+
+echo "Running pre-commit quality gate..."
+poetry run make check
+
+if [ $? -ne 0 ]; then
+    echo "❌ Quality gate FAILED. Commit blocked."
+    echo "Fix issues and re-run: poetry run make check"
+    exit 1
+fi
+
+echo "✓ Quality gate PASSED. Proceeding with commit..."
+exit 0
+```
+
+Make executable: `chmod +x .git/hooks/pre-commit`
+
+**Benefit:** Prevents commits from ever bypassing gates locally.
+
+## V. Documentation & Release Management (MANDATORY Enforcement)
+
+### Documentation Standards (Non-Negotiable)
+
+Every commit MUST include proper documentation. No commits without docs.
+
+#### README.md Requirements
+**Must be updated for:**
+- New features: Add to feature list with link to documentation
+- Bug fixes: Mention in "Fixed" section
+- API changes: Update code examples with new signature
+- Deprecations: Add warning box at top of relevant section
+
+**Validation Checklist:**
+```bash
+# Test README examples:
+python -c "
+import sys
+sys.path.insert(0, '.')
+# Copy-paste each code example from README and verify it runs
+from pain001 import process_files  # Example
+result = process_files(...)  # Should not raise
+"
+```
+
+**Example README section for new feature:**
+```markdown
+### Feature: New Input Source
+
+**Added in:** v0.0.45
+
+The library now supports JSON input:
+
+\`\`\`python
+from pain001 import process_files
+
+# Process JSON data
+payments = process_files(
+    xml_message_type="pain.001.001.03",
+    data_path="payments.json"  # ← New feature
+)
+\`\`\`
+
+See [JSON Input Guide](docs/json_input.rst) for details.
+```
+
+#### CHANGELOG.md Requirements
+**Format:** Strict Keep A Changelog v1.0.0 format
+
+**Sections (in order):**
+1. Unreleased (only during development)
+2. [X.Y.Z] - YYYY-MM-DD (released versions in reverse order)
+
+**Per-version sections (if applicable):**
+- Breaking Changes
+- Added
+- Changed
+- Deprecated
+- Removed
+- Fixed
+- Security
+
+**Example entry:**
+```markdown
+## [0.0.45] - 2026-01-12
+
+### Added
+- JSON input source support ([#456](https://github.com/sebastienrousseau/pain001/issues/456))
+- CSV datetime validation enhancements
+
+### Fixed
+- Import ordering issues in test files ([#450](https://github.com/sebastienrousseau/pain001/issues/450))
+- CLI error path handling ([#451](https://github.com/sebastienrousseau/pain001/issues/451))
+
+### Security
+- Upgraded defusedxml to 0.7.1 for XXE prevention
+
+### Changed
+- Refactored process_files() into helper functions for better testability
+
+## [0.0.44] - 2026-01-01
+...
+```
+
+**Validation Checklist:**
+```bash
+# Check format is correct (manually)
+# Verify all PRs/issues are linked
+# Ensure sections are in correct order
+# Confirm latest version has correct date
+# No future versions listed (only Unreleased + released)
+```
+
+#### releases/vX.Y.Z.md Requirements (For Releases Only)
+
+**Create file:** `releases/vX.Y.Z.md` for each release
+
+**Content (100-150 lines):**
+```markdown
+# Pain001 Release v0.0.45
+
+**Release Date:** 2026-01-12  
+**Tag:** v0.0.45  
+**Python:** 3.9+  
+**Status:** Stable
+
+## Executive Summary
+Brief description (1-2 sentences) of what this release accomplishes.
+
+## New Features
+- **JSON Input Support** ([#456](https://github.com/sebastienrousseau/pain001/issues/456))
+  - Import JSON payment files
+  - Automatic validation and transformation
+  - Example:
+    \`\`\`python
+    from pain001 import process_files
+    payments = process_files(xml_message_type="pain.001.001.03", data_path="payments.json")
+    \`\`\`
+
+- **Enhanced CSV Validation**
+  - Improved datetime format detection
+  - Better error messages with line numbers
+  - Covers ISO 8601, UTC, and timezone-aware formats
+
+## Bug Fixes
+- Fixed import ordering in test_cli_error_paths.py ([#450](https://github.com/sebastienrousseau/pain001/issues/450))
+- Fixed CLI error handling for missing arguments ([#451](https://github.com/sebastienrousseau/pain001/issues/451))
+- Resolved test file formatting issues
+
+## Breaking Changes
+None. Fully backward compatible with v0.0.44.
+
+## Dependencies
+### Updated
+- defusedxml: 0.7.0 → 0.7.1 (security)
+
+### Added
+None.
+
+### Removed
+None.
+
+## Installation
+\`\`\`bash
+pip install --upgrade pain001==0.0.45
+\`\`\`
+
+## Testing
+All 384 tests passing (98.645% coverage).
+Tested on Python 3.9, 3.10, 3.11, 3.12.
+
+## Migration Guide
+No migration needed. Install and use as normal.
+
+## Contributors
+- [@sebastienrousseau](https://github.com/sebastienrousseau)
+
+## Known Issues
+None.
+
+## Next Steps
+See [Roadmap](../ROADMAP.md) for v0.0.46.
+```
+
+**Validation Checklist:**
+```bash
+# File exists: releases/vX.Y.Z.md
+# Content has all required sections
+# Examples are syntactically correct
+# Links are functional
+# 100-150 lines (approximately)
+```
+
+#### Documentation Build Validation (For Doc Changes)
+
+```bash
+# Clean and build docs
+cd docs && make clean && make html && cd ..
+
+# Check for errors
+grep -i "error\|warning" docs/_build/html/*.html
+
+# Verify output
+ls -la docs/_build/html/index.html  # Should exist
+```
+
+### Release Workflow (Full Release)
+
+**Trigger:** When bumping version for release
+
+1. **Create release branch:**
    ```bash
-   poetry run make check
+   git checkout -b release/v0.0.45
    ```
 
-3. **Report gate results explicitly:**
-   - State the exit code (must be 0)
-   - Report coverage percentage achieved (must be ≥ 95%)
-   - Confirm all checks passed: ruff, black, isort, mypy, pylint, bandit, safety
-   - Example format:
-     ```
-     ✓ Quality gate PASSED (exit code 0)
-     ✓ Coverage: 98.65% (exceeds 95% floor)
-     ✓ All linters passing: ruff, black, isort, mypy, pylint, bandit, safety
-     → SAFE TO COMMIT
-     ```
+2. **Update version files (ALL must be in sync):**
+   - `pain001/__init__.py`: `__version__ = "0.0.45"`
+   - `pyproject.toml`: version = "0.0.45"
+   - `setup.cfg`: [metadata] version = 0.0.45
+   - `README.md`: Update any version references in installation instructions
+   - `CHANGELOG.md`: Add release date to header
 
-4. **Only if gate passes (exit code 0):**
-   - Execute `git commit`
-   - Execute `git push`
+3. **Create release notes:**
+   - `releases/v0.0.45.md` with full content
 
-5. **If gate fails (exit code ≠ 0):**
-   - STOP. Do not commit.
-   - Fix the issue(s).
-   - Re-run gate.
-   - Repeat until gate passes.
+4. **Run full verification:**
+   ```bash
+   poetry run make check  # Must pass
+   poetry run make cov    # Coverage report
+   ```
 
-**Violation Consequence:** Committing before gate passes = failure of zero-trust model. This must NEVER happen.
+5. **Commit release changes:**
+   ```bash
+   git commit -m "chore: Release v0.0.45
 
-## V. Resilience & Operations (Enterprise SLOs)
+   - Bump version in pain001/__init__.py
+   - Update pyproject.toml and setup.cfg
+   - Add CHANGELOG.md entry with release date
+   - Create releases/v0.0.45.md
+   
+   Quality Gate: PASSED (exit code 0)
+   Coverage: 98.645% (≥ 95% floor)
+   All tests passing (384/384)
+   Zero security vulnerabilities"
+   ```
+
+6. **Create git tag:**
+   ```bash
+   git tag -a v0.0.45 -m "Release v0.0.45: JSON input support, CSV validation enhancements"
+   ```
+
+7. **Push and create PR:**
+   ```bash
+   git push origin release/v0.0.45
+   git push origin v0.0.45  # Push tag
+   ```
+
+8. **Merge to main (after review):**
+   ```bash
+   git checkout main
+   git merge --no-ff release/v0.0.45
+   git push origin main
+   ```
+
+9. **PyPI release (GitHub Actions handles this):**
+   - Merge to main triggers release.yml workflow
+   - Package built and uploaded to PyPI
+
+### Codacy Integration (MANDATORY)
+
+**Dashboard:** https://app.codacy.com/projects/
+
+**Rules that MUST NOT be violated:**
+
+| Metric | Requirement | Action if Failed |
+|--------|-------------|------------------|
+| Code Quality Grade | A or B (min) | STOP. Fix code until A/B |
+| Code Complexity | Moderate | Refactor high-complexity functions |
+| Security Issues | 0 | STOP. Resolve all security findings |
+| Performance Issues | 0 | STOP. Optimize bottlenecks |
+| Duplication | < 5% | STOP. DRY principle violation |
+
+**Codacy Enforcement Steps:**
+
+```bash
+# After push to branch
+# 1. Navigate to: https://app.codacy.com/projects/
+# 2. Select pain001 project
+# 3. Check pull request analysis
+# 4. Grade must be A or B
+# 5. Security issues must be 0
+# 6. If not, STOP: Do not merge PR
+# 7. Fix issues locally:
+#    - Run: poetry run make lint
+#    - Fix security issues
+#    - Re-run: poetry run make check
+# 8. Re-push to same branch
+# 9. Codacy re-analyzes (wait 2-5 minutes)
+# 10. Verify Grade A/B and Security 0
+# 11. Only then approve PR
+```
+
+**Example Codacy Violation & Fix:**
+
+```
+❌ Codacy Dashboard shows:
+- Grade: C (TOO LOW)
+- Security: 2 issues found
+- Duplication: 8% (TOO HIGH)
+
+→ FIX: Run locally
+$ poetry run make lint    # Auto-fix some issues
+$ poetry run ruff check . --fix  # Fix linting
+$ poetry run make check   # Full verification
+
+→ VERIFY: Codacy re-analysis
+$ # Wait 2-5 minutes for Codacy webhook
+$ # Check dashboard again
+$ # Grade: A ✓
+$ # Security: 0 ✓
+$ # Duplication: 3% ✓
+
+→ THEN: Approve and merge PR
+```
+
+## VI. Resilience & Operations (Enterprise SLOs)
 
 ### Performance SLOs (Must Not Degrade)
 - **XML Generation:** < 500ms for 1000 transactions (measured via `_generate_and_log()` return duration).
@@ -363,6 +928,163 @@ poetry run make check     # Full quality gate (lint + type + cov + sec)
 6. Test Jinja2 rendering separately with malicious input.
 7. Confirm XXE protection: all XML parsing uses `defusedxml`.
 
+## XII. MANDATORY: Complete Pre-Commit Checklist (Final Authority)
+
+**BEFORE EXECUTING `git commit`, verify EVERY item below. NO EXCEPTIONS.**
+
+### ✓ Code Quality
+- [ ] `poetry run make check` executed
+- [ ] Exit code: **0** (not 1, not warnings)
+- [ ] Coverage: **≥ 95%** (report actual %)
+- [ ] All linters passed: ruff, black, isort, mypy, pylint
+- [ ] All tests passed: **384/384** (or current count)
+- [ ] Security: bandit & safety = **0 vulnerabilities**
+- [ ] Test execution time: **< 60 seconds** (report actual)
+- [ ] No untracked files: `git status` shows only M (modified), no ??
+
+### ✓ Type Safety
+- [ ] `poetry run mypy .` returns **exit code 0**
+- [ ] Zero mypy errors
+- [ ] Zero mypy warnings
+- [ ] No `Any` types without `# type: ignore[specific-code]`
+- [ ] All function signatures have type hints
+
+### ✓ Documentation (MANDATORY for ALL commits)
+
+**README.md:**
+- [ ] Code examples are tested and execute without error
+- [ ] Feature list matches `pain001/__init__.py` exports
+- [ ] Installation instructions are current
+- [ ] All 4 input sources documented: CSV, SQLite, List, Dict
+- [ ] New features documented with examples
+- [ ] Deprecation warnings visible if applicable
+
+**CHANGELOG.md:**
+- [ ] Latest "Unreleased" or version entry exists
+- [ ] Format is "## [X.Y.Z] - YYYY-MM-DD"
+- [ ] All sections present (if applicable): Breaking, Added, Changed, Deprecated, Removed, Fixed, Security
+- [ ] All PRs/issues linked: [#123](https://github.com/sebastienrousseau/pain001/issues/123)
+- [ ] No future versions listed (only released + Unreleased)
+
+**Release Notes (if version bumped):**
+- [ ] File exists: `releases/vX.Y.Z.md`
+- [ ] Contains: Executive summary (1-2 sentences)
+- [ ] Contains: New features with examples
+- [ ] Contains: Bug fixes with issue references
+- [ ] Contains: Breaking changes (if any) with migration
+- [ ] Contains: Dependencies updated/added/removed
+- [ ] Contains: Contributors list
+- [ ] Approximately 100-150 lines
+
+### ✓ Version Synchronization (MANDATORY for Releases Only)
+
+**If bumping version number:**
+- [ ] `pain001/__init__.py`: `__version__ = "X.Y.Z"`
+- [ ] `pyproject.toml`: `version = "X.Y.Z"`
+- [ ] `setup.cfg`: `[metadata] version = X.Y.Z`
+- [ ] `README.md`: version references updated
+- [ ] `CHANGELOG.md`: release date filled in
+- [ ] `releases/vX.Y.Z.md`: created
+
+**If NOT bumping version:**
+- [ ] Skip version sync steps (not applicable)
+
+### ✓ Backward Compatibility Matrix
+
+**All input sources work:**
+- [ ] CSV file loading passes tests
+- [ ] SQLite database loading passes tests
+- [ ] Python list data passes tests
+- [ ] Python dict data passes tests
+
+**All ISO versions work:**
+- [ ] pain.001.001.03 (v03) tests pass
+- [ ] pain.001.001.04 (v04) tests pass
+- [ ] pain.001.001.05 (v05) tests pass
+- [ ] pain.001.001.06 (v06) tests pass
+- [ ] pain.001.001.07 (v07) tests pass
+- [ ] pain.001.001.08 (v08) tests pass
+- [ ] pain.001.001.09 (v09) tests pass
+- [ ] pain.001.001.10 (v10) tests pass
+- [ ] pain.001.001.11 (v11) tests pass
+
+**Total test count:**
+- [ ] All 384 tests passing (or current floor)
+- [ ] Zero regressions
+- [ ] No version-specific failures
+
+### ✓ Security Verification
+
+- [ ] XXE prevention intact: All XML parsing uses `defusedxml`
+- [ ] Jinja2 autoescape enabled: `autoescape=True`
+- [ ] No PII logged: payment amounts, IBAN, BIC, passwords
+- [ ] No hardcoded secrets: Check for API keys, tokens
+- [ ] ConfigParser safe: No interpolation enabled
+- [ ] bandit scan passed: `poetry run bandit -r pain001`
+- [ ] safety scan passed: `poetry run safety check`
+
+### ✓ Codacy Dashboard Verification
+
+**Before merging PR, verify Codacy analysis:**
+- [ ] Grade: **A** or **B** (C/D/E = STOP)
+- [ ] Security issues: **0** (any > 0 = STOP)
+- [ ] Code duplication: **< 5%** (target < 2%)
+- [ ] Code complexity: Within acceptable limits
+- [ ] Performance issues: **0**
+
+**If Codacy fails:**
+- [ ] STOP commit/push
+- [ ] Fix issues locally: `poetry run make lint`
+- [ ] Re-run: `poetry run make check`
+- [ ] Re-push to same branch
+- [ ] Wait 2-5 minutes for Codacy re-analysis
+- [ ] Verify pass before merge
+
+### ✓ Git Status & Staging
+
+- [ ] `git status --porcelain` shows only M (modified) files
+- [ ] No ?? (untracked) files
+- [ ] All changes staged: `git add .` (or specific files)
+- [ ] Verify: `git status` shows "Changes to be committed"
+
+### ✓ Commit Message
+
+- [ ] Type specified: feat, fix, docs, style, refactor, perf, test, chore, security
+- [ ] Subject is concise (< 50 characters)
+- [ ] Body describes what, why, how
+- [ ] Footer includes: Issue links (Closes/Relates to #123)
+- [ ] Quality gate result documented: "Quality Gate: PASSED (exit code 0)"
+- [ ] Coverage reported: "Coverage: X.XX% (≥ 95% floor)"
+- [ ] Test count reported: "Tests: 384/384 passing"
+
+### ✓ Final Gate Execution (Before Push)
+
+- [ ] Run: `poetry run make check` (FINAL verification)
+- [ ] Exit code: **0**
+- [ ] Coverage: **≥ 95%**
+- [ ] All tests: **PASSING**
+- [ ] All linters: **PASSING**
+- [ ] All security: **0 VULNS**
+
+### ✓ Push Verification
+
+- [ ] Branch pushed: `git push origin feature/name`
+- [ ] All commits pushed successfully
+- [ ] No "rejected" messages
+- [ ] GitHub Actions workflows triggered
+- [ ] PR created (if not already existing)
+
+### ✓ Post-Push Verification
+
+- [ ] GitHub Actions CI/CD triggers and runs
+- [ ] Wait for all workflows to complete
+- [ ] PR gate workflow passes (make pr)
+- [ ] All checks marked green (✓)
+- [ ] Codacy re-analyzes and shows Grade A/B
+- [ ] No failed status checks
+
+---
+
 ## XI. Prohibited Actions (Red Lines—No Exceptions)
 
 - **Gate Weakening:** Never bypass quality gates, suppress lint/type errors, or use `# type: ignore` without specific error codes.
@@ -372,8 +1094,12 @@ poetry run make check     # Full quality gate (lint + type + cov + sec)
 - **Silent Failures:** No bare `except:` blocks; all I/O must use context managers.
 - **Drive-by Refactoring:** Never refactor unrelated modules; maintain minimal viable diff.
 - **Blocking I/O:** No synchronous I/O in potentially async paths.
+- **Committing Before Gate:** NO EXCEPTIONS. Gate must pass (exit 0) before any commit.
+- **Skipping Documentation:** Every commit requires README/CHANGELOG updates (no exceptions).
+- **Untracked Files:** All changes must be staged with `git add` before committing.
+- **Codacy Violations:** Never merge with Grade C or lower, or with security issues > 0.
 
-## XII. PySentinel Completion Summary (Enterprise Sign-Off)
+## XIII. PySentinel Completion Summary (Enterprise Sign-Off)
 
 Every task completion must include:
 
