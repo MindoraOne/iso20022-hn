@@ -1,21 +1,15 @@
 """Edge-branch regression tests for CLI and core helpers."""
 
+import xml.etree.ElementTree as ET  # nosec B405 - only used for element creation in tests, not parsing
 from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
-from defusedxml import defuse_stdlib
 
-defuse_stdlib()  # Protect stdlib from XXE before any XML operations
-
-# Import xml.etree after defuse_stdlib() to ensure protection
-import xml.etree.ElementTree as defused_et  # noqa: E402
-
-# Import pain001 modules after security initialization
-from pain001.cli.cli import main as cli_main  # noqa: E402
-from pain001.core import core  # noqa: E402
-from pain001.csv.validate_csv_data import _validate_field_type  # noqa: E402
-from pain001.xml.write_xml_to_file import write_xml_to_file  # noqa: E402
+from pain001.cli.cli import main as cli_main
+from pain001.core import core
+from pain001.csv.validate_csv_data import _validate_field_type
+from pain001.xml.write_xml_to_file import write_xml_to_file
 
 
 def test_cli_missing_data_file_exits(tmp_path: Path) -> None:
@@ -107,8 +101,8 @@ def test_validate_field_type_boolean_branch() -> None:
 
 def test_write_xml_to_file_indentation(tmp_path: Path) -> None:
     """Ensure write_xml_to_file indents child elements."""
-    root = defused_et.Element("root")
-    child = defused_et.Element("child")
+    root = ET.Element("root")
+    child = ET.Element("child")
     root.append(child)
 
     xml_path = tmp_path / "output.xml"
