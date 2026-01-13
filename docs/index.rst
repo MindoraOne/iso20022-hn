@@ -6,7 +6,7 @@ Pain001: ISO 20022-Compliant Payment Files
 
 Welcome to **Pain001** — a powerful Python library for automating ISO 20022-compliant payment file creation.
 
-Pain001 simplifies payment processing by generating standardized payment initiation files (pain.001) directly from CSV or SQLite data sources, with mandatory validation and enterprise-grade reliability.
+Pain001 simplifies payment processing by generating standardized payment initiation files (pain.001) from CSV files, SQLite databases, or Python data structures, with mandatory validation and enterprise-grade reliability.
 
 .. grid:: 2
    :gutter: 2
@@ -44,7 +44,7 @@ Key Features
 * **📊 Multiple Data Sources** — Support for CSV files, SQLite databases, and Python data structures
 * **✅ Automatic Validation** — Built-in XSD schema validation for generated XML files
 * **🔒 Secure by Design** — Uses defusedxml to prevent XXE attacks and SQL injection protection
-* **🧪 Fully Tested** — 98.57% test coverage with 341+ comprehensive tests
+* **🧪 Fully Tested** — 98.645% test coverage with 385 comprehensive tests
 * **📦 Type-Safe** — Full type hints for better IDE support and mypy compatibility
 * **🚀 Production-Ready** — Used in production for SEPA and international payments
 * **💼 Enterprise Grade** — Robust error handling, comprehensive logging, and detailed reporting

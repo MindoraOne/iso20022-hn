@@ -2,7 +2,7 @@
 
 ![Pain001 banner][banner]
 
-## A Powerful Python Library that enables you to create ISO 20022-Compliant Payment Files directly from CSV or SQLite data files
+## A Powerful Python Library that enables you to create ISO 20022-Compliant Payment Files from CSV, SQLite, or Python data structures
 
 [![PyPI Version][pypi-badge]][03]
 [![Python Versions][python-versions-badge]][03]
@@ -18,8 +18,8 @@
 ## Overview
 
 **Pain001** is an open-source Python library that you can use to create **ISO
-20022-compliant payment files** directly from your **CSV** or **SQLite** data
-files.
+20022-compliant payment files** from your **CSV files**, **SQLite databases**,
+or **Python data structures** (lists and dictionaries).
 
 - **Website:** <https://pain001.com>
 - **Source code:** <https://github.com/sebastienrousseau/pain001>
@@ -34,7 +34,7 @@ that initiates a customer payment.
 - **Mandatory Data Validation:** Ensures all payment files are ISO 20022-compliant before creation
 - **Multi-source Support:** Works with CSV files, SQLite databases, and Python data structures
 - **Automatic XSD Validation:** Validates generated XML against ISO 20022 schemas
-- **Comprehensive Testing:** 98.57% test coverage with 341 tests ensuring reliability
+- **Comprehensive Testing:** 98.645% test coverage with 385 tests ensuring reliability
 - **Secure by Design:** Uses `defusedxml` to prevent XXE attacks and implements SQL injection protection
 - **Type-Safe:** Full type hints for better IDE support and type checking with mypy
 - **Robust Error Handling:** Specific exception types for precise error handling and debugging
@@ -44,25 +44,25 @@ that initiates a customer payment.
 As of today, the library is designed to be compatible with the:
 
 - **Payments Initiation V03 (pain.001.001.03):** This version is used for initiating credit transfers within the SEPA (Single Euro Payments Area)
-- **Payments Initiation V04 (pain.001.001.04):** Introduced support for non-SEPA payments and additional functionalities
-- **Payments Initiation V05 (pain.001.001.05):** Brought further enhancements and clarifications
-- **Payments Initiation V06 (pain.001.001.06):** Focused on introducing support for instant payments
-- **Payments Initiation V07 (pain.001.001.07):** Added support for Request for Large Payment (RLP) and Request to Modify Payment (RTP) functionalities
-- **Payments Initiation V08 (pain.001.001.08):** Included support for the TARGET Instant Settlement Service (TISS) and introduced a new pain.002 message type for debit transfers
-- **Payments Initiation V09 (pain.001.001.09):** Introduced support for Request for Account Information (RAI) functionality
-- **Payments Initiation V10 (pain.001.001.10):** Enhanced payment initiation with improved data structures and compliance updates
-- **Payments Initiation V11 (pain.001.001.11):** The latest version with advanced payment features and extended ISO 20022 compliance
+- **Payments Initiation V04 (pain.001.001.04):** Enhanced with additional optional fields and improved data structures
+- **Payments Initiation V05 (pain.001.001.05):** Brings further refinements and clarifications to the ISO 20022 standard
+- **Payments Initiation V06 (pain.001.001.06):** Focused on supporting instant credit transfers within the SEPA region
+- **Payments Initiation V07 (pain.001.001.07):** Extended schema with additional optional elements for enhanced payment requests
+- **Payments Initiation V08 (pain.001.001.08):** Introduces support for new transaction types and enhanced validation rules
+- **Payments Initiation V09 (pain.001.001.09):** Simplified message structure with consolidated required fields
+- **Payments Initiation V10 (pain.001.001.10):** Enhanced with improved data structures and additional compliance requirements
+- **Payments Initiation V11 (pain.001.001.11):** The latest version with extended ISO 20022 compliance and advanced payment features
 
 ### Version Comparison
 
 | Version | Status | CSV Fields | Key Features | Use Case |
 |---------|--------|------------|--------------|----------|
 | pain.001.001.03 | ✅ Stable | 42 | SEPA credit transfers | EU payments |
-| pain.001.001.04 | ✅ Stable | 47 | Non-SEPA support | International payments |
-| pain.001.001.05 | ✅ Stable | 47 | Enhanced clarity | Global payments |
-| pain.001.001.06 | ✅ Stable | 44 | Instant payments | Real-time transfers |
-| pain.001.001.07 | ✅ Stable | 44 | RLP/RTP support | Large payment requests |
-| pain.001.001.08 | ✅ Stable | 44 | TISS support | TARGET instant settlement |
+| pain.001.001.04 | ✅ Stable | 47 | Extended fields | Enhanced payment details |
+| pain.001.001.05 | ✅ Stable | 47 | Schema refinements | ISO 20022 alignment |
+| pain.001.001.06 | ✅ Stable | 44 | Instant transfers | Real-time SEPA payments |
+| pain.001.001.07 | ✅ Stable | 44 | Additional elements | Extended functionality |
+| pain.001.001.08 | ✅ Stable | 44 | Enhanced validation | Improved compliance |
 | pain.001.001.09 | ✅ Stable | 23 | Simplified structure | Modern implementations |
 | pain.001.001.10 | ✅ Stable | 23 | Improved compliance | Enhanced data validation |
 | pain.001.001.11 | ✅ Latest | 23 | Advanced features | Future-proof payments |
@@ -90,8 +90,8 @@ processing with confidence that every file is ISO 20022-compliant.**
 
 ```mermaid
 flowchart LR
-    A["CSV/SQLite
-    Data File"] -->|Load & Validate| B["Pain001
+    A["CSV / SQLite / Python
+    Data Source"] -->|Load & Validate| B["Pain001
     Library"]
     B -->|Generate XML| C["ISO 20022
     Payment File"]
@@ -133,6 +133,8 @@ flowchart LR
       - [Pain.001.001.07](#pain00100107)
       - [Pain.001.001.08](#pain00100108)
       - [Pain.001.001.09](#pain00100109)
+      - [Pain.001.001.10](#pain00100110)
+      - [Pain.001.001.11](#pain00100111)
     - [Embedded in an Application](#embedded-in-an-application)
     - [Validation](#validation)
   - [Output Files](#output-files)
@@ -176,7 +178,7 @@ flowchart LR
   - No sensitive data storage—all information remains confidential
   - OWASP Top 10 security best practices implemented
 - **Robust Development:** Comprehensive quality assurance with
-  - 96% test coverage with 323 comprehensive tests (16 per version)
+  - 98.645% test coverage with 385 comprehensive tests
   - Code formatting with Black and Ruff
   - Import sorting with isort
   - Style checking with Flake8 (10.00/10 score)
@@ -290,7 +292,11 @@ After installation, you can run **Pain001** directly from the command line. Foll
 You'll need:
 - **XML template file** - Contains the structure for your payment message
 - **XSD schema file** - Used to validate the generated XML file
-- **Data file** (CSV or SQLite) - Contains your payment instructions
+- **Data source** - Your payment instructions from:
+  - CSV file (.csv)
+  - SQLite database (.db)
+  - Python list of dictionaries
+  - Python dictionary (single transaction)
 
 **Step 2:** Run Pain001
 
@@ -396,8 +402,8 @@ Each template directory contains:
 
 ## Examples
 
-The following examples demonstrate how to use **Pain001** to generate a payment
-initiation message from a CSV file and a SQLite Data file.
+The following examples demonstrate how to use **Pain001** to generate payment
+initiation messages from different data sources (CSV file, SQLite database, and Python data structures).
 
 ### Using a CSV Data File as the source
 
@@ -417,6 +423,46 @@ python3 -m pain001 \
     -m /path/to/your/template.xml \
     -s /path/to/your/pain.001.001.03.xsd \
     -d /path/to/your/template.db
+```
+
+### Using Python Data Structures (Programmatic API)
+
+You can use the library directly in Python with lists or dictionaries:
+
+```python
+from pain001 import process_files
+
+# Using a list of payment dictionaries
+payments = [
+    {
+        'id': 'MSG001',
+        'amount': '1000.00',
+        'currency': 'EUR',
+        # ... other required fields
+    }
+]
+
+result = process_files(
+    xml_message_type='pain.001.001.03',
+    xml_data=payments,  # Python list
+    xml_template_file_path='pain001/templates/pain.001.001.03/template.xml',
+    xsd_schema_file_path='pain001/templates/pain.001.001.03/pain.001.001.03.xsd'
+)
+
+# Using a single payment dictionary
+payment = {
+    'id': 'MSG001',
+    'amount': '1000.00',
+    'currency': 'EUR',
+    # ... other required fields
+}
+
+result = process_files(
+    xml_message_type='pain.001.001.03',
+    xml_data=payment,  # Single dict
+    xml_template_file_path='pain001/templates/pain.001.001.03/template.xml',
+    xsd_schema_file_path='pain001/templates/pain.001.001.03/pain.001.001.03.xsd'
+)
 ```
 
 ### Using the Source code
@@ -598,7 +644,7 @@ def create_payment_file(data_file, output_dir='output'):
         xml_message_type = 'pain.001.001.03'
         xml_template = os.path.join(output_dir, 'payment.xml')
         xsd_schema = 'pain001/templates/pain.001.001.03/pain.001.001.03.xsd'
-        
+
         # Generate the payment file
         process_files(
             xml_message_type,
@@ -606,7 +652,7 @@ def create_payment_file(data_file, output_dir='output'):
             xsd_schema,
             data_file
         )
-        
+
         # Validate the generated file
         if validate_via_xsd(xml_template, xsd_schema):
             print(f"✓ Successfully created and validated: {xml_template}")
@@ -614,7 +660,7 @@ def create_payment_file(data_file, output_dir='output'):
         else:
             print(f"✗ Validation failed for: {xml_template}")
             return None
-            
+
     except FileNotFoundError as e:
         print(f"Error: File not found - {e}")
         return None
@@ -645,7 +691,7 @@ if __name__ == '__main__':
 Every time you load data (from CSV, SQLite, or Python objects), **Pain001** automatically validates:
 - ✓ All required fields are present
 - ✓ Data types are correct (strings, numbers, booleans)
-- ✓ Boolean values are valid ('true'/'false' or 'yes'/'no')  
+- ✓ Boolean values are valid ('true'/'false' or 'yes'/'no')
 - ✓ Field formats meet ISO 20022 standards
 
 **Stage 2: XSD Schema Validation (Automatic)**
@@ -705,39 +751,41 @@ Mandatory validation is the core principle of Pain001. It ensures:
 %%{init: {'theme':'default'}}%%
 flowchart TD
     Start([1. Load Data Source]) --> DataType{Data Type?}
-    
-    DataType -->|CSV| LoadData[Load CSV File]
-    DataType -->|SQLite| LoadData
-    DataType -->|Python| LoadData
-    
-    LoadData --> Stage1[2. Automatic Data Validation]
-    
+
+    DataType -->|CSV| LoadCSV[Load CSV File]
+    DataType -->|SQLite| LoadDB[Load SQLite Database]
+    DataType -->|Python| LoadPython[Load Python Dict/List]
+
+    LoadCSV --> Stage1[2. Automatic Data Validation]
+    LoadDB --> Stage1
+    LoadPython --> Stage1
+
     Stage1 --> CheckReq[Check Required Fields]
     CheckReq --> CheckTypes[Validate Data Types]
     CheckTypes --> CheckBool[Verify Boolean Values]
     CheckBool --> CheckFormats[Check ISO 20022 Formats]
-    
+
     CheckFormats --> Valid1{All Checks<br/>Passed?}
-    
+
     Valid1 -->|No| ErrorData[ValueError Raised<br/>Fix Your Data]
     Valid1 -->|Yes| ValidData[Valid Data ✓]
-    
+
     ErrorData --> Start
-    
+
     ValidData --> Stage3[3. Generate XML File]
     Stage3 --> Stage4[4. XSD Schema Validation]
-    
+
     Stage4 --> CheckStruct[Validate XML Structure]
     CheckStruct --> CheckElem[Check Element Formatting]
     CheckElem --> CheckComp[Verify ISO 20022 Compliance]
-    
+
     CheckComp --> Valid2{XML Schema<br/>Valid?}
-    
+
     Valid2 -->|No| ErrorXML[Validation Failed<br/>Check Error Message]
     Valid2 -->|Yes| ValidXML[Valid XML ✓]
-    
+
     ErrorXML --> Start
-    
+
     ValidXML --> Success([5. Payment File Ready<br/>for Bank Submission ✓])
 ```
 
@@ -812,7 +860,7 @@ def generate_payment_file():
         # Define paths
         output_dir = 'output'
         os.makedirs(output_dir, exist_ok=True)
-        
+
         # Generate payment file
         main(
             xml_message_type='pain.001.001.03',
@@ -820,22 +868,22 @@ def generate_payment_file():
             xsd_schema_file_path='pain001/templates/pain.001.001.03/pain.001.001.03.xsd',
             data_file_path='my_payments.csv'
         )
-        
+
         print("✓ Payment file generated successfully!")
         print(f"✓ Location: {output_dir}/payment.xml")
         print("✓ File is ready for bank submission")
         return True
-        
+
     except ValueError as e:
         print(f"✗ Data validation error: {e}")
         print("→ Please check your CSV file for missing or invalid data")
         return False
-        
+
     except FileNotFoundError as e:
         print(f"✗ File not found: {e}")
         print("→ Please check all file paths are correct")
         return False
-        
+
     except Exception as e:
         print(f"✗ Unexpected error: {e}")
         return False
