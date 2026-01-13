@@ -22,7 +22,7 @@ jobs:
       - uses: abatilo/actions-poetry@v2
       - run: poetry install --no-interaction
       - run: poetry run make mutate-fast || true  # Continue on failure, upload results
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: mutation-fast-results
@@ -44,7 +44,7 @@ jobs:
       - uses: abatilo/actions-poetry@v2
       - run: poetry install --no-interaction
       - run: poetry run make mutate || true  # Continue on failure
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: mutation-full-results
@@ -65,7 +65,7 @@ jobs:
       - uses: abatilo/actions-poetry@v2
       - run: poetry install --no-interaction
       - run: poetry run make perf
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: benchmarks
           path: |
