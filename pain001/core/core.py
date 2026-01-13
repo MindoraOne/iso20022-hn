@@ -247,9 +247,7 @@ def process_files(
         data_source_type = "unknown"
 
     # Log process start
-    start_time = log_process_start(
-        logger, xml_message_type, data_source_type
-    )
+    start_time = log_process_start(logger, xml_message_type, data_source_type)
 
     try:
         _validate_inputs(

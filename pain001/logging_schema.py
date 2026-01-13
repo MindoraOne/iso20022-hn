@@ -131,7 +131,9 @@ def mask_sensitive_data(value: str, visible_chars: int = 4) -> str:
     if len(value) <= visible_chars * 2:
         return "****"
     masked_length = len(value) - (visible_chars * 2)
-    return f"{value[:visible_chars]}{'*' * masked_length}{value[-visible_chars:]}"
+    return (
+        f"{value[:visible_chars]}{'*' * masked_length}{value[-visible_chars:]}"
+    )
 
 
 def log_event(
