@@ -2,7 +2,7 @@
 
 ![Pain001 banner][banner]
 
-## A Powerful Python Library that enables you to create ISO 20022-Compliant Payment Files from CSV, SQLite, or Python data structures
+## Enterprise-Grade ISO 20022 Payment Generation from 4 Data Sources: CSV, SQLite, Python Dict, Python List
 
 [![PyPI Version][pypi-badge]][03]
 [![Python Versions][python-versions-badge]][03]
@@ -38,7 +38,7 @@ that initiates a customer payment.
 - **Secure by Design:** Uses `defusedxml` to prevent XXE attacks and implements SQL injection protection
 - **Type-Safe:** Full type hints for better IDE support and type checking with mypy
 - **Robust Error Handling:** Specific exception types for precise error handling and debugging
-- **9 ISO 20022 Versions Supported:** From pain.001.001.03 to pain.001.001.11
+- **9 ISO 20022 Versions Supported:** Supports all 9 Customer Credit Transfer Initiation versions: pain.001.001.03 through pain.001.001.11
 - **Production-Ready:** Used in production environments for SEPA and international payments
 
 As of today, the library is designed to be compatible with the:

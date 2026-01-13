@@ -49,6 +49,14 @@ class TestCsvDateTimeValidation:
         """Test datetime validation with empty string."""
         assert _validate_datetime("") is False
 
+    def test_validate_datetime_yyyy_mm_dd_format(self) -> None:
+        """Test datetime validation with YYYY-MM-DD format (strptime fallback)."""
+        # This specifically tests the strptime fallback path
+        # when fromisoformat fails but YYYY-MM-DD format succeeds
+        assert _validate_datetime("2024-12-25") is True
+        assert _validate_datetime("1999-01-01") is True
+        assert _validate_datetime("2026-06-15") is True
+
 
 class TestCsvFieldTypeValidation:
     """Test CSV field type validation."""

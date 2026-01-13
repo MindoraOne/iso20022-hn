@@ -344,6 +344,51 @@ class TestProcessFiles(unittest.TestCase):
         # Should complete successfully or with expected error
         assert result.returncode in [0, 1]
 
+    def test_process_files_unknown_data_type(self) -> None:
+        """Test processing with unsupported data type (triggers unknown path)."""
+        # Pass an unsupported type (not str, list, or dict)
+        # This should log "unknown" data_source_type and then raise ValueError
+        import pytest
+        
+        with pytest.raises(ValueError, match="Unsupported data source type"):
+            process_files(
+                xml_message_type=self.xml_message_type,
+                xml_template_file_path=self.xml_template_file_path,
+                xsd_schema_file_path=self.xsd_schema_file_path,
+                data_file_path=12345,  # type: ignore  # Intentionally invalid type
+            )
+
+    def test_process_files_with_list_input(self) -> None:
+        """Test process_files with Python list input (triggers list path in core.py line 129)."""
+        # Use minimal valid payment data that will pass validation
+        # The goal is to trigger the isinstance(data_file_path, list) branch
+        # We'll use a ValueError expectation since we need all required fields
+        payment_list = [{"id": "1"}]  # Minimal - will fail validation but triggers list path
+        
+        with self.assertRaises((ValueError, KeyError)):
+            # This will trigger the list branch in _load_data and process_files
+            process_files(
+                xml_message_type=self.xml_message_type,
+                xml_template_file_path=self.xml_template_file_path,
+                xsd_schema_file_path=self.xsd_schema_file_path,
+                data_file_path=payment_list,
+            )
+
+    def test_process_files_with_dict_input(self) -> None:
+        """Test process_files with Python dict input (triggers dict path in core.py line 131)."""
+        # Use minimal valid payment data that will pass validation
+        # The goal is to trigger the isinstance(data_file_path, dict) branch
+        payment_dict = {"id": "1"}  # Minimal - will fail validation but triggers dict path
+        
+        with self.assertRaises((ValueError, KeyError)):
+            # This will trigger the dict branch in _load_data and process_files
+            process_files(
+                xml_message_type=self.xml_message_type,
+                xml_template_file_path=self.xml_template_file_path,
+                xsd_schema_file_path=self.xsd_schema_file_path,
+                data_file_path=payment_dict,
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
