@@ -13,7 +13,7 @@
 [![Quality][quality-badge]][quality-url]
 [![Documentation][docs-badge]][docs-url]
 
-> **Latest Release: v0.0.43** - CI/CD authentication fix for PyPI publishing. [See what's new →](https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.43)
+> **Latest Release: v0.0.44** - Core orchestration refactor with expanded regression coverage. [See what's new →](https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.44)
 
 ## Overview
 
@@ -34,7 +34,7 @@ that initiates a customer payment.
 - **Mandatory Data Validation:** Ensures all payment files are ISO 20022-compliant before creation
 - **Multi-source Support:** Works with CSV files, SQLite databases, and Python data structures
 - **Automatic XSD Validation:** Validates generated XML against ISO 20022 schemas
-- **Comprehensive Testing:** 98.645% test coverage with 385 tests ensuring reliability
+- **Comprehensive Testing:** 99.14% test coverage with 392 tests ensuring reliability
 - **Secure by Design:** Uses `defusedxml` to prevent XXE attacks and implements SQL injection protection
 - **Type-Safe:** Full type hints for better IDE support and type checking with mypy
 - **Robust Error Handling:** Specific exception types for precise error handling and debugging
@@ -178,7 +178,7 @@ flowchart LR
   - No sensitive data storage—all information remains confidential
   - OWASP Top 10 security best practices implemented
 - **Robust Development:** Comprehensive quality assurance with
-  - 98.645% test coverage with 385 comprehensive tests
+    - 99.14% test coverage with 392 comprehensive tests
   - Code formatting with Black and Ruff
   - Import sorting with isort
   - Style checking with Flake8 (10.00/10 score)

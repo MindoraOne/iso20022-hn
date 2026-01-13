@@ -305,6 +305,7 @@ If a quality gate fails and cannot be fixed via standard refactoring:
 1. **Full Quality Gate:** `poetry run make check` (Lint + Type + Cov + Sec) MUST exit 0.
    - Coverage ≥ 95% floor (report actual %)
    - All linters passing: ruff, black, isort, mypy, pylint
+   - Pylint global rating must be 10.00/10 (anything lower = gate failure)
    - Security checks: bandit, safety (0 vulnerabilities)
    - All tests passing: 384/384
    - Execution time < 60s SLO

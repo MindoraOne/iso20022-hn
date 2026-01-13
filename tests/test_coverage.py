@@ -38,7 +38,7 @@ class TestCoverageComplete:
                 exec(
                     open("pain001/__main__.py").read(),
                     {"__name__": "__main__"},
-                )
+                )  # nosec B102 - executing local module for coverage check
 
     def test_core_module_direct_execution(self) -> None:
         """Test core.py module when executed directly with insufficient args."""
@@ -72,7 +72,7 @@ class TestCoverageComplete:
                 exec(
                     open("pain001/cli/cli.py").read(),
                     {"__name__": "__main__"},
-                )
+                )  # nosec B102 - executing local CLI module for coverage check
 
     def test_context_logger_with_existing_handlers(self) -> None:
         """Test context logger when handlers already exist."""
