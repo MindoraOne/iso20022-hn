@@ -1,15 +1,18 @@
 """Edge-branch regression tests for CLI and core helpers."""
 
-import xml.etree.ElementTree as defused_et  # noqa: N817 - Standard abbreviation for ElementTree
+import xml.etree.ElementTree as defused_et
 from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
+from defusedxml import defuse_stdlib
 
-from pain001.cli.cli import main as cli_main
-from pain001.core import core
-from pain001.csv.validate_csv_data import _validate_field_type
-from pain001.xml.write_xml_to_file import write_xml_to_file
+defuse_stdlib()  # noqa: E402 - Protect stdlib from XXE; call before any XML parsing
+
+from pain001.cli.cli import main as cli_main  # noqa: E402
+from pain001.core import core  # noqa: E402
+from pain001.csv.validate_csv_data import _validate_field_type  # noqa: E402
+from pain001.xml.write_xml_to_file import write_xml_to_file  # noqa: E402
 
 
 def test_cli_missing_data_file_exits(tmp_path: Path) -> None:
