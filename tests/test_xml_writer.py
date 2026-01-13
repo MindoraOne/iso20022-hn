@@ -176,22 +176,21 @@ class TestWriteXmlToFile:
         # - Elements with existing text and tail
         # - Empty leaf elements (len(elem) == 0) at level > 0
         root = et.Element("root")
-        
+
         # Empty child at level 1 (triggers else branch with level > 0)
-        empty_child = et.SubElement(root, "empty_child")
-        
+        _empty_child = et.SubElement(root, "empty_child")
+
         # Parent with children (triggers if len(elem) branch)
         parent = et.SubElement(root, "parent")
         parent.text = "  "  # Has text that needs stripping
-        
+
         # Nested child with whitespace tail
         child_with_tail = et.SubElement(parent, "child")
         child_with_tail.text = "Content"
         child_with_tail.tail = "   "  # Whitespace tail to be replaced
-        
+
         # Nested empty at deeper level
-        nested_empty = et.SubElement(parent, "nested_empty")
-        
+        _nested_empty = et.SubElement(parent, "nested_empty")
         with tempfile.NamedTemporaryFile(
             mode="w", delete=False, suffix=".xml"
         ) as f:

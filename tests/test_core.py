@@ -19,6 +19,8 @@ import unittest
 from io import StringIO
 from unittest.mock import patch
 
+import pytest
+
 from pain001.core.core import process_files
 
 
@@ -348,8 +350,6 @@ class TestProcessFiles(unittest.TestCase):
         """Test processing with unsupported data type (triggers unknown path)."""
         # Pass an unsupported type (not str, list, or dict)
         # This should log "unknown" data_source_type and then raise ValueError
-        import pytest
-        
         with pytest.raises(ValueError, match="Unsupported data source type"):
             process_files(
                 xml_message_type=self.xml_message_type,
@@ -363,8 +363,10 @@ class TestProcessFiles(unittest.TestCase):
         # Use minimal valid payment data that will pass validation
         # The goal is to trigger the isinstance(data_file_path, list) branch
         # We'll use a ValueError expectation since we need all required fields
-        payment_list = [{"id": "1"}]  # Minimal - will fail validation but triggers list path
-        
+        payment_list = [
+            {"id": "1"}
+        ]  # Minimal - will fail validation but triggers list path
+
         with self.assertRaises((ValueError, KeyError)):
             # This will trigger the list branch in _load_data and process_files
             process_files(
@@ -378,8 +380,10 @@ class TestProcessFiles(unittest.TestCase):
         """Test process_files with Python dict input (triggers dict path in core.py line 131)."""
         # Use minimal valid payment data that will pass validation
         # The goal is to trigger the isinstance(data_file_path, dict) branch
-        payment_dict = {"id": "1"}  # Minimal - will fail validation but triggers dict path
-        
+        payment_dict = {
+            "id": "1"
+        }  # Minimal - will fail validation but triggers dict path
+
         with self.assertRaises((ValueError, KeyError)):
             # This will trigger the dict branch in _load_data and process_files
             process_files(
