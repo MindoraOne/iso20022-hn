@@ -138,6 +138,52 @@ class TestCliErrorPaths:
         assert result.exit_code == 1
         assert "does not exist" in result.output
 
+    def test_cli_dry_run_data_validation_failure(self) -> None:
+        """Test CLI dry-run when data validation fails."""
+
+        runner = CliRunner()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            template_path = os.path.join(tmpdir, "template.xml")
+            schema_path = os.path.join(tmpdir, "schema.xsd")
+            data_path = os.path.join(tmpdir, "data.csv")
+
+            for path in [template_path, schema_path, data_path]:
+                with open(path, "w", encoding="utf-8") as f:
+                    f.write("content")
+
+            with pytest.MonkeyPatch.context() as mp:
+                mp.setattr(
+                    "pain001.cli.cli.validate_via_xsd",
+                    lambda *args, **kwargs: True,
+                    raising=False,
+                )
+
+                def _raise_value_error(*_args, **_kwargs):
+                    raise ValueError("invalid data")
+
+                mp.setattr(
+                    "pain001.cli.cli.load_payment_data",
+                    _raise_value_error,
+                )
+
+                result = runner.invoke(
+                    main,
+                    [
+                        "-t",
+                        "pain.001.001.03",
+                        "-m",
+                        template_path,
+                        "-s",
+                        schema_path,
+                        "-d",
+                        data_path,
+                        "--dry-run",
+                    ],
+                )
+
+            assert result.exit_code == 1
+            assert "Data validation failed" in result.output
+
 
 class TestXmlWriterEdgeCases:
     """Test XML writer indentation edge cases."""

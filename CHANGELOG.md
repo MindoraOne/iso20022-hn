@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **CLI Dry-Run Mode** - Added `--dry-run` / `--validate-only` flag for validation without XML generation (Resolves #81):
+  - Validates XML template, XSD schema, and payment data using the same validation paths as generation
+  - Returns exit code 0 on success, 1 on validation failure
+  - Skips XML file generation to enable pre-flight checks and CI/CD integration
+  - Supports all input sources (CSV, SQLite via CLI; Python list/dict via programmatic API)
+  - Available in both `pain001.cli.cli` and `pain001.__main__` entry points
+  - Example: `python3 -m pain001 -t pain.001.001.03 -m template.xml -s schema.xsd -d data.csv --dry-run`
+
 ### Changed
 
 - **Core Refactoring** - Split monolithic `process_files()` function into focused helpers (Resolves #80):
@@ -19,17 +29,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Quality Assurance
 
-- **Code Quality**: Refactor maintains 100% branch coverage of modified code
-- **Test Coverage**: 385 tests passing with 98.645% total coverage (exceeds 95% requirement)
+- **Code Quality**: All changes maintain 100% branch coverage
+- **Test Coverage**: 387 tests passing with 98.67% total coverage (exceeds 95% requirement)
 - **Type Hints**: Full strict typing across all new and refactored functions
-- **Linting**: All linters pass (ruff, black, isort, mypy)
-- **Performance**: No performance degradation; generation duration timing preserved
+- **Linting**: All linters pass (ruff, black, isort, mypy, pylint 9.89/10)
+- **Security**: 0 vulnerabilities (bandit, safety)
+- **Performance**: No degradation; test suite < 39s (target < 60s)
 
 ### Notes
 
 - All v0.0.43 functionality fully preserved
-- Breaking changes: None (all existing code paths unchanged)
-- Backward compatibility: 100% maintained
+- Breaking changes: None (all existing code paths unchanged; dry_run defaults to False)
+- Backward compatibility: 100% maintained across all 9 ISO versions and 4 input sources
 
 ---
 

@@ -27,6 +27,7 @@ from rich.table import Table
 from pain001.constants.constants import valid_xml_types
 from pain001.context.context import Context
 from pain001.core.core import process_files
+from pain001.data.loader import load_payment_data
 from pain001.xml.validate_via_xsd import validate_via_xsd
 
 console = Console()
@@ -84,15 +85,38 @@ console.print(table)
     type=click.Path(),
     help="Path to configuration file (optional)",
 )
+@click.option(
+    "--dry-run",
+    "--validate-only",
+    "dry_run",
+    is_flag=True,
+    default=False,
+    help=(
+        "Validate templates, schema, and data without generating XML output. "
+        "Returns exit code 0 on success."
+    ),
+)
 def main(
     xml_message_type: Optional[str],
     xml_template_file_path: Optional[str],
     xsd_schema_file_path: Optional[str],
     data_file_path: Optional[str],
     config_file: Optional[str],
+    dry_run: bool = False,
 ) -> None:
-    # TODO: add a dry-run/validate-only flag that skips XML generation and reports validation results.
-    # TODO: replace print+sys.exit with structured error handling shared with library API.
+    """CLI entry point for Pain001 ISO 20022 payment file generation.
+
+    Args:
+        xml_message_type: ISO 20022 message type (e.g., 'pain.001.001.03').
+        xml_template_file_path: Path to Jinja2 XML template file.
+        xsd_schema_file_path: Path to XSD schema for validation.
+        data_file_path: Path to CSV or SQLite data file.
+        config_file: Optional configuration file path.
+        dry_run: If True, validate inputs without generating XML.
+
+    Exits:
+        0 on success, 1 on validation or processing error.
+    """
     # Check that the required arguments are provided first
     if not xml_message_type:
         print("The XML message type is required.")
@@ -159,6 +183,21 @@ def main(
         logger.error(f"Schema validation failed: {e}")
         print(f"Schema validation failed: {e}")
         sys.exit(1)
+
+    if dry_run:
+        # Validate payment data (same path as generation) but skip XML output
+        try:
+            load_payment_data(data_file_path)
+        except (FileNotFoundError, ValueError) as e:
+            logger.error(f"Data validation failed: {e}")
+            print(f"Data validation failed: {e}")
+            sys.exit(1)
+
+        logger.info(
+            "Dry run requested; validation succeeded. Skipping XML generation."
+        )
+        print("Validation succeeded. No XML generated (--dry-run).")
+        return
 
     process_files(
         xml_message_type,

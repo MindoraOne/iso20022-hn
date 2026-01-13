@@ -324,6 +324,21 @@ If successful, you'll see:
 - ✓ Validation messages in your terminal
 - ✓ A new ISO 20022-compliant XML file at your specified location
 
+### Validate without generating XML
+
+Use `--dry-run` (alias `--validate-only`) to validate your template, XSD schema, and payment data without writing an XML file. This runs the same validation path used for generation and checks the input source you provide on the CLI (CSV or SQLite); when used programmatically, the library continues to support Python list and dict sources as well:
+
+```sh
+python3 -m pain001 \
+    -t pain.001.001.03 \
+    -m pain001/templates/pain.001.001.03/template.xml \
+    -s pain001/templates/pain.001.001.03/pain.001.001.03.xsd \
+    -d pain001/templates/pain.001.001.03/template.csv \
+    --dry-run
+```
+
+When validation succeeds, Pain001 exits with code 0 and does not generate XML.
+
 ### Arguments
 
 When running **Pain001**, you will need to specify four arguments:
