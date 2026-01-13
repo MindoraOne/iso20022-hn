@@ -285,7 +285,7 @@ def log_validation_event(
         )
 
 
-def log_data_load_event(  # pylint: disable=too-many-arguments  # noqa: PLR0913
+def log_data_load_event(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     logger: logging.Logger,
     data_source_type: str,
     success: bool,
@@ -323,7 +323,7 @@ def log_data_load_event(  # pylint: disable=too-many-arguments  # noqa: PLR0913
         )
 
 
-def log_xml_generation_event(  # pylint: disable=too-many-arguments  # noqa: PLR0913
+def log_xml_generation_event(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     logger: logging.Logger,
     message_type: str,
     success: bool,
