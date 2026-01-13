@@ -188,7 +188,9 @@ def main(
                 console.print(f"Data validation failed: {exc}")
                 sys.exit(1)
 
-            console.print("Validation succeeded. No XML generated (--dry-run).")
+            console.print(
+                "Validation succeeded. No XML generated (--dry-run)."
+            )
             return
 
         process_files(
