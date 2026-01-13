@@ -1,14 +1,17 @@
 """Edge-branch regression tests for CLI and core helpers."""
 
-import xml.etree.ElementTree as defused_et
 from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
 from defusedxml import defuse_stdlib
 
-defuse_stdlib()  # noqa: E402 - Protect stdlib from XXE; call before any XML parsing
+defuse_stdlib()  # Protect stdlib from XXE before any XML operations
 
+# Import xml.etree after defuse_stdlib() to ensure protection
+import xml.etree.ElementTree as defused_et  # noqa: E402
+
+# Import pain001 modules after security initialization
 from pain001.cli.cli import main as cli_main  # noqa: E402
 from pain001.core import core  # noqa: E402
 from pain001.csv.validate_csv_data import _validate_field_type  # noqa: E402
