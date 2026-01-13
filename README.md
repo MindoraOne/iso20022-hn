@@ -13,7 +13,7 @@
 [![Quality][quality-badge]][quality-url]
 [![Documentation][docs-badge]][docs-url]
 
-> **Latest Release: v0.0.42** - Final workflow fixes. Prevented duplicate documentation deployments and ensured single workflow execution path. [See what's new →](https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.42)
+> **Latest Release: v0.0.43** - CI/CD authentication fix for PyPI publishing. [See what's new →](https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.43)
 
 ## Overview
 

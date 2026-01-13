@@ -79,11 +79,11 @@ Supported ISO 20022 Versions
    * - pain.001.001.07
      - ✅ Stable
      - 44
-     - Large payment requests (RLP/RTP)
+     - Extended optional elements for regional requirements
    * - pain.001.001.08
      - ✅ Stable
      - 44
-     - TARGET instant settlement
+     - Enhanced validation and optional elements
    * - pain.001.001.09
      - ✅ Stable
      - 23
