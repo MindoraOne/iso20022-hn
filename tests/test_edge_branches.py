@@ -1,6 +1,6 @@
 """Edge-branch regression tests for CLI and core helpers."""
 
-import xml.etree.ElementTree as ET  # nosec B405 - only used for element creation in tests, not parsing
+import xml.etree.ElementTree as et  # nosec B405 - only used for element creation in tests, not parsing
 from pathlib import Path
 
 import pytest
@@ -101,8 +101,8 @@ def test_validate_field_type_boolean_branch() -> None:
 
 def test_write_xml_to_file_indentation(tmp_path: Path) -> None:
     """Ensure write_xml_to_file indents child elements."""
-    root = ET.Element("root")
-    child = ET.Element("child")
+    root = et.Element("root")
+    child = et.Element("child")
     root.append(child)
 
     xml_path = tmp_path / "output.xml"
