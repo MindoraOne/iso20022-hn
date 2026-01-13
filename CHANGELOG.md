@@ -17,6 +17,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Available in both `pain001.cli.cli` and `pain001.__main__` entry points
   - Example: `python3 -m pain001 -t pain.001.001.03 -m template.xml -s schema.xsd -d data.csv --dry-run`
 
+- **Structured Logging Normalization** - Standardized event names and fields across CLI and library (Resolves #102):
+  - Created `pain001.logging_schema` module with standardized Events and Fields classes
+  - Implemented helper functions for common logging patterns (process lifecycle, validation, data loading, XML generation)
+  - All log entries now use consistent JSON format with standardized field names
+  - Added PII masking utility for sensitive data (IBAN, BIC, names, amounts)
+  - Updated `pain001.core.core` and `pain001.cli.cli` to use structured logging
+  - Added comprehensive test coverage in `tests/test_logging_schema.py`
+  - Added documentation guide in `docs/structured_logging.rst`
+  - Enables integration with log aggregation systems (Elasticsearch, Splunk, CloudWatch)
+
 ---
 
 ## [0.0.44] - 2026-01-13

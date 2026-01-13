@@ -151,6 +151,7 @@ Contents
    installation
    usage
    configuration
+   structured_logging
    examples
    modules
 

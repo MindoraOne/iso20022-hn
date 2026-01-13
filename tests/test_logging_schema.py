@@ -1,0 +1,373 @@
+# Copyright (C) 2023-2026 Sebastien Rousseau.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""Tests for structured logging schema."""
+
+import json
+import logging
+import time
+import unittest
+from io import StringIO
+from typing import Any
+
+from pain001.logging_schema import (
+    Events,
+    Fields,
+    log_data_load_event,
+    log_event,
+    log_process_error,
+    log_process_start,
+    log_process_success,
+    log_validation_event,
+    log_xml_generation_event,
+    mask_sensitive_data,
+)
+
+
+class TestLoggingSchema(unittest.TestCase):
+    """Test structured logging schema functionality."""
+
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        self.logger = logging.getLogger("test_logger")
+        self.logger.setLevel(logging.DEBUG)
+        # Remove any existing handlers
+        self.logger.handlers = []
+        # Add StringIO handler to capture log output
+        self.log_stream = StringIO()
+        handler = logging.StreamHandler(self.log_stream)
+        handler.setLevel(logging.DEBUG)
+        self.logger.addHandler(handler)
+
+    def tearDown(self) -> None:
+        """Clean up test fixtures."""
+        self.logger.handlers = []
+        self.log_stream.close()
+
+    def _get_last_log_entry(self) -> dict[str, Any]:
+        """Parse the last log entry as JSON."""
+        log_output = self.log_stream.getvalue()
+        lines = log_output.strip().split("\n")
+        if not lines or not lines[-1]:
+            return {}
+        parsed: dict[str, Any] = json.loads(lines[-1])
+        return parsed
+
+    def test_events_constants(self) -> None:
+        """Test that Events class has expected constants."""
+        self.assertEqual(Events.PROCESS_START, "process_start")
+        self.assertEqual(Events.PROCESS_SUCCESS, "process_success")
+        self.assertEqual(Events.PROCESS_ERROR, "process_error")
+        self.assertEqual(Events.CLI_ARGS_PARSED, "cli_args_parsed")
+        self.assertEqual(Events.CLI_DRY_RUN, "cli_dry_run")
+        self.assertEqual(Events.VALIDATION_START, "validation_start")
+        self.assertEqual(Events.VALIDATION_SUCCESS, "validation_success")
+        self.assertEqual(Events.VALIDATION_ERROR, "validation_error")
+        self.assertEqual(Events.DATA_LOAD_START, "data_load_start")
+        self.assertEqual(Events.DATA_LOAD_SUCCESS, "data_load_success")
+        self.assertEqual(Events.DATA_LOAD_ERROR, "data_load_error")
+        self.assertEqual(Events.XML_GENERATE_START, "xml_generate_start")
+        self.assertEqual(Events.XML_GENERATE_SUCCESS, "xml_generate_success")
+        self.assertEqual(Events.XML_GENERATE_ERROR, "xml_generate_error")
+        self.assertEqual(Events.XSD_VALIDATION_START, "xsd_validation_start")
+        self.assertEqual(
+            Events.XSD_VALIDATION_SUCCESS, "xsd_validation_success"
+        )
+        self.assertEqual(Events.XSD_VALIDATION_ERROR, "xsd_validation_error")
+        self.assertEqual(Events.NAMESPACE_REGISTER, "namespace_register")
+
+    def test_fields_constants(self) -> None:
+        """Test that Fields class has expected constants."""
+        self.assertEqual(Fields.EVENT, "event")
+        self.assertEqual(Fields.TIMESTAMP, "timestamp")
+        self.assertEqual(Fields.LEVEL, "level")
+        self.assertEqual(Fields.COMPONENT, "component")
+        self.assertEqual(Fields.MODULE, "module")
+        self.assertEqual(Fields.FUNCTION, "function")
+        self.assertEqual(Fields.MESSAGE_TYPE, "message_type")
+        self.assertEqual(Fields.ISO_VERSION, "iso_version")
+        self.assertEqual(Fields.TEMPLATE_PATH, "template_path")
+        self.assertEqual(Fields.SCHEMA_PATH, "schema_path")
+        self.assertEqual(Fields.DATA_SOURCE_TYPE, "data_source_type")
+        self.assertEqual(Fields.RECORD_COUNT, "record_count")
+        self.assertEqual(Fields.TRANSACTION_COUNT, "transaction_count")
+        self.assertEqual(Fields.DURATION_MS, "duration_ms")
+        self.assertEqual(Fields.SIZE_BYTES, "size_bytes")
+        self.assertEqual(Fields.ERROR_TYPE, "error_type")
+        self.assertEqual(Fields.ERROR_MESSAGE, "error_message")
+        self.assertEqual(Fields.ERROR_DETAILS, "error_details")
+        self.assertEqual(Fields.VALIDATION_TYPE, "validation_type")
+
+    def test_mask_sensitive_data(self) -> None:
+        """Test sensitive data masking."""
+        # Test IBAN masking
+        iban = "GB29NWBK60161331926819"
+        masked = mask_sensitive_data(iban, 4)
+        self.assertEqual(masked, "GB29**************6819")
+
+        # Test short string
+        short = "ABC"
+        masked_short = mask_sensitive_data(short, 4)
+        self.assertEqual(masked_short, "****")
+
+        # Test exact boundary (8 chars with 4 visible each side)
+        boundary = "12345678"
+        masked_boundary = mask_sensitive_data(boundary, 4)
+        self.assertEqual(masked_boundary, "****")
+
+        # Test 9 chars (just above boundary)
+        nine = "123456789"
+        masked_nine = mask_sensitive_data(nine, 4)
+        self.assertEqual(masked_nine, "1234*6789")
+
+    def test_log_event(self) -> None:
+        """Test basic event logging."""
+        log_event(
+            self.logger,
+            logging.INFO,
+            Events.PROCESS_START,
+            message_type="pain.001.001.03",
+            record_count=10,
+        )
+
+        entry = self._get_last_log_entry()
+        self.assertEqual(entry[Fields.EVENT], Events.PROCESS_START)
+        self.assertEqual(entry["message_type"], "pain.001.001.03")
+        self.assertEqual(entry["record_count"], 10)
+        self.assertIn(Fields.TIMESTAMP, entry)
+
+    def test_log_process_start(self) -> None:
+        """Test process start logging."""
+        start_time = log_process_start(
+            self.logger,
+            "pain.001.001.03",
+            "csv",
+            extra_field="extra_value",
+        )
+
+        self.assertIsInstance(start_time, float)
+        self.assertGreater(start_time, 0)
+
+        entry = self._get_last_log_entry()
+        self.assertEqual(entry[Fields.EVENT], Events.PROCESS_START)
+        self.assertEqual(entry["message_type"], "pain.001.001.03")
+        self.assertEqual(entry["data_source_type"], "csv")
+        self.assertEqual(entry["extra_field"], "extra_value")
+
+    def test_log_process_success(self) -> None:
+        """Test process success logging."""
+        start_time = time.time()
+        time.sleep(0.01)  # Small delay to ensure measurable duration
+
+        log_process_success(
+            self.logger,
+            start_time,
+            "pain.001.001.03",
+            100,
+            output_file="test.xml",
+        )
+
+        entry = self._get_last_log_entry()
+        self.assertEqual(entry[Fields.EVENT], Events.PROCESS_SUCCESS)
+        self.assertEqual(entry["message_type"], "pain.001.001.03")
+        self.assertEqual(entry["record_count"], 100)
+        self.assertIn(Fields.DURATION_MS, entry)
+        self.assertGreater(entry[Fields.DURATION_MS], 0)
+        self.assertEqual(entry["output_file"], "test.xml")
+
+    def test_log_process_error(self) -> None:
+        """Test process error logging."""
+        error = ValueError("Test error message")
+
+        log_process_error(
+            self.logger,
+            error,
+            "pain.001.001.03",
+            extra_context="additional info",
+        )
+
+        entry = self._get_last_log_entry()
+        self.assertEqual(entry[Fields.EVENT], Events.PROCESS_ERROR)
+        self.assertEqual(entry[Fields.ERROR_TYPE], "ValueError")
+        self.assertEqual(entry[Fields.ERROR_MESSAGE], "Test error message")
+        self.assertEqual(entry["message_type"], "pain.001.001.03")
+        self.assertEqual(entry["extra_context"], "additional info")
+
+    def test_log_validation_event_success(self) -> None:
+        """Test validation success logging."""
+        log_validation_event(
+            self.logger,
+            "schema",
+            True,
+            message_type="pain.001.001.03",
+        )
+
+        entry = self._get_last_log_entry()
+        self.assertEqual(entry[Fields.EVENT], Events.VALIDATION_SUCCESS)
+        self.assertEqual(entry[Fields.VALIDATION_TYPE], "schema")
+        self.assertEqual(entry["message_type"], "pain.001.001.03")
+
+    def test_log_validation_event_error(self) -> None:
+        """Test validation error logging."""
+        error = ValueError("Invalid data")
+
+        log_validation_event(
+            self.logger,
+            "data",
+            False,
+            error,
+            message_type="pain.001.001.03",
+        )
+
+        entry = self._get_last_log_entry()
+        self.assertEqual(entry[Fields.EVENT], Events.VALIDATION_ERROR)
+        self.assertEqual(entry[Fields.VALIDATION_TYPE], "data")
+        self.assertEqual(entry[Fields.ERROR_TYPE], "ValueError")
+        self.assertEqual(entry[Fields.ERROR_MESSAGE], "Invalid data")
+        self.assertEqual(entry["message_type"], "pain.001.001.03")
+
+    def test_log_validation_event_error_without_exception(self) -> None:
+        """Test validation error logging without exception object."""
+        log_validation_event(
+            self.logger,
+            "business_rules",
+            False,
+            None,
+            message_type="pain.001.001.03",
+        )
+
+        entry = self._get_last_log_entry()
+        self.assertEqual(entry[Fields.EVENT], Events.VALIDATION_ERROR)
+        self.assertEqual(entry[Fields.VALIDATION_TYPE], "business_rules")
+        self.assertEqual(entry[Fields.ERROR_TYPE], "Unknown")
+        self.assertEqual(entry[Fields.ERROR_MESSAGE], "Validation failed")
+
+    def test_log_data_load_event_success(self) -> None:
+        """Test data load success logging."""
+        log_data_load_event(
+            self.logger,
+            "csv",
+            True,
+            record_count=50,
+            duration_ms=125,
+        )
+
+        entry = self._get_last_log_entry()
+        self.assertEqual(entry[Fields.EVENT], Events.DATA_LOAD_SUCCESS)
+        self.assertEqual(entry[Fields.DATA_SOURCE_TYPE], "csv")
+        self.assertEqual(entry[Fields.RECORD_COUNT], 50)
+        self.assertEqual(entry[Fields.DURATION_MS], 125)
+
+    def test_log_data_load_event_error(self) -> None:
+        """Test data load error logging."""
+        error = FileNotFoundError("File not found")
+
+        log_data_load_event(
+            self.logger,
+            "sqlite",
+            False,
+            error=error,
+        )
+
+        entry = self._get_last_log_entry()
+        self.assertEqual(entry[Fields.EVENT], Events.DATA_LOAD_ERROR)
+        self.assertEqual(entry[Fields.DATA_SOURCE_TYPE], "sqlite")
+        self.assertEqual(entry[Fields.ERROR_TYPE], "FileNotFoundError")
+        self.assertEqual(entry[Fields.ERROR_MESSAGE], "File not found")
+
+    def test_log_xml_generation_event_success(self) -> None:
+        """Test XML generation success logging."""
+        log_xml_generation_event(
+            self.logger,
+            "pain.001.001.03",
+            True,
+            record_count=25,
+            duration_ms=450,
+        )
+
+        entry = self._get_last_log_entry()
+        self.assertEqual(entry[Fields.EVENT], Events.XML_GENERATE_SUCCESS)
+        self.assertEqual(entry["message_type"], "pain.001.001.03")
+        self.assertEqual(entry[Fields.RECORD_COUNT], 25)
+        self.assertEqual(entry[Fields.DURATION_MS], 450)
+
+    def test_log_xml_generation_event_error(self) -> None:
+        """Test XML generation error logging."""
+        error = RuntimeError("Template error")
+
+        log_xml_generation_event(
+            self.logger,
+            "pain.001.001.03",
+            False,
+            error=error,
+        )
+
+        entry = self._get_last_log_entry()
+        self.assertEqual(entry[Fields.EVENT], Events.XML_GENERATE_ERROR)
+        self.assertEqual(entry["message_type"], "pain.001.001.03")
+        self.assertEqual(entry[Fields.ERROR_TYPE], "RuntimeError")
+        self.assertEqual(entry[Fields.ERROR_MESSAGE], "Template error")
+
+    def test_json_serialization(self) -> None:
+        """Test that all log entries are valid JSON."""
+        # Log multiple events
+        log_process_start(self.logger, "pain.001.001.03", "csv")
+        log_validation_event(self.logger, "schema", True)
+        log_process_error(self.logger, ValueError("test"))
+
+        # Verify each line is valid JSON
+        log_output = self.log_stream.getvalue()
+        lines = log_output.strip().split("\n")
+
+        for line in lines:
+            try:
+                json.loads(line)
+            except json.JSONDecodeError:
+                self.fail(f"Invalid JSON: {line}")
+
+    def test_timestamp_format(self) -> None:
+        """Test that timestamps are unix timestamps."""
+        before = time.time()
+        log_event(self.logger, logging.INFO, Events.PROCESS_START)
+        after = time.time()
+
+        entry = self._get_last_log_entry()
+        timestamp = entry[Fields.TIMESTAMP]
+
+        self.assertIsInstance(timestamp, (int, float))
+        self.assertGreaterEqual(timestamp, before)
+        self.assertLessEqual(timestamp, after)
+
+    def test_multiple_extra_fields(self) -> None:
+        """Test logging with multiple extra fields."""
+        log_event(
+            self.logger,
+            logging.INFO,
+            Events.PROCESS_START,
+            field1="value1",
+            field2=123,
+            field3=True,
+            field4={"nested": "dict"},
+        )
+
+        entry = self._get_last_log_entry()
+        self.assertEqual(entry["field1"], "value1")
+        self.assertEqual(entry["field2"], 123)
+        self.assertEqual(entry["field3"], True)
+        self.assertEqual(entry["field4"], {"nested": "dict"})
+
+
+if __name__ == "__main__":
+    unittest.main()

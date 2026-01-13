@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import configparser
+import logging
 import os
 import sys
 from typing import Optional
@@ -30,6 +31,12 @@ from pain001.constants.constants import valid_xml_types
 from pain001.context.context import Context
 from pain001.core.core import process_files
 from pain001.data.loader import load_payment_data
+from pain001.logging_schema import (
+    Events,
+    Fields,
+    log_event,
+    log_validation_event,
+)
 from pain001.xml.validate_via_xsd import validate_via_xsd
 
 console = Console()
@@ -165,11 +172,25 @@ def main(  # pylint: disable=too-many-arguments,too-many-positional-arguments
 
     logger = Context.get_instance().get_logger()
 
-    logger.info("Parsing command line arguments.")
+    log_event(
+        logger,
+        logging.INFO,
+        Events.CLI_ARGS_PARSED,
+        **{
+            Fields.MESSAGE_TYPE: xml_message_type,
+            "dry_run": dry_run,
+        },
+    )
 
     # Check that the XML message type is valid
     if xml_message_type not in valid_xml_types:
-        logger.info(f"Invalid XML message type: {xml_message_type}.")
+        log_validation_event(
+            logger,
+            "message_type",
+            False,
+            ValueError(f"Invalid XML message type: {xml_message_type}"),
+            message_type=xml_message_type,
+        )
         print(
             f"""
                 Invalid XML message type: {xml_message_type}.
@@ -181,8 +202,20 @@ def main(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     # Validate XML and XSD schemas
     try:
         validate_via_xsd(xml_template_file_path, xsd_schema_file_path)
+        log_validation_event(
+            logger,
+            "xsd_schema",
+            True,
+            message_type=xml_message_type,
+        )
     except Exception as e:
-        logger.error(f"Schema validation failed: {e}")
+        log_validation_event(
+            logger,
+            "xsd_schema",
+            False,
+            e,
+            message_type=xml_message_type,
+        )
         print(f"Schema validation failed: {e}")
         sys.exit(1)
 
@@ -190,13 +223,31 @@ def main(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         # Validate payment data (same path as generation) but skip XML output
         try:
             load_payment_data(data_file_path)
+            log_validation_event(
+                logger,
+                "payment_data",
+                True,
+                message_type=xml_message_type,
+            )
         except (FileNotFoundError, ValueError) as e:
-            logger.error(f"Data validation failed: {e}")
+            log_validation_event(
+                logger,
+                "payment_data",
+                False,
+                e,
+                message_type=xml_message_type,
+            )
             print(f"Data validation failed: {e}")
             sys.exit(1)
 
-        logger.info(
-            "Dry run requested; validation succeeded. Skipping XML generation."
+        log_event(
+            logger,
+            logging.INFO,
+            Events.CLI_DRY_RUN,
+            **{
+                Fields.MESSAGE_TYPE: xml_message_type,
+                "validation_passed": True,
+            },
         )
         print("Validation succeeded. No XML generated (--dry-run).")
         return
