@@ -21,11 +21,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: ❯ Verify Trinity Version Sync
         run: |
-          # Robust extraction handling both " and ' quotes
-          V_INIT=$(grep "__version__" pain001/__init__.py | sed -E "s/.*[\"'](.*)[\"'].*/\1/")
-          V_TOML=$(grep "^version = " pyproject.toml | head -1 | sed -E "s/.*[\"'](.*)[\"'].*/\1/")
-          V_CFG=$(grep "^version = " setup.cfg | head -1 | cut -d "=" -f 2 | xargs)
-
+          # Use Python + awk for robust extraction (no external dependencies)
+          V_INIT=$(python3 -c "exec(open('pain001/__init__.py').read()); print(__version__)")
+          V_TOML=$(awk -F'"' '/^version = / {print $2; exit}' pyproject.toml)
+          V_CFG=$(awk -F'= ' '/^version =/ {print $2; exit}' setup.cfg | tr -d ' ')
+          
           echo "🔍 Trinity Status:"
           echo "   Init: $V_INIT"
           echo "   Toml: $V_TOML"
@@ -35,6 +35,7 @@ jobs:
             echo "❌ CRITICAL: Version Desync Detected!"
             exit 1
           fi
+          echo "✅ Trinity Sync Verified."
           echo "✅ Trinity Sync Verified."
 
   # 2. TOLLGATES (Blocking - Latest Python)
