@@ -26,7 +26,7 @@ This test suite validates:
 """
 
 import unittest
-import xml.etree.ElementTree as ET  # nosec B405 - controlled element creation in tests
+import xml.etree.ElementTree as et  # nosec B405 - controlled element creation in tests
 from pathlib import Path
 
 from pain001.xml.create_xml_v9 import create_xml_v9
@@ -38,7 +38,7 @@ class TestPain001V9XMLGeneration(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up test fixtures."""
-        self.root = ET.Element("Document")
+        self.root = et.Element("Document")
         self.test_data = [
             {
                 "id": "MSG001",
@@ -97,7 +97,7 @@ class TestPain001V9XMLGeneration(unittest.TestCase):
         result = create_xml_v9(self.root, self.test_data)
 
         # Verify the XML structure
-        xml_string = ET.tostring(result, encoding="unicode")
+        xml_string = et.tostring(result, encoding="unicode")
 
         # Check for expected structure elements
         self.assertIn("MSG001", xml_string)
@@ -109,7 +109,7 @@ class TestPain001V9XMLGeneration(unittest.TestCase):
     def test_create_xml_v9_namespace(self) -> None:
         """Test that correct namespace is used for pain.001.001.09."""
         result = create_xml_v9(self.root, self.test_data)
-        xml_string = ET.tostring(result, encoding="unicode")
+        xml_string = et.tostring(result, encoding="unicode")
 
         # Verify pain.001.001.09 namespace is present
         self.assertIn("pain.001.001.09", xml_string)
@@ -140,15 +140,15 @@ class TestPain001V9XSDValidation(unittest.TestCase):
     def test_xml_example_well_formed(self) -> None:
         """Test that XML example is well-formed."""
         try:
-            tree = ET.parse(self.xml_example)
+            tree = et.parse(self.xml_example)
             root = tree.getroot()
             self.assertIsNotNone(root)
-        except ET.ParseError as e:
+        except et.ParseError as e:
             self.fail(f"XML is not well-formed: {e}")
 
     def test_xml_has_correct_namespace(self) -> None:
         """Test that XML example uses correct namespace."""
-        tree = ET.parse(self.xml_example)
+        tree = et.parse(self.xml_example)
         root = tree.getroot()
 
         # Check namespace

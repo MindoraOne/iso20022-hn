@@ -15,7 +15,7 @@
 
 
 import unittest
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as et  # nosec B405 - only used for element creation in tests, not parsing
 
 from pain001.xml.create_xml_element import create_xml_element
 
@@ -27,7 +27,7 @@ class TestCreateXmlElement(unittest.TestCase):
         """
         Test if the XML element is created correctly with a tag only.
         """
-        root = ET.Element("root")
+        root = et.Element("root")
         elem = create_xml_element(root, "test")
         self.assertEqual(elem.tag, "test")
         self.assertIsNone(elem.text)
@@ -37,7 +37,7 @@ class TestCreateXmlElement(unittest.TestCase):
         """
         Test if the XML element is created correctly with a tag and text.
         """
-        root = ET.Element("root")
+        root = et.Element("root")
         elem = create_xml_element(root, "test", text="Hello, world!")
         self.assertEqual(elem.tag, "test")
         self.assertEqual(elem.text, "Hello, world!")
@@ -47,7 +47,7 @@ class TestCreateXmlElement(unittest.TestCase):
         """
         Test if the XML element is created correctly with a tag and attributes.
         """
-        root = ET.Element("root")
+        root = et.Element("root")
         attributes = {"attr1": "value1", "attr2": "value2"}
         elem = create_xml_element(root, "test", attributes=attributes)
         self.assertEqual(elem.tag, "test")
@@ -60,7 +60,7 @@ class TestCreateXmlElement(unittest.TestCase):
         Test if the XML element is created correctly with a tag, text and
         attributes.
         """
-        root = ET.Element("root")
+        root = et.Element("root")
         attributes = {"attr1": "value1", "attr2": "value2"}
         elem = create_xml_element(
             root, "test", text="Hello, world!", attributes=attributes
