@@ -14,7 +14,7 @@
 # limitations under the License.
 
 
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as et  # nosec B405 - only used for element creation in tests, not parsing
 
 from pain001.xml.create_root_element import create_root_element
 
@@ -54,7 +54,7 @@ def test_create_root_element_returns_element_object() -> None:
     root = create_root_element(payment_initiation_message_type)
 
     # Check if root element is an instance of Element
-    assert isinstance(root, ET.Element)
+    assert isinstance(root, et.Element)
 
 
 def test_create_root_element_does_not_raise_exception() -> None:

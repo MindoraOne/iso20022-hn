@@ -27,7 +27,7 @@ This test suite validates:
 import csv
 import sqlite3
 import unittest
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as et  # nosec B405 - controlled element creation in testssec B405 - controlled element creation in tests
 from pathlib import Path
 
 from pain001.xml.create_xml_v6 import create_xml_v6
@@ -39,7 +39,7 @@ class TestPain001V6XMLGeneration(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up test fixtures with data from CSV template."""
-        self.root = ET.Element("Document")
+        self.root = et.Element("Document")
 
         # Load test data from CSV template
         csv_path = Path("pain001/templates/pain.001.001.06/template.csv")
@@ -64,7 +64,7 @@ class TestPain001V6XMLGeneration(unittest.TestCase):
         result = create_xml_v6(self.root, self.test_data)
 
         # Verify the XML structure
-        xml_string = ET.tostring(result, encoding="unicode")
+        xml_string = et.tostring(result, encoding="unicode")
 
         # Check for expected structure elements
         self.assertIn("CstmrCdtTrfInitn", xml_string)
@@ -74,7 +74,7 @@ class TestPain001V6XMLGeneration(unittest.TestCase):
     def test_create_xml_v6_namespace(self) -> None:
         """Test that correct namespace is used for pain.001.001.06."""
         result = create_xml_v6(self.root, self.test_data)
-        xml_string = ET.tostring(result, encoding="unicode")
+        xml_string = et.tostring(result, encoding="unicode")
 
         # Verify pain.001.001.06 namespace is present
         self.assertIn("pain.001.001.06", xml_string)
@@ -105,16 +105,16 @@ class TestPain001V6XSDValidation(unittest.TestCase):
     def test_xml_example_well_formed(self) -> None:
         """Test that XML example is well-formed."""
         try:
-            tree = ET.parse(self.xml_example)
+            tree = et.parse(self.xml_example)
             root = tree.getroot()
             self.assertIsNotNone(root)
-        except ET.ParseError as e:
+        except et.ParseError as e:
             self.fail(f"XML is not well-formed: {e}")
 
     def test_xml_has_correct_namespace(self) -> None:
         """Test that XML example has correct namespace."""
-        tree = ET.parse(self.xml_example)
-        xml_string = ET.tostring(tree.getroot(), encoding="unicode")
+        tree = et.parse(self.xml_example)
+        xml_string = et.tostring(tree.getroot(), encoding="unicode")
         self.assertIn("pain.001.001.06", xml_string)
 
     def test_xml_validates_against_xsd(self) -> None:

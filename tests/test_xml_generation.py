@@ -15,7 +15,7 @@
 
 
 import unittest
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as et  # nosec B405 - only used for element creation in tests, not parsing
 
 from pain001.xml.create_common_elements import create_common_elements
 from pain001.xml.create_xml_v3 import create_xml_v3
@@ -34,7 +34,7 @@ class TestXMLCreation(unittest.TestCase):
         """
         Test setup
         """
-        self.root = ET.Element("Root")
+        self.root = et.Element("Root")
         self.row_v3 = {
             "id": "1",
             "date": "2023-03-10T15:30:47.000Z",

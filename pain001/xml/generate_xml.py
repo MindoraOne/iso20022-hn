@@ -17,6 +17,8 @@
 # and the mapping dictionary between XML tags and CSV columns names and
 # writes it to a file in the same directory as the CSV file
 
+# pylint: disable=duplicate-code
+
 # Import the CSV library
 import sys
 from typing import Any

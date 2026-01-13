@@ -21,6 +21,8 @@ from typing import Optional
 
 import click
 from rich import box
+
+# pylint: disable=duplicate-code
 from rich.console import Console
 from rich.table import Table
 

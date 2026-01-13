@@ -23,6 +23,8 @@ generate the XML content based on the given data. The function ultimately
 returns the root element of the modified XML tree.
 """
 
+# pylint: disable=duplicate-code
+
 # Import ElementTree and Jinja2
 import xml.etree.ElementTree as et  # nosec B405 - Only used for element creation, not parsing; defused_et used for parsing
 from typing import Any

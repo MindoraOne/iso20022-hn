@@ -15,7 +15,7 @@
 
 """Tests for the register_namespaces module."""
 
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as et  # nosec B405 - only used for element creation in tests, not parsing
 
 from pain001.xml.register_namespaces import register_namespaces
 
@@ -30,10 +30,10 @@ class TestRegisterNamespaces:
 
         # Create a test element to verify namespace registration
         namespace = f"urn:iso:std:iso:20022:tech:xsd:{message_type}"
-        root = ET.Element(f"{{{namespace}}}Document")
+        root = et.Element(f"{{{namespace}}}Document")
 
         # Convert to string and verify namespace is in the output
-        xml_string = ET.tostring(root, encoding="unicode")
+        xml_string = et.tostring(root, encoding="unicode")
         assert namespace in xml_string
         assert "Document" in xml_string
 
@@ -43,8 +43,8 @@ class TestRegisterNamespaces:
         register_namespaces(message_type)
 
         namespace = f"urn:iso:std:iso:20022:tech:xsd:{message_type}"
-        root = ET.Element(f"{{{namespace}}}Document")
-        xml_string = ET.tostring(root, encoding="unicode")
+        root = et.Element(f"{{{namespace}}}Document")
+        xml_string = et.tostring(root, encoding="unicode")
 
         assert namespace in xml_string
 
@@ -54,8 +54,8 @@ class TestRegisterNamespaces:
         register_namespaces(message_type)
 
         namespace = f"urn:iso:std:iso:20022:tech:xsd:{message_type}"
-        root = ET.Element(f"{{{namespace}}}Document")
-        xml_string = ET.tostring(root, encoding="unicode")
+        root = et.Element(f"{{{namespace}}}Document")
+        xml_string = et.tostring(root, encoding="unicode")
 
         assert namespace in xml_string
 
@@ -65,8 +65,8 @@ class TestRegisterNamespaces:
         register_namespaces(message_type)
 
         namespace = f"urn:iso:std:iso:20022:tech:xsd:{message_type}"
-        root = ET.Element(f"{{{namespace}}}Document")
-        xml_string = ET.tostring(root, encoding="unicode")
+        root = et.Element(f"{{{namespace}}}Document")
+        xml_string = et.tostring(root, encoding="unicode")
 
         assert namespace in xml_string
 
@@ -76,8 +76,8 @@ class TestRegisterNamespaces:
         register_namespaces(message_type)
 
         namespace = f"urn:iso:std:iso:20022:tech:xsd:{message_type}"
-        root = ET.Element(f"{{{namespace}}}Document")
-        xml_string = ET.tostring(root, encoding="unicode")
+        root = et.Element(f"{{{namespace}}}Document")
+        xml_string = et.tostring(root, encoding="unicode")
 
         assert namespace in xml_string
 
@@ -87,8 +87,8 @@ class TestRegisterNamespaces:
         register_namespaces(message_type)
 
         namespace = f"urn:iso:std:iso:20022:tech:xsd:{message_type}"
-        root = ET.Element(f"{{{namespace}}}Document")
-        xml_string = ET.tostring(root, encoding="unicode")
+        root = et.Element(f"{{{namespace}}}Document")
+        xml_string = et.tostring(root, encoding="unicode")
 
         assert namespace in xml_string
 
@@ -98,8 +98,8 @@ class TestRegisterNamespaces:
         register_namespaces(message_type)
 
         namespace = f"urn:iso:std:iso:20022:tech:xsd:{message_type}"
-        root = ET.Element(f"{{{namespace}}}Document")
-        xml_string = ET.tostring(root, encoding="unicode")
+        root = et.Element(f"{{{namespace}}}Document")
+        xml_string = et.tostring(root, encoding="unicode")
 
         assert namespace in xml_string
 
@@ -112,10 +112,10 @@ class TestRegisterNamespaces:
         xsi_ns = "http://www.w3.org/2001/XMLSchema-instance"
         namespace = f"urn:iso:std:iso:20022:tech:xsd:{message_type}"
 
-        root = ET.Element(f"{{{namespace}}}Document")
+        root = et.Element(f"{{{namespace}}}Document")
         root.set(f"{{{xsi_ns}}}schemaLocation", "test")
 
-        xml_string = ET.tostring(root, encoding="unicode")
+        xml_string = et.tostring(root, encoding="unicode")
         assert "xsi:" in xml_string or xsi_ns in xml_string
 
     def test_register_namespaces_returns_none(self) -> None:
@@ -131,8 +131,8 @@ class TestRegisterNamespaces:
         register_namespaces(message_type)
 
         namespace = f"urn:iso:std:iso:20022:tech:xsd:{message_type}"
-        root = ET.Element(f"{{{namespace}}}CustomDocument")
-        xml_string = ET.tostring(root, encoding="unicode")
+        root = et.Element(f"{{{namespace}}}CustomDocument")
+        xml_string = et.tostring(root, encoding="unicode")
 
         assert namespace in xml_string
         assert "CustomDocument" in xml_string
@@ -144,8 +144,8 @@ class TestRegisterNamespaces:
 
         expected_namespace = "urn:iso:std:iso:20022:tech:xsd:pain.001.001.03"
 
-        root = ET.Element(f"{{{expected_namespace}}}Document")
-        xml_string = ET.tostring(root, encoding="unicode")
+        root = et.Element(f"{{{expected_namespace}}}Document")
+        xml_string = et.tostring(root, encoding="unicode")
 
         assert "urn:iso:std:iso:20022:tech:xsd:pain.001.001.03" in xml_string
 
@@ -154,14 +154,14 @@ class TestRegisterNamespaces:
         # First call
         register_namespaces("pain.001.001.03")
         namespace_03 = "urn:iso:std:iso:20022:tech:xsd:pain.001.001.03"
-        root_03 = ET.Element(f"{{{namespace_03}}}Document")
-        xml_03 = ET.tostring(root_03, encoding="unicode")
+        root_03 = et.Element(f"{{{namespace_03}}}Document")
+        xml_03 = et.tostring(root_03, encoding="unicode")
 
         # Second call with different type
         register_namespaces("pain.001.001.04")
         namespace_04 = "urn:iso:std:iso:20022:tech:xsd:pain.001.001.04"
-        root_04 = ET.Element(f"{{{namespace_04}}}Document")
-        xml_04 = ET.tostring(root_04, encoding="unicode")
+        root_04 = et.Element(f"{{{namespace_04}}}Document")
+        xml_04 = et.tostring(root_04, encoding="unicode")
 
         assert namespace_03 in xml_03
         assert namespace_04 in xml_04
@@ -172,11 +172,11 @@ class TestRegisterNamespaces:
         register_namespaces(message_type)
 
         namespace = f"urn:iso:std:iso:20022:tech:xsd:{message_type}"
-        root = ET.Element(f"{{{namespace}}}Document")
-        child = ET.SubElement(root, f"{{{namespace}}}CstmrCdtTrfInitn")
-        ET.SubElement(child, f"{{{namespace}}}GrpHdr")
+        root = et.Element(f"{{{namespace}}}Document")
+        child = et.SubElement(root, f"{{{namespace}}}CstmrCdtTrfInitn")
+        et.SubElement(child, f"{{{namespace}}}GrpHdr")
 
-        xml_string = ET.tostring(root, encoding="unicode")
+        xml_string = et.tostring(root, encoding="unicode")
 
         assert "Document" in xml_string
         assert "CstmrCdtTrfInitn" in xml_string
@@ -190,9 +190,9 @@ class TestRegisterNamespaces:
         register_namespaces(message_type)
 
         namespace = f"urn:iso:std:iso:20022:tech:xsd:{message_type}"
-        root = ET.Element(f"{{{namespace}}}Document")
+        root = et.Element(f"{{{namespace}}}Document")
         root.set("version", "1.0")
-        child = ET.SubElement(root, f"{{{namespace}}}Child")
+        child = et.SubElement(root, f"{{{namespace}}}Child")
         child.text = "Test Content"
 
         # Verify we can still access and modify elements
@@ -200,6 +200,6 @@ class TestRegisterNamespaces:
         assert child.text == "Test Content"
         assert len(root) == 1
 
-        xml_string = ET.tostring(root, encoding="unicode")
+        xml_string = et.tostring(root, encoding="unicode")
         assert "Test Content" in xml_string
         assert 'version="1.0"' in xml_string

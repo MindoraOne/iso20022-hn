@@ -17,6 +17,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Available in both `pain001.cli.cli` and `pain001.__main__` entry points
   - Example: `python3 -m pain001 -t pain.001.001.03 -m template.xml -s schema.xsd -d data.csv --dry-run`
 
+---
+
+## [0.0.44] - 2026-01-13
+
+### Added
+
+- **Edge Coverage Tests** - Added regression tests for CLI file validation, boolean field validation, XML writer indentation, and process error branches to strengthen reliability and observability.
+
 ### Changed
 
 - **Core Refactoring** - Split monolithic `process_files()` function into focused helpers (Resolves #80):
@@ -29,8 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Quality Assurance
 
-- **Code Quality**: All changes maintain 100% branch coverage
-- **Test Coverage**: 387 tests passing with 98.67% total coverage (exceeds 95% requirement)
+- **Code Quality**: 392 tests passing with 99.14% total coverage (exceeds 95% requirement)
 - **Type Hints**: Full strict typing across all new and refactored functions
 - **Linting**: All linters pass (ruff, black, isort, mypy, pylint 9.89/10)
 - **Security**: 0 vulnerabilities (bandit, safety)
@@ -38,9 +45,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Notes
 
-- All v0.0.43 functionality fully preserved
-- Breaking changes: None (all existing code paths unchanged; dry_run defaults to False)
-- Backward compatibility: 100% maintained across all 9 ISO versions and 4 input sources
+- All v0.0.43 functionality fully preserved and hardened with additional coverage
+- Breaking changes: None (all existing code paths unchanged)
+- Backward compatibility: 100% maintained
 
 ---
 

@@ -111,7 +111,7 @@ class TestDataLoader:
 
         # Insert data
         placeholders = ", ".join(["?" for _ in fields])
-        insert_sql = f"INSERT INTO pain001 VALUES ({placeholders})"
+        insert_sql = f"INSERT INTO pain001 VALUES ({placeholders})"  # nosec B608 - static test SQL
         for row in sample_payment_data:
             cursor.execute(insert_sql, list(row.values()))
 
