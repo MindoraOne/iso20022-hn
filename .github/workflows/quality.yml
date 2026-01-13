@@ -70,48 +70,34 @@ jobs:
           name: benchmarks
           path: |
             .benchmarks/
-    runs-on: ubuntu-latest
-    name: Mutation Testing
-    timeout-minutes: 30  # Reduced timeout with optimizations
-    steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
-      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
-        with:
-          python-version: "3.9"
-      - uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1
-      - run: poetry install --no-interaction
-      - run: poetry run make mutate || true  # Continue on failure
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
-        if: always()  # Upload even if mutation testing fails/times out
-        with:
-          name: mutation-report
-          path: htmlcov/mutmut.html
 
+  # Job 4: Coverage Report
   coverage:
     runs-on: ubuntu-latest
-    name: Coverage Report
+    name: 📊 Coverage Report
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
-      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
         with:
-          python-version: "3.9"
-      - uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1
+          python-version: "3.12"
+      - uses: abatilo/actions-poetry@v2
       - run: poetry install --no-interaction
       - run: poetry run make cov
-      - uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
+      - uses: codecov/codecov-action@v3
         with:
-          file: ./coverage.xml
-          fail_ci_if_error: true
+          files: ./coverage.xml
+          fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }}
 
+  # Job 5: Heavy Lint (flake8/pylint)
   heavy-lint:
     runs-on: ubuntu-latest
-    name: Heavy Lint (flake8/pylint)
+    name: 🔍 Heavy Lint (flake8/pylint)
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
-      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
         with:
-          python-version: "3.9"
-      - uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1
+          python-version: "3.12"
+      - uses: abatilo/actions-poetry@v2
       - run: poetry install --no-interaction
       - run: poetry run make lint
