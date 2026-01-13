@@ -1,7 +1,7 @@
 """Edge-branch regression tests for CLI and core helpers."""
 
+import xml.etree.ElementTree as defused_et  # noqa: N817 - Standard abbreviation for ElementTree
 from pathlib import Path
-import xml.etree.ElementTree as ET  # nosec B405 - Element creation only, not parsing untrusted XML
 
 import pytest
 from click.testing import CliRunner
@@ -74,7 +74,9 @@ def test_process_files_missing_schema(tmp_path: Path) -> None:
         )
 
 
-def test_process_files_missing_output_branch(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_process_files_missing_output_branch(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """Cover branch where output file is reported missing after generation."""
 
     # First two existence checks must pass, final check returns False.
@@ -99,8 +101,8 @@ def test_validate_field_type_boolean_branch() -> None:
 
 def test_write_xml_to_file_indentation(tmp_path: Path) -> None:
     """Ensure write_xml_to_file indents child elements."""
-    root = ET.Element("root")
-    child = ET.Element("child")
+    root = defused_et.Element("root")
+    child = defused_et.Element("child")
     root.append(child)
 
     xml_path = tmp_path / "output.xml"

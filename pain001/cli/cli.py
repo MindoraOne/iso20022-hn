@@ -19,10 +19,10 @@ import os
 import sys
 from typing import Optional
 
-# pylint: disable=duplicate-code
-
 import click
 from rich import box
+
+# pylint: disable=duplicate-code
 from rich.console import Console
 from rich.table import Table
 
