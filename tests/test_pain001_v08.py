@@ -27,7 +27,7 @@ This test suite validates:
 import csv
 import sqlite3
 import unittest
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # nosec B405 - controlled element creation in tests
 from pathlib import Path
 
 from pain001.xml.create_xml_v8 import create_xml_v8

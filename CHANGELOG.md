@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- No changes yet.
+
+## [0.0.44] - 2026-01-13
+
+### Added
+
+- **Edge Coverage Tests** - Added regression tests for CLI file validation, boolean field validation, XML writer indentation, and process error branches to strengthen reliability and observability.
+
 ### Changed
 
 - **Core Refactoring** - Split monolithic `process_files()` function into focused helpers (Resolves #80):
@@ -19,15 +27,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Quality Assurance
 
-- **Code Quality**: Refactor maintains 100% branch coverage of modified code
-- **Test Coverage**: 385 tests passing with 98.645% total coverage (exceeds 95% requirement)
+- **Code Quality**: 392 tests passing with 99.14% total coverage (exceeds 95% requirement)
 - **Type Hints**: Full strict typing across all new and refactored functions
 - **Linting**: All linters pass (ruff, black, isort, mypy)
 - **Performance**: No performance degradation; generation duration timing preserved
 
 ### Notes
 
-- All v0.0.43 functionality fully preserved
+- All v0.0.43 functionality fully preserved and hardened with additional coverage
 - Breaking changes: None (all existing code paths unchanged)
 - Backward compatibility: 100% maintained
 
