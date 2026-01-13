@@ -96,7 +96,7 @@ console.print(table)
         "Returns exit code 0 on success."
     ),
 )
-def main(
+def main(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     xml_message_type: Optional[str],
     xml_template_file_path: Optional[str],
     xsd_schema_file_path: Optional[str],
