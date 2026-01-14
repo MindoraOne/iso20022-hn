@@ -191,13 +191,21 @@ def validate_bic_format(
     if not (bank_ok and country_ok and location_ok and branch_ok):
         errors = []
         if not bank_ok:
-            errors.append(f"bank code (first 4 chars) must be letters (got '{bank_code}')")
+            errors.append(
+                f"bank code (first 4 chars) must be letters (got '{bank_code}')"
+            )
         if not country_ok:
-            errors.append(f"country code (chars 5-6) must be letters (got '{country_code}')")
+            errors.append(
+                f"country code (chars 5-6) must be letters (got '{country_code}')"
+            )
         if not location_ok:
-            errors.append(f"location code (chars 7-8) must be alphanumeric (got '{location_code}')")
+            errors.append(
+                f"location code (chars 7-8) must be alphanumeric (got '{location_code}')"
+            )
         if not branch_ok:
-            errors.append(f"branch code (chars 9-11) must be alphanumeric (got '{branch_code}')")
+            errors.append(
+                f"branch code (chars 9-11) must be alphanumeric (got '{branch_code}')"
+            )
         return False, f"BIC format invalid: {'; '.join(errors)}"
 
     # Validate country code against known codes

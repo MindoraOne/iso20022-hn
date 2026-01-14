@@ -150,7 +150,10 @@ def validate_iban_format(
 
     # Check length range
     if not 15 <= iban_len <= 34:
-        return (False, f"IBAN length must be 15-34 characters (got {iban_len})")
+        return (
+            False,
+            f"IBAN length must be 15-34 characters (got {iban_len})",
+        )
 
     # Check all format requirements together
     country_ok = iban_clean[:2].isalpha()
@@ -169,7 +172,10 @@ def validate_iban_format(
 
     # Validate country-specific length
     country_code = iban_clean[:2]
-    if country_code in IBAN_LENGTHS and len(iban_clean) != IBAN_LENGTHS[country_code]:
+    if (
+        country_code in IBAN_LENGTHS
+        and len(iban_clean) != IBAN_LENGTHS[country_code]
+    ):
         return (
             False,
             f"Invalid IBAN length for {country_code}: "
