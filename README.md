@@ -3,6 +3,7 @@
 ![Pain001 banner][banner]
 
 ## Enterprise-Grade ISO 20022 Payment Generation from 4 Data
+
 Sources: CSV, SQLite, Python Dict, Python List
 
 [![PyPI Version][pypi-badge]][03]
@@ -52,8 +53,8 @@ that initiates a customer payment.
   checking with mypy
 - **Robust Error Handling:** Specific exception types for precise
   error handling and debugging
-- **9 ISO 20022 Versions Supported:** Supports all 9 Customer
-  Credit Transfer Initiation versions: pain.001.001.03 through
+- **9 ISO 20022 Versions Supported:** Supports all 9 Customer Credit
+  Transfer Initiation versions: pain.001.001.03 through
   pain.001.001.11
 - **Production-Ready:** Used in production environments for SEPA
   and international payments
@@ -205,12 +206,17 @@ flowchart LR
   - No sensitive data storage—all information remains confidential
   - OWASP Top 10 security best practices implemented
 - **🛡️ Enterprise Logging & Compliance:**
-  - **Structured Logging:** All logs emitted as JSON for seamless integration with Splunk, Datadog, Elasticsearch, and CloudWatch
-  - **PII Protection:** Automatic masking of sensitive fields (IBANs, BICs, names, account numbers) in logs to ensure GDPR Article 32 and PCI-DSS Requirement 3.4 compliance
-  - **Event Standardization:** 17 standardized event types for consistent observability across payment processing lifecycle
-  - **Zero PII Leakage:** Logs never expose clear-text payment data—all sensitive information automatically redacted before logging
+  - **Structured Logging:** All logs emitted as JSON for seamless
+    integration with Splunk, Datadog, Elasticsearch, and CloudWatch
+  - **PII Protection:** Automatic masking of sensitive fields (IBANs,
+    BICs, names, account numbers) in logs to ensure GDPR Article 32 and
+    PCI-DSS Requirement 3.4 compliance
+  - **Event Standardization:** 17 standardized event types for
+    consistent observability across payment processing lifecycle
+  - **Zero PII Leakage:** Logs never expose clear-text payment data—all
+    sensitive information automatically redacted before logging
 - **Robust Development:** Comprehensive quality assurance with
-    - 99.30% test coverage with 435 comprehensive tests
+  - 99.30% test coverage with 435 comprehensive tests
   - Code formatting with Black and Ruff
   - Import sorting with isort
   - Style checking with Flake8 (10.00/10 score)
