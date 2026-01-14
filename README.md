@@ -2,7 +2,8 @@
 
 ![Pain001 banner][banner]
 
-## Enterprise-Grade ISO 20022 Payment Generation from 4 Data Sources: CSV, SQLite, Python Dict, Python List
+## Enterprise-Grade ISO 20022 Payment Generation from 4 Data
+Sources: CSV, SQLite, Python Dict, Python List
 
 [![PyPI Version][pypi-badge]][03]
 [![Python Versions][python-versions-badge]][03]
@@ -37,27 +38,47 @@ that initiates a customer payment.
 
 **Key Features:**
 
-- **Mandatory Data Validation:** Ensures all payment files are ISO 20022-compliant before creation
-- **Multi-source Support:** Works with CSV files, SQLite databases, and Python data structures
-- **Automatic XSD Validation:** Validates generated XML against ISO 20022 schemas
-- **Comprehensive Testing:** 99.30% test coverage with 435 tests ensuring reliability
-- **Secure by Design:** Uses `defusedxml` to prevent XXE attacks and implements SQL injection protection
-- **Type-Safe:** Full type hints for better IDE support and type checking with mypy
-- **Robust Error Handling:** Specific exception types for precise error handling and debugging
-- **9 ISO 20022 Versions Supported:** Supports all 9 Customer Credit Transfer Initiation versions: pain.001.001.03 through pain.001.001.11
-- **Production-Ready:** Used in production environments for SEPA and international payments
+- **Mandatory Data Validation:** Ensures all payment files are
+  ISO 20022-compliant before creation
+- **Multi-source Support:** Works with CSV files, SQLite databases,
+  and Python data structures
+- **Automatic XSD Validation:** Validates generated XML against
+  ISO 20022 schemas
+- **Comprehensive Testing:** 99.30% test coverage with 435 tests
+  ensuring reliability
+- **Secure by Design:** Uses `defusedxml` to prevent XXE attacks
+  and implements SQL injection protection
+- **Type-Safe:** Full type hints for better IDE support and type
+  checking with mypy
+- **Robust Error Handling:** Specific exception types for precise
+  error handling and debugging
+- **9 ISO 20022 Versions Supported:** Supports all 9 Customer
+  Credit Transfer Initiation versions: pain.001.001.03 through
+  pain.001.001.11
+- **Production-Ready:** Used in production environments for SEPA
+  and international payments
 
 As of today, the library is designed to be compatible with the:
 
-- **Payments Initiation V03 (pain.001.001.03):** This version is used for initiating credit transfers within the SEPA (Single Euro Payments Area)
-- **Payments Initiation V04 (pain.001.001.04):** Enhanced with additional optional fields and improved data structures
-- **Payments Initiation V05 (pain.001.001.05):** Brings further refinements and clarifications to the ISO 20022 standard
-- **Payments Initiation V06 (pain.001.001.06):** Focused on supporting instant credit transfers within the SEPA region
-- **Payments Initiation V07 (pain.001.001.07):** Extended schema with additional optional elements for enhanced payment requests
-- **Payments Initiation V08 (pain.001.001.08):** Introduces support for new transaction types and enhanced validation rules
-- **Payments Initiation V09 (pain.001.001.09):** Simplified message structure with consolidated required fields
-- **Payments Initiation V10 (pain.001.001.10):** Enhanced with improved data structures and additional compliance requirements
-- **Payments Initiation V11 (pain.001.001.11):** The latest version with extended ISO 20022 compliance and advanced payment features
+- **Payments Initiation V03 (pain.001.001.03):** This version is
+  used for initiating credit transfers within the SEPA (Single Euro
+  Payments Area)
+- **Payments Initiation V04 (pain.001.001.04):** Enhanced with
+  additional optional fields and improved data structures
+- **Payments Initiation V05 (pain.001.001.05):** Brings further
+  refinements and clarifications to the ISO 20022 standard
+- **Payments Initiation V06 (pain.001.001.06):** Focused on
+  supporting instant credit transfers within the SEPA region
+- **Payments Initiation V07 (pain.001.001.07):** Extended schema
+  with additional optional elements for enhanced payment requests
+- **Payments Initiation V08 (pain.001.001.08):** Introduces support
+  for new transaction types and enhanced validation rules
+- **Payments Initiation V09 (pain.001.001.09):** Simplified message
+  structure with consolidated required fields
+- **Payments Initiation V10 (pain.001.001.10):** Enhanced with
+  improved data structures and additional compliance requirements
+- **Payments Initiation V11 (pain.001.001.11):** The latest version
+  with extended ISO 20022 compliance and advanced payment features
 
 ### Version Comparison
 
