@@ -21,10 +21,7 @@ import sqlite3
 import pytest
 
 from pain001.data.loader import load_payment_data
-from pain001.exceptions import (
-    DataSourceError,
-    PaymentValidationError,
-)
+from pain001.exceptions import DataSourceError, PaymentValidationError
 
 
 class TestDataLoader:

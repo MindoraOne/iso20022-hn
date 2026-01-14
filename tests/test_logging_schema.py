@@ -37,9 +37,7 @@ from pain001.logging_schema import (
 )
 
 
-class TestLoggingSchema(
-    unittest.TestCase
-):  # pylint: disable=too-many-public-methods
+class TestLoggingSchema(unittest.TestCase):  # pylint: disable=R0904
     """Test structured logging schema functionality."""
 
     def setUp(self) -> None:

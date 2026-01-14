@@ -166,7 +166,7 @@ def _redact_pii_from_dict(data: dict[str, Any]) -> dict[str, Any]:
         >>> _redact_pii_from_dict({"debtor_iban": "GB29NWBK60161331926819"})
         {'debtor_iban': 'GB29****6819'}
     """
-    redacted = {}
+    redacted: dict[str, Any] = {}
     for key, value in data.items():
         key_lower = key.lower()
 

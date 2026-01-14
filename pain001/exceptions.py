@@ -35,6 +35,9 @@ Example:
 """
 
 
+from typing import Optional
+
+
 class Pain001Error(Exception):
     """Base exception for all Pain001 errors.
 
@@ -69,7 +72,7 @@ class PaymentValidationError(Pain001Error):
         ...     return {"error": str(e), "field": e.field}
     """
 
-    def __init__(self, message: str, field: str = None):
+    def __init__(self, message: str, field: Optional[str] = None):
         """Initialize validation error with optional field name.
 
         Args:
@@ -157,7 +160,7 @@ class SchemaValidationError(Pain001Error):
         ...     log.debug(f"Validation errors: {e.errors}")
     """
 
-    def __init__(self, message: str, errors: list = None):
+    def __init__(self, message: str, errors: Optional[list[str]] = None):
         """Initialize schema validation error with optional error list.
 
         Args:
