@@ -523,7 +523,7 @@ def log_xml_generation_event(  # pylint: disable=too-many-arguments,too-many-pos
         )
 
 
-class ExecutionSummaryTracker:
+class ExecutionSummaryTracker:  # pylint: disable=too-many-instance-attributes
     """Track execution metrics for final summary report.
 
     This class provides automatic log event counting and execution
@@ -604,7 +604,7 @@ class ExecutionSummaryTracker:
         if level_lower in self.counts:
             self.counts[level_lower] += 1
 
-        if level_lower == "error" or level_lower == "critical":
+        if level_lower in ("error", "critical"):
             self.has_errors = True
         elif level_lower == "warning":
             self.has_warnings = True
@@ -686,12 +686,14 @@ class ExecutionSummaryTracker:
             summary_data["validation_metrics"] = self.validation_metrics  # type: ignore[assignment]
 
         # Add artifacts info
+        output_file_value = "None"
+        if self.output_file:
+            output_file_value = self.output_file
+        elif self.dry_run:
+            output_file_value = "None (Dry Run)"
+
         summary_data["artifacts"] = {  # type: ignore[assignment]
-            "output_file": (
-                self.output_file
-                if self.output_file
-                else "None (Dry Run)" if self.dry_run else "None"
-            ),
+            "output_file": output_file_value,
             "log_file": self.log_file if self.log_file else "None",
         }
 

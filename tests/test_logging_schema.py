@@ -17,6 +17,7 @@
 
 import json
 import logging
+import re
 import time
 import unittest
 from io import StringIO
@@ -24,8 +25,11 @@ from typing import Any
 
 from pain001.logging_schema import (
     Events,
+    ExecutionSummaryTracker,
     Fields,
     _redact_pii_from_dict,
+    generate_request_id,
+    get_request_id,
     log_data_load_event,
     log_event,
     log_process_error,
@@ -34,6 +38,7 @@ from pain001.logging_schema import (
     log_validation_event,
     log_xml_generation_event,
     mask_sensitive_data,
+    set_request_id,
 )
 
 
@@ -345,8 +350,6 @@ class TestLoggingSchema(unittest.TestCase):  # pylint: disable=R0904
 
     def test_timestamp_format(self) -> None:
         """Test that timestamps are ISO 8601 formatted."""
-        import re
-
         log_event(self.logger, logging.INFO, Events.PROCESS_START)
 
         entry = self._get_last_log_entry()
@@ -515,12 +518,6 @@ class TestLoggingSchema(unittest.TestCase):  # pylint: disable=R0904
 
     def test_request_id_generation(self) -> None:
         """Test that request IDs are generated and consistent within context."""
-        from pain001.logging_schema import (
-            generate_request_id,
-            get_request_id,
-            set_request_id,
-        )
-
         # Test generate_request_id format
         req_id = generate_request_id()
         self.assertTrue(req_id.startswith("req-"))
@@ -538,8 +535,6 @@ class TestLoggingSchema(unittest.TestCase):  # pylint: disable=R0904
 
     def test_log_event_includes_request_id(self) -> None:
         """Test that all log events include request_id."""
-        from pain001.logging_schema import set_request_id
-
         custom_id = "req-test1234"
         set_request_id(custom_id)
 
@@ -558,8 +553,6 @@ class TestLoggingSchema(unittest.TestCase):  # pylint: disable=R0904
 
     def test_execution_summary_tracker_context_manager(self) -> None:
         """Test ExecutionSummaryTracker as context manager."""
-        from pain001.logging_schema import ExecutionSummaryTracker
-
         with ExecutionSummaryTracker(
             self.logger, dry_run=True, message_type="pain.001.001.03"
         ) as tracker:
@@ -596,8 +589,8 @@ class TestLoggingSchema(unittest.TestCase):  # pylint: disable=R0904
         )
         tracker.start()
         tracker.increment_processed_records(500)
-        tracker.set_output_file("/tmp/output.xml")
-        tracker.set_log_file("/tmp/pain001.log")
+        tracker.set_output_file("/tmp/output.xml")  # nosec B108
+        tracker.set_log_file("/tmp/pain001.log")  # nosec B108
         tracker.log_summary()
 
         entry = self._get_last_log_entry()
@@ -606,9 +599,13 @@ class TestLoggingSchema(unittest.TestCase):  # pylint: disable=R0904
         self.assertEqual(summary["execution_mode"], "production")
         self.assertEqual(summary["total_records_processed"], 500)
         self.assertEqual(
-            summary["artifacts"]["output_file"], "/tmp/output.xml"
+            summary["artifacts"]["output_file"],
+            "/tmp/output.xml",  # nosec B108
         )
-        self.assertEqual(summary["artifacts"]["log_file"], "/tmp/pain001.log")
+        self.assertEqual(
+            summary["artifacts"]["log_file"],
+            "/tmp/pain001.log",  # nosec B108
+        )
 
     def test_execution_summary_tracker_with_errors(self) -> None:
         """Test ExecutionSummaryTracker status with errors."""
