@@ -37,7 +37,9 @@ from pain001.logging_schema import (
 )
 
 
-class TestLoggingSchema(unittest.TestCase):  # pylint: disable=too-many-public-methods
+class TestLoggingSchema(
+    unittest.TestCase
+):  # pylint: disable=too-many-public-methods
     """Test structured logging schema functionality."""
 
     def setUp(self) -> None:
@@ -409,7 +411,7 @@ class TestLoggingSchema(unittest.TestCase):  # pylint: disable=too-many-public-m
             "cdtr": "Bob Johnson",
         }
         redacted = _redact_pii_from_dict(data)
-        
+
         # Only fields containing 'name' are redacted
         self.assertEqual(redacted["debtor_name"], "[REDACTED]")
         self.assertEqual(redacted["creditor_name"], "[REDACTED]")
@@ -424,7 +426,7 @@ class TestLoggingSchema(unittest.TestCase):  # pylint: disable=too-many-public-m
             "account": "9876543210",
         }
         redacted = _redact_pii_from_dict(data)
-        
+
         # Account numbers should show first 4 and last 4 only
         self.assertEqual(redacted["account_number"], "1234********3456")
         self.assertEqual(redacted["account"], "9876**3210")
@@ -445,7 +447,7 @@ class TestLoggingSchema(unittest.TestCase):  # pylint: disable=too-many-public-m
             ],
         }
         redacted = _redact_pii_from_dict(data)
-        
+
         # Nested dict redaction
         self.assertEqual(
             redacted["transaction"]["debtor_iban"], "GB29**************6819"
@@ -456,7 +458,7 @@ class TestLoggingSchema(unittest.TestCase):  # pylint: disable=too-many-public-m
         self.assertEqual(
             redacted["transaction"]["creditor"]["bic"], "NWBK**2L"
         )
-        
+
         # List redaction (FR IBAN is 27 chars -> 4 + 19* + 4)
         self.assertEqual(
             redacted["payments"][0]["iban"], "DE89**************3000"
@@ -476,13 +478,13 @@ class TestLoggingSchema(unittest.TestCase):  # pylint: disable=too-many-public-m
             "debtor_iban": "GB29NWBK60161331926819",
         }
         redacted = _redact_pii_from_dict(data)
-        
+
         # Non-sensitive fields unchanged
         self.assertEqual(redacted["message_type"], "pain.001.001.03")
         self.assertEqual(redacted["record_count"], 42)
         self.assertEqual(redacted["timestamp"], "2025-01-15T10:30:00Z")
         self.assertEqual(redacted["success"], True)
-        
+
         # Sensitive field redacted (22 chars -> 4 + 14* + 4)
         self.assertEqual(redacted["debtor_iban"], "GB29**************6819")
 
@@ -496,9 +498,9 @@ class TestLoggingSchema(unittest.TestCase):  # pylint: disable=too-many-public-m
             debtor_name="John Doe",
             record_count=10,
         )
-        
+
         entry = self._get_last_log_entry()
-        
+
         # PII should be automatically redacted (22 chars -> 4 + 14* + 4)
         self.assertEqual(entry["debtor_iban"], "GB29**************6819")
         self.assertEqual(entry["debtor_name"], "[REDACTED]")

@@ -213,16 +213,21 @@ class TestDataLoader:
         invalid_data = [{"id": "MSG001"}, "not a dict", {"id": "MSG003"}]
 
         with pytest.raises(
-            PaymentValidationError, match="All items in data list must be dictionaries"
+            PaymentValidationError,
+            match="All items in data list must be dictionaries",
         ):
             load_payment_data(invalid_data)
 
     def test_unsupported_type_raises_error(self) -> None:
         """Test that unsupported data types raise DataSourceError."""
-        with pytest.raises(DataSourceError, match="Unsupported data source type"):
+        with pytest.raises(
+            DataSourceError, match="Unsupported data source type"
+        ):
             load_payment_data(12345)
 
-        with pytest.raises(DataSourceError, match="Unsupported data source type"):
+        with pytest.raises(
+            DataSourceError, match="Unsupported data source type"
+        ):
             load_payment_data(None)
 
     # ========== INTEGRATION TESTS ==========
@@ -281,6 +286,7 @@ class TestDataLoader:
             return_value=False,
         ):
             with pytest.raises(
-                PaymentValidationError, match="Data dictionary validation failed"
+                PaymentValidationError,
+                match="Data dictionary validation failed",
             ):
                 load_payment_data(invalid_data_dict)

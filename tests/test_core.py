@@ -355,7 +355,9 @@ class TestProcessFiles(unittest.TestCase):
         """Test processing with unsupported data type (triggers unknown path)."""
         # Pass an unsupported type (not str, list, or dict)
         # This should log "unknown" data_source_type and then raise DataSourceError
-        with pytest.raises(DataSourceError, match="Unsupported data source type"):
+        with pytest.raises(
+            DataSourceError, match="Unsupported data source type"
+        ):
             process_files(
                 xml_message_type=self.xml_message_type,
                 xml_template_file_path=self.xml_template_file_path,
