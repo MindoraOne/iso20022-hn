@@ -108,8 +108,13 @@ class TestLoggingSchema(unittest.TestCase):  # pylint: disable=R0904
         self.assertEqual(Fields.SIZE_BYTES, "size_bytes")
         self.assertEqual(Fields.ERROR_TYPE, "error_type")
         self.assertEqual(Fields.ERROR_MESSAGE, "error_message")
-        self.assertEqual(Fields.ERROR_DETAILS, "error_details")
+        self.assertEqual(Fields.ERROR_FIELD, "error_field")
+        self.assertEqual(Fields.ERROR_INVALID_VALUE, "error_invalid_value")
+        self.assertEqual(Fields.ERROR_REASON, "error_reason")
         self.assertEqual(Fields.VALIDATION_TYPE, "validation_type")
+        self.assertEqual(Fields.REQUEST_ID, "request_id")
+        self.assertEqual(Fields.LOGGER_NAME, "logger")
+        self.assertEqual(Fields.VERSION, "version")
 
     def test_mask_sensitive_data(self) -> None:
         """Test sensitive data masking."""
@@ -339,17 +344,21 @@ class TestLoggingSchema(unittest.TestCase):  # pylint: disable=R0904
                 self.fail(f"Invalid JSON: {line}")
 
     def test_timestamp_format(self) -> None:
-        """Test that timestamps are unix timestamps."""
-        before = time.time()
+        """Test that timestamps are ISO 8601 formatted."""
+        import re
+
         log_event(self.logger, logging.INFO, Events.PROCESS_START)
-        after = time.time()
 
         entry = self._get_last_log_entry()
         timestamp = entry[Fields.TIMESTAMP]
 
-        self.assertIsInstance(timestamp, (int, float))
-        self.assertGreaterEqual(timestamp, before)
-        self.assertLessEqual(timestamp, after)
+        # Verify ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ)
+        self.assertIsInstance(timestamp, str)
+        iso8601_pattern = r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$"
+        self.assertIsNotNone(
+            re.match(iso8601_pattern, timestamp),
+            f"Timestamp '{timestamp}' does not match ISO 8601 format",
+        )
 
     def test_multiple_extra_fields(self) -> None:
         """Test logging with multiple extra fields."""
@@ -502,8 +511,149 @@ class TestLoggingSchema(unittest.TestCase):  # pylint: disable=R0904
         # PII should be automatically redacted (22 chars -> 4 + 14* + 4)
         self.assertEqual(entry["debtor_iban"], "GB29**************6819")
         self.assertEqual(entry["debtor_name"], "[REDACTED]")
-        # Non-PII preserved
         self.assertEqual(entry["record_count"], 10)
+
+    def test_request_id_generation(self) -> None:
+        """Test that request IDs are generated and consistent within context."""
+        from pain001.logging_schema import (
+            generate_request_id,
+            get_request_id,
+            set_request_id,
+        )
+
+        # Test generate_request_id format
+        req_id = generate_request_id()
+        self.assertTrue(req_id.startswith("req-"))
+        self.assertEqual(len(req_id), 12)  # req- + 8 hex chars
+
+        # Test get_request_id creates one if missing
+        req_id1 = get_request_id()
+        req_id2 = get_request_id()
+        self.assertEqual(req_id1, req_id2)  # Should be same within context
+
+        # Test set_request_id
+        custom_id = "req-custom01"
+        set_request_id(custom_id)
+        self.assertEqual(get_request_id(), custom_id)
+
+    def test_log_event_includes_request_id(self) -> None:
+        """Test that all log events include request_id."""
+        from pain001.logging_schema import set_request_id
+
+        custom_id = "req-test1234"
+        set_request_id(custom_id)
+
+        log_event(
+            self.logger,
+            logging.INFO,
+            Events.PROCESS_START,
+            message_type="pain.001.001.03",
+        )
+
+        entry = self._get_last_log_entry()
+        self.assertEqual(entry[Fields.REQUEST_ID], custom_id)
+        self.assertEqual(entry[Fields.LOGGER_NAME], "test_logger")
+        self.assertIn(Fields.VERSION, entry)
+        self.assertEqual(entry[Fields.LEVEL], "INFO")
+
+    def test_execution_summary_tracker_context_manager(self) -> None:
+        """Test ExecutionSummaryTracker as context manager."""
+        from pain001.logging_schema import ExecutionSummaryTracker
+
+        with ExecutionSummaryTracker(
+            self.logger, dry_run=True, message_type="pain.001.001.03"
+        ) as tracker:
+            tracker.increment_processed_records(1250)
+            tracker.set_validation_result("schema_validation", "PASSED")
+            tracker.set_validation_result("checksum_validation", "PASSED")
+            tracker.increment_event_count("info")
+            tracker.increment_event_count("info")
+            tracker.increment_event_count("warning")
+
+        # Check summary was logged
+        entry = self._get_last_log_entry()
+        self.assertEqual(entry[Fields.EVENT], Events.EXECUTION_SUMMARY)
+        self.assertIn("summary", entry)
+
+        summary = entry["summary"]
+        self.assertEqual(summary["status"], "COMPLETED_WITH_WARNINGS")
+        self.assertEqual(summary["execution_mode"], "dry_run")
+        self.assertEqual(summary["total_records_processed"], 1250)
+        self.assertEqual(summary["counts"]["info"], 2)
+        self.assertEqual(summary["counts"]["warning"], 1)
+        self.assertEqual(
+            summary["validation_metrics"]["schema_validation"], "PASSED"
+        )
+        self.assertIn("performance", summary)
+        self.assertIn("artifacts", summary)
+
+    def test_execution_summary_tracker_manual_usage(self) -> None:
+        """Test ExecutionSummaryTracker with manual start/stop."""
+        from pain001.logging_schema import ExecutionSummaryTracker
+
+        tracker = ExecutionSummaryTracker(
+            self.logger, dry_run=False, message_type="pain.001.001.09"
+        )
+        tracker.start()
+        tracker.increment_processed_records(500)
+        tracker.set_output_file("/tmp/output.xml")
+        tracker.set_log_file("/tmp/pain001.log")
+        tracker.log_summary()
+
+        entry = self._get_last_log_entry()
+        summary = entry["summary"]
+        self.assertEqual(summary["status"], "SUCCESS")
+        self.assertEqual(summary["execution_mode"], "production")
+        self.assertEqual(summary["total_records_processed"], 500)
+        self.assertEqual(
+            summary["artifacts"]["output_file"], "/tmp/output.xml"
+        )
+        self.assertEqual(summary["artifacts"]["log_file"], "/tmp/pain001.log")
+
+    def test_execution_summary_tracker_with_errors(self) -> None:
+        """Test ExecutionSummaryTracker status with errors."""
+        from pain001.logging_schema import ExecutionSummaryTracker
+
+        tracker = ExecutionSummaryTracker(self.logger)
+        tracker.start()
+        tracker.increment_event_count("error")
+        tracker.increment_event_count("error")
+        tracker.log_summary()
+
+        entry = self._get_last_log_entry()
+        summary = entry["summary"]
+        self.assertEqual(summary["status"], "FAILED")
+        self.assertEqual(summary["counts"]["error"], 2)
+
+    def test_execution_summary_tracker_aborted(self) -> None:
+        """Test ExecutionSummaryTracker abort status."""
+        from pain001.logging_schema import ExecutionSummaryTracker
+
+        tracker = ExecutionSummaryTracker(self.logger)
+        tracker.start()
+        tracker.abort()
+        tracker.log_summary()
+
+        entry = self._get_last_log_entry()
+        summary = entry["summary"]
+        self.assertEqual(summary["status"], "ABORTED")
+
+    def test_execution_summary_tracker_exception_handling(self) -> None:
+        """Test ExecutionSummaryTracker handles exceptions in context."""
+        from pain001.logging_schema import ExecutionSummaryTracker
+
+        try:
+            with ExecutionSummaryTracker(self.logger) as tracker:
+                tracker.increment_processed_records(100)
+                raise ValueError("Test exception")
+        except ValueError:
+            pass  # Expected
+
+        # Summary should still be logged with ABORTED status
+        entry = self._get_last_log_entry()
+        summary = entry["summary"]
+        self.assertEqual(summary["status"], "ABORTED")
+        self.assertEqual(summary["counts"]["error"], 1)  # Auto-incremented
 
 
 if __name__ == "__main__":

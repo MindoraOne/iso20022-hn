@@ -26,6 +26,20 @@ This module implements automatic PII redaction for sensitive fields.
 Any field containing IBAN, BIC, or personal names is automatically
 masked before logging to ensure GDPR/PCI-DSS compliance.
 
+Request Tracing
+---------------
+Every operation is assigned a unique request_id (UUID) to enable
+end-to-end request tracking across distributed systems and microservices.
+This is essential for API Layer (#149) observability.
+
+Log Severity Mapping (ISO 20022 Context)
+-----------------------------------------
+- DEBUG: XSD traversal, template loading, variable substitution
+- INFO: Process start/success, validation success, file generation
+- WARNING: Schema deprecation, character truncation, missing optional fields
+- ERROR: XSD validation failure, checksum failure, bank profile violations
+- CRITICAL: Missing dependencies, memory overflow, configuration corruption
+
 Event Naming Convention:
     - Use snake_case for event names
     - Format: <component>_<action>_<state>
@@ -35,12 +49,30 @@ Field Naming Convention:
     - Use snake_case for field names
     - Be consistent with terminology across all events
     - Include units where applicable (e.g., "duration_ms", "size_bytes")
+    - All logs are flat JSON objects for easy indexing
 """
 
 import json
 import logging
 import time
+import uuid
+from contextvars import ContextVar
 from typing import Any, Optional
+
+# Context variable for request tracing across async operations
+_request_id_context: ContextVar[Optional[str]] = ContextVar(
+    "request_id", default=None
+)
+
+
+# Execution Status Constants
+class ExecutionStatus:  # pylint: disable=too-few-public-methods
+    """High-level execution status for summary reports."""
+
+    SUCCESS = "SUCCESS"
+    FAILED = "FAILED"
+    COMPLETED_WITH_WARNINGS = "COMPLETED_WITH_WARNINGS"
+    ABORTED = "ABORTED"
 
 
 # Standard Event Names
@@ -51,6 +83,7 @@ class Events:  # pylint: disable=too-few-public-methods
     PROCESS_START = "process_start"
     PROCESS_SUCCESS = "process_success"
     PROCESS_ERROR = "process_error"
+    EXECUTION_SUMMARY = "execution_summary"  # Final summary report
 
     # CLI events
     CLI_ARGS_PARSED = "cli_args_parsed"
@@ -84,19 +117,24 @@ class Events:  # pylint: disable=too-few-public-methods
 class Fields:  # pylint: disable=too-few-public-methods
     """Standardized field names for structured logging."""
 
-    # Core fields
+    # Core fields (always present)
     EVENT = "event"
     TIMESTAMP = "timestamp"
     LEVEL = "level"
+    REQUEST_ID = "request_id"  # UUID for request tracing
+    LOGGER_NAME = "logger"
 
     # Component identification
     COMPONENT = "component"
     MODULE = "module"
     FUNCTION = "function"
+    VERSION = "version"  # Pain001 library version
 
     # Message type and version
     MESSAGE_TYPE = "message_type"
     ISO_VERSION = "iso_version"
+    DRY_RUN = "dry_run"  # Boolean flag
+    BANK_PROFILE = "bank_profile"  # e.g., hsbc_uk, jpm_cbpr_plus
 
     # File paths (never log sensitive data)
     TEMPLATE_PATH = "template_path"
@@ -111,13 +149,55 @@ class Fields:  # pylint: disable=too-few-public-methods
     DURATION_MS = "duration_ms"
     SIZE_BYTES = "size_bytes"
 
-    # Error information
+    # Error information (flat structure)
     ERROR_TYPE = "error_type"
     ERROR_MESSAGE = "error_message"
-    ERROR_DETAILS = "error_details"
+    ERROR_FIELD = "error_field"  # Which field failed validation
+    ERROR_INVALID_VALUE = (
+        "error_invalid_value"  # The invalid value (masked if PII)
+    )
+    ERROR_REASON = (
+        "error_reason"  # Detailed reason (e.g., "Invalid checksum (ISO 7064)")
+    )
 
     # Validation details
     VALIDATION_TYPE = "validation_type"  # schema, data, business_rules
+    END_TO_END_ID = "end_to_end_id"  # Transaction reference for tracing
+
+
+def generate_request_id() -> str:
+    """Generate a unique request ID for request tracing.
+
+    Returns:
+        A short UUID-based request ID (format: req-<8-char-hex>).
+
+    Example:
+        >>> generate_request_id()
+        'req-88f24b21'
+    """
+    return f"req-{uuid.uuid4().hex[:8]}"
+
+
+def get_request_id() -> str:
+    """Get or create request ID for current context.
+
+    Returns:
+        The request ID for the current execution context.
+    """
+    request_id = _request_id_context.get()
+    if request_id is None:
+        request_id = generate_request_id()
+        _request_id_context.set(request_id)
+    return request_id
+
+
+def set_request_id(request_id: str) -> None:
+    """Set request ID for current context (useful for API handlers).
+
+    Args:
+        request_id: The request ID to set.
+    """
+    _request_id_context.set(request_id)
 
 
 def mask_sensitive_data(value: str, visible_chars: int = 4) -> str:
@@ -207,9 +287,11 @@ def log_event(
 ) -> None:
     """Log a structured event with standardized format and PII redaction.
 
-    This function automatically redacts PII before logging to ensure
-    compliance with GDPR and PCI-DSS requirements. Any field containing
-    'iban', 'bic', 'name', or 'account' is automatically masked.
+    This function automatically:
+    1. Adds request_id for distributed tracing
+    2. Adds ISO 8601 timestamp
+    3. Redacts PII before logging (GDPR/PCI-DSS compliance)
+    4. Outputs flat JSON for easy indexing
 
     Args:
         logger: The logger instance to use.
@@ -225,10 +307,19 @@ def log_event(
         ...     message_type="pain.001.001.03",
         ...     record_count=10
         ... )
+        # Output: {"timestamp": "2026-01-14T21:59:55Z", "level": "INFO",
+        #          "request_id": "req-88f24b21", "event": "process_start", ...}
     """
+    from pain001 import __version__  # pylint: disable=import-outside-toplevel
+
+    # Build flat JSON structure
     log_data = {
+        Fields.TIMESTAMP: time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        Fields.LEVEL: logging.getLevelName(level),
+        Fields.LOGGER_NAME: logger.name,
+        Fields.REQUEST_ID: get_request_id(),
         Fields.EVENT: event,
-        Fields.TIMESTAMP: time.time(),
+        Fields.VERSION: __version__,
         **fields,
     }
 
@@ -430,3 +521,202 @@ def log_xml_generation_event(  # pylint: disable=too-many-arguments,too-many-pos
             error_type=type(error).__name__ if error else "Unknown",
             error_message=str(error) if error else "XML generation failed",
         )
+
+
+class ExecutionSummaryTracker:
+    """Track execution metrics for final summary report.
+
+    This class provides automatic log event counting and execution
+    metrics tracking for generating comprehensive summary reports.
+    Use as a context manager for automatic start/end tracking.
+
+    Example:
+        >>> with ExecutionSummaryTracker(logger) as tracker:
+        ...     # Your execution logic here
+        ...     tracker.increment_processed_records(1250)
+        ...     tracker.set_validation_result("schema_validation", "PASSED")
+        # Summary report automatically logged on exit
+
+        >>> # Or use manually:
+        >>> tracker = ExecutionSummaryTracker(logger, dry_run=True)
+        >>> tracker.start()
+        >>> # ... execution logic ...
+        >>> tracker.log_summary()
+    """
+
+    def __init__(
+        self,
+        logger: logging.Logger,
+        dry_run: bool = False,
+        message_type: Optional[str] = None,
+    ):
+        """Initialize execution summary tracker.
+
+        Args:
+            logger: Logger instance to use for summary report.
+            dry_run: Whether this is a dry-run execution.
+            message_type: ISO 20022 message type (if applicable).
+        """
+        self.logger = logger
+        self.dry_run = dry_run
+        self.message_type = message_type
+
+        # Execution metrics
+        self.start_time: Optional[float] = None
+        self.end_time: Optional[float] = None
+        self.start_time_iso: Optional[str] = None
+        self.end_time_iso: Optional[str] = None
+
+        # Event counts
+        self.counts = {
+            "debug": 0,
+            "info": 0,
+            "warning": 0,
+            "error": 0,
+            "critical": 0,
+        }
+
+        # Processing metrics
+        self.total_records_processed = 0
+        self.validation_metrics: dict[str, str] = {}
+        self.output_file: Optional[str] = None
+        self.log_file: Optional[str] = None
+
+        # Status tracking
+        self.has_errors = False
+        self.has_warnings = False
+        self.aborted = False
+
+    def start(self) -> None:
+        """Mark execution start time."""
+        self.start_time = time.time()
+        self.start_time_iso = time.strftime(
+            "%Y-%m-%dT%H:%M:%SZ", time.gmtime()
+        )
+
+    def increment_event_count(self, level: str) -> None:
+        """Increment count for a specific log level.
+
+        Args:
+            level: Log level name (debug, info, warning, error, critical).
+        """
+        level_lower = level.lower()
+        if level_lower in self.counts:
+            self.counts[level_lower] += 1
+
+        if level_lower == "error" or level_lower == "critical":
+            self.has_errors = True
+        elif level_lower == "warning":
+            self.has_warnings = True
+
+    def increment_processed_records(self, count: int = 1) -> None:
+        """Increment total records processed count.
+
+        Args:
+            count: Number of records to add (default: 1).
+        """
+        self.total_records_processed += count
+
+    def set_validation_result(self, validation_type: str, result: str) -> None:
+        """Set validation result for a specific validation type.
+
+        Args:
+            validation_type: Type of validation (e.g., "schema_validation").
+            result: Result status (e.g., "PASSED", "FAILED").
+        """
+        self.validation_metrics[validation_type] = result
+
+    def set_output_file(self, file_path: Optional[str]) -> None:
+        """Set output file path.
+
+        Args:
+            file_path: Path to generated output file (None for dry-run).
+        """
+        self.output_file = file_path
+
+    def set_log_file(self, file_path: str) -> None:
+        """Set log file path.
+
+        Args:
+            file_path: Path to log file.
+        """
+        self.log_file = file_path
+
+    def abort(self) -> None:
+        """Mark execution as aborted."""
+        self.aborted = True
+
+    def _get_status(self) -> str:
+        """Determine execution status based on tracked metrics.
+
+        Returns:
+            Status string from ExecutionStatus constants.
+        """
+        if self.aborted:
+            return ExecutionStatus.ABORTED
+        if self.has_errors:
+            return ExecutionStatus.FAILED
+        if self.has_warnings:
+            return ExecutionStatus.COMPLETED_WITH_WARNINGS
+        return ExecutionStatus.SUCCESS
+
+    def log_summary(self) -> None:
+        """Log execution summary report."""
+        self.end_time = time.time()
+        self.end_time_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+        duration_ms = 0
+        if self.start_time is not None:
+            duration_ms = int((self.end_time - self.start_time) * 1000)
+
+        summary_data = {
+            "status": self._get_status(),
+            "execution_mode": "dry_run" if self.dry_run else "production",
+            "total_records_processed": self.total_records_processed,
+            "counts": self.counts,
+            "performance": {
+                "start_time": self.start_time_iso,
+                "end_time": self.end_time_iso,
+                "total_duration_ms": duration_ms,
+            },
+        }
+
+        # Add validation metrics if any were tracked
+        if self.validation_metrics:
+            summary_data["validation_metrics"] = self.validation_metrics  # type: ignore[assignment]
+
+        # Add artifacts info
+        summary_data["artifacts"] = {  # type: ignore[assignment]
+            "output_file": (
+                self.output_file
+                if self.output_file
+                else "None (Dry Run)" if self.dry_run else "None"
+            ),
+            "log_file": self.log_file if self.log_file else "None",
+        }
+
+        # Add message type if provided
+        if self.message_type:
+            summary_data["message_type"] = self.message_type
+
+        log_event(
+            self.logger,
+            logging.INFO,
+            Events.EXECUTION_SUMMARY,
+            message="Execution Summary Report",
+            summary=summary_data,
+        )
+
+    def __enter__(self) -> "ExecutionSummaryTracker":
+        """Context manager entry."""
+        self.start()
+        return self
+
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        """Context manager exit - log summary automatically."""
+        if exc_type is not None:
+            # Exception occurred - mark as error and aborted
+            self.increment_event_count("error")
+            self.abort()
+
+        self.log_summary()

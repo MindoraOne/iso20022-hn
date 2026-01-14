@@ -43,24 +43,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - CLI flag `--no-pre-validate` to disable (default: enabled)
   - 86 total new tests for validation subsystem
 
+- **Enhanced Structured Logging** - Request tracing and execution summary reports:
+  - **Request Tracing**: Unique `request_id` (format: `req-<8-hex-chars>`) added to every log entry using `contextvars.ContextVar` for thread-safe async operation tracking
+  - **Execution Summary Reports**: `ExecutionSummaryTracker` class logs comprehensive final report with:
+    - Status determination (SUCCESS/FAILED/COMPLETED_WITH_WARNINGS/ABORTED)
+    - Log event counts by level (debug/info/warning/error/critical)
+    - Total records processed counter
+    - Validation metrics tracking (schema_validation, checksum_validation, etc.)
+    - Performance metrics (start_time, end_time, total_duration_ms)
+    - Artifact paths (output_file, log_file)
+  - **ISO 8601 Timestamps**: Changed from Unix epoch to `YYYY-MM-DDTHH:MM:SSZ` format for better readability
+  - **Flat JSON Structure**: All log entries use single-level JSON objects (no nested dicts except in summary field)
+  - **ISO 20022 Severity Mapping**: DEBUG (traversal), INFO (success), WARNING (non-critical), ERROR (validation failure), CRITICAL (system crash)
+  - 5 new tests for execution tracking (31 total logging tests, 99% coverage of `logging_schema.py`)
+  - Prepares for API Layer (#149) distributed tracing requirements
+
 ### Changed
 
 - **Coverage Threshold Adjustment** - Reduced from 99% to 98% for sustainable quality:
   - Updated `pyproject.toml` coverage threshold: `--cov-fail-under=98`
   - Updated `setup.cfg` coverage threshold: `--cov-fail-under=98`
   - Updated `Makefile` test/cov targets with 98% floor
-  - Updated README.md metrics: 98.56% coverage with 561 tests
+  - Updated README.md metrics: 98.55% coverage with 568 tests
   - Rationale: 98% provides strong quality assurance while avoiding diminishing returns of complex edge case mocking
-  - Current actual coverage: 98.56% (exceeds threshold)
+  - Current actual coverage: 98.55% (exceeds threshold)
+
+- **Codacy Compliance Fixes** - Reduced return statement count from 8 to 5 in validators:
+  - `pain001.validation.iban_validator`: Combined length checks and grouped format errors with semicolon separation (8→5 returns)
+  - `pain001.validation.bic_validator`: Combined code format checks with composite error messages (8→5 returns)
+  - Both validators now comply with Codacy's 6-return limit per function
+  - Applied Black formatting to ensure code style consistency
 
 ### Quality Assurance
 
-- **Code Quality**: 561 tests passing (↑86 from v0.0.45) with 98.56% total coverage
-- **Type Hints**: Full strict typing across all validation modules (0 mypy errors in 87 files)
-- **Linting**: All linters pass (ruff, black, mypy, pylint 9.94/10)
+- **Code Quality**: 568 tests passing (↑93 from v0.0.45) with 98.55% total coverage
+- **Type Hints**: Full strict typing across all validation and logging modules (0 mypy errors in 87 files)
+- **Linting**: All linters pass (ruff, black, mypy, pylint 9.93/10)
 - **Security**: 0 vulnerabilities (bandit, safety)
-- **Performance**: Test suite 43.30s (< 60s SLO)
+- **Performance**: Test suite 45.46s (< 60s SLO)
 - **Backward Compatibility**: 100% maintained - all 9 ISO versions × 4 input sources validated
+- **Codacy Compliance**: All checks passing (return statement limits, complexity metrics)
 
 ### Notes
 

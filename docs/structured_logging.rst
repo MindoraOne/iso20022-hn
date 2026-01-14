@@ -23,11 +23,14 @@ All log entries follow this JSON structure:
 .. code-block:: json
 
     {
+        "timestamp": "2026-01-14T22:06:40Z",
+        "level": "INFO",
+        "logger": "pain001.core.core",
+        "request_id": "req-e5ffe29b",
         "event": "process_start",
-        "timestamp": 1704987654.123,
+        "version": "0.0.46",
         "message_type": "pain.001.001.03",
-        "data_source_type": "csv",
-        "record_count": 100
+        "data_source_type": "csv"
     }
 
 Standard Events
@@ -162,6 +165,18 @@ XSD Validation Events
         - ``error_type``: Exception class name
         - ``error_message``: Error description
 
+**execution_summary**
+    Comprehensive final report logged at process completion
+
+    Fields:
+        - ``status``: SUCCESS | FAILED | COMPLETED_WITH_WARNINGS | ABORTED
+        - ``execution_mode``: dry_run | production
+        - ``total_records_processed``: Total record count
+        - ``counts``: Event counts by level (debug, info, warning, error, critical)
+        - ``performance``: Start time, end time, total_duration_ms
+        - ``validation_metrics``: Schema validation, checksum validation results
+        - ``artifacts``: Output file and log file paths
+
 Namespace Events
 ----------------
 
@@ -178,8 +193,11 @@ Core Fields
 -----------
 
 - ``event``: Event name (always present)
-- ``timestamp``: Unix timestamp (always present)
-- ``level``: Log level (info, error, etc.)
+- ``timestamp``: ISO 8601 timestamp (YYYY-MM-DDTHH:MM:SSZ format, always present)
+- ``level``: Log level (INFO, ERROR, etc., always present)
+- ``logger``: Logger name (always present)
+- ``request_id``: Unique request identifier in format "req-<8-hex-chars>" (always present)
+- ``version``: Pain001 library version (always present)
 
 Identity Fields
 ---------------
@@ -458,6 +476,120 @@ Best Practices
 5. **Use consistent event names** from the Events class
 6. **Include error context** for debugging
 7. **Log at appropriate levels** (DEBUG for details, INFO for lifecycle, ERROR for failures)
+8. **Track requests** using request_id for distributed tracing
+9. **Monitor execution summaries** for at-a-glance health status
+
+Request Tracing (v0.0.46+)
+===========================
+
+Every log entry includes a unique ``request_id`` for end-to-end request tracking:
+
+.. code-block:: python
+
+    from pain001.logging_schema import set_request_id, get_request_id
+
+    # Set custom request ID (optional - auto-generated if not set)
+    set_request_id("req-custom01")
+
+    # Get current request ID
+    request_id = get_request_id()  # Returns "req-custom01" or auto-generated ID
+
+    # All log_event calls automatically include request_id
+    log_event(
+        logger,
+        logging.INFO,
+        Events.PROCESS_START,
+        message_type="pain.001.001.03"
+    )
+    # Output includes: "request_id": "req-custom01"
+
+**Request ID Format:** ``req-<8-hex-chars>`` (e.g., ``req-e5ffe29b``)
+
+**Use Cases:**
+- Correlate logs across distributed systems
+- Track payment processing from API to file generation
+- Debug issues across microservices
+- Aggregate logs by transaction
+
+Execution Summary Reports (v0.0.46+)
+=====================================
+
+Automatically log comprehensive summary at process completion:
+
+.. code-block:: python
+
+    from pain001.logging_schema import ExecutionSummaryTracker
+
+    # Use as context manager (automatic tracking)
+    with ExecutionSummaryTracker(
+        logger=logger,
+        message_type="pain.001.001.03",
+        dry_run=False
+    ) as tracker:
+        # Process payments
+        tracker.increment_processed_records(1250)
+        
+        # Track validation results
+        tracker.set_validation_result("schema_validation", "PASSED")
+        tracker.set_validation_result("checksum_validation", "PASSED")
+        
+        # Set output paths
+        tracker.output_file = "/path/to/output.xml"
+        tracker.log_file = "/path/to/logfile.log"
+        
+    # Automatic summary logged on exit
+
+**Example Summary Output:**
+
+.. code-block:: json
+
+    {
+        "timestamp": "2026-01-14T22:06:40Z",
+        "level": "INFO",
+        "logger": "pain001.core.core",
+        "request_id": "req-e5ffe29b",
+        "event": "execution_summary",
+        "version": "0.0.46",
+        "message": "Execution Summary Report",
+        "summary": {
+            "status": "SUCCESS",
+            "execution_mode": "production",
+            "total_records_processed": 1250,
+            "counts": {
+                "debug": 5,
+                "info": 12,
+                "warning": 0,
+                "error": 0,
+                "critical": 0
+            },
+            "performance": {
+                "start_time": "2026-01-14T22:06:38Z",
+                "end_time": "2026-01-14T22:06:40Z",
+                "total_duration_ms": 2105
+            },
+            "validation_metrics": {
+                "schema_validation": "PASSED",
+                "checksum_validation": "PASSED"
+            },
+            "artifacts": {
+                "output_file": "/path/to/output.xml",
+                "log_file": "/path/to/logfile.log"
+            }
+        }
+    }
+
+**Status Values:**
+- ``SUCCESS``: All operations completed without errors or warnings
+- ``COMPLETED_WITH_WARNINGS``: Completed but with non-critical warnings
+- ``FAILED``: Errors encountered during execution
+- ``ABORTED``: Process terminated early
+
+**Integration Benefits:**
+- Dashboard indicators (green/yellow/red status)
+- Reconciliation via total_records_processed
+- Performance regression tracking (duration_ms)
+- Automated health monitoring
+- Management-friendly at-a-glance reports
 
 Next Steps
 ==========
