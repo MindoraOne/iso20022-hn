@@ -76,10 +76,8 @@ class TestReadmeExamples(unittest.TestCase):
         Example shows using pain001 as a library within an application
         with programmatic API.
         """
-        from pain001 import process_files
-
         # Test using the process_files function directly
-        process_files(
+        pain001.process_files(
             "pain.001.001.03",
             str(self.xml_template),
             str(self.xsd_schema),
@@ -97,11 +95,10 @@ class TestReadmeExamples(unittest.TestCase):
         Example shows programmatic usage with error handling and validation.
         """
         # Import required modules
-        from pain001 import process_files
 
         try:
             # Generate XML for pain.001.001.03
-            process_files(
+            pain001.process_files(
                 "pain.001.001.03",
                 str(self.xml_template),
                 str(self.xsd_schema),
@@ -138,11 +135,10 @@ class TestReadmeExamples(unittest.TestCase):
 
         Example shows using the XSD validator directly.
         """
-        from pain001 import process_files
         from pain001.xml.validate_via_xsd import validate_via_xsd
 
         # First generate an XML file
-        process_files(
+        pain001.process_files(
             "pain.001.001.03",
             str(self.xml_template),
             str(self.xsd_schema),
@@ -163,10 +159,10 @@ class TestReadmeExamples(unittest.TestCase):
 
         Example shows processing CSV data files.
         """
-        from pain001 import process_files
+
 
         # Process CSV file
-        process_files(
+        pain001.process_files(
             "pain.001.001.03",
             str(self.xml_template),
             str(self.xsd_schema),
@@ -189,10 +185,9 @@ class TestReadmeExamples(unittest.TestCase):
 
         Example shows processing SQLite database files.
         """
-        from pain001 import process_files
 
         # Process SQLite database file
-        process_files(
+        pain001.process_files(
             "pain.001.001.03",
             str(self.xml_template),
             str(self.xsd_schema),
@@ -220,7 +215,7 @@ class TestReadmeExamples(unittest.TestCase):
         are not present in the basic test template. The full version tests are in
         test_pain001_vXX.py files which use appropriate test data for each version.
         """
-        from pain001 import process_files
+
 
         # Test versions that are compatible with the basic template.csv
         versions = [
@@ -230,7 +225,7 @@ class TestReadmeExamples(unittest.TestCase):
 
         for version in versions:
             with self.subTest(version=version):
-                process_files(
+                pain001.process_files(
                     version,
                     str(self.xml_template),
                     str(self.xsd_schema),
