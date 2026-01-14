@@ -146,42 +146,35 @@ def validate_iban_format(
 
     # Remove spaces for validation
     iban_clean = iban.replace(" ", "").replace("-", "").upper()
+    iban_len = len(iban_clean)
 
-    # Check length (shortest IBAN is 15, longest is 34)
-    if not 15 <= len(iban_clean) <= 34:
-        if len(iban_clean) < 15:
-            return (
-                False,
-                f"IBAN too short: {len(iban_clean)} characters (minimum 15)",
-            )
-        return (
-            False,
-            f"IBAN too long: {len(iban_clean)} characters (maximum 34)",
-        )
+    # Check length range
+    if not 15 <= iban_len <= 34:
+        return (False, f"IBAN length must be 15-34 characters (got {iban_len})")
 
-    # Check country code (first 2 characters)
-    if not iban_clean[:2].isalpha():
-        return False, "IBAN must start with 2-letter country code"
+    # Check all format requirements together
+    country_ok = iban_clean[:2].isalpha()
+    checkdigit_ok = iban_clean[2:4].isdigit()
+    bban_ok = iban_clean[4:].isalnum()
 
-    country_code = iban_clean[:2]
-
-    # Check check digits (characters 3-4 must be digits)
-    if not iban_clean[2:4].isdigit():
-        return False, "IBAN characters 3-4 must be check digits (00-99)"
-
-    # Check that remaining characters are alphanumeric
-    if not iban_clean[4:].isalnum():
-        return False, "IBAN must contain only alphanumeric characters"
+    if not (country_ok and checkdigit_ok and bban_ok):
+        errors = []
+        if not country_ok:
+            errors.append("must start with 2-letter country code")
+        if not checkdigit_ok:
+            errors.append("characters 3-4 must be check digits (00-99)")
+        if not bban_ok:
+            errors.append("must contain only alphanumeric characters")
+        return False, f"IBAN format invalid: {'; '.join(errors)}"
 
     # Validate country-specific length
-    if country_code in IBAN_LENGTHS:
-        expected_length = IBAN_LENGTHS[country_code]
-        if len(iban_clean) != expected_length:
-            return (
-                False,
-                f"Invalid IBAN length for {country_code}: "
-                f"{len(iban_clean)} characters (expected {expected_length})",
-            )
+    country_code = iban_clean[:2]
+    if country_code in IBAN_LENGTHS and len(iban_clean) != IBAN_LENGTHS[country_code]:
+        return (
+            False,
+            f"Invalid IBAN length for {country_code}: "
+            f"{len(iban_clean)} characters (expected {IBAN_LENGTHS[country_code]})",
+        )
     else:
         # Country code not in known list - warn but don't fail
         # (allows for future IBAN countries)

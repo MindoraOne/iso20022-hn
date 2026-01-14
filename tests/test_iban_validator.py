@@ -55,13 +55,13 @@ class TestIBANFormatValidation:
         """Test IBAN validation with too short IBAN."""
         is_valid, error = validate_iban_format("DE89")
         assert not is_valid
-        assert "too short" in error.lower()
+        assert "length must be 15-34" in error
 
     def test_iban_too_long(self):
         """Test IBAN validation with too long IBAN."""
         is_valid, error = validate_iban_format("DE" + "1" * 40)
         assert not is_valid
-        assert "too long" in error.lower()
+        assert "length must be 15-34" in error
 
     def test_iban_invalid_country_code(self):
         """Test IBAN validation with invalid country code (numbers)."""

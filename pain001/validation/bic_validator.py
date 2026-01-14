@@ -177,19 +177,28 @@ def validate_bic_format(
             f"BIC must be 8 or 11 characters (got {len(bic_clean)}: '{bic_clean}')",
         )
 
-    # Check bank code (first 4 characters) and country code (characters 5-6)
+    # Check all code formats together
     bank_code = bic_clean[:4]
     country_code = bic_clean[4:6]
-    if not bank_code.isalpha() or not country_code.isalpha():
-        if not bank_code.isalpha():
-            return (
-                False,
-                f"BIC bank code (first 4 characters) must be letters (got '{bank_code}')",
-            )
-        return (
-            False,
-            f"BIC country code (characters 5-6) must be letters (got '{country_code}')",
-        )
+    location_code = bic_clean[6:8]
+    branch_code = bic_clean[8:11] if len(bic_clean) == 11 else ""
+
+    bank_ok = bank_code.isalpha()
+    country_ok = country_code.isalpha()
+    location_ok = location_code.isalnum()
+    branch_ok = branch_code.isalnum() if branch_code else True
+
+    if not (bank_ok and country_ok and location_ok and branch_ok):
+        errors = []
+        if not bank_ok:
+            errors.append(f"bank code (first 4 chars) must be letters (got '{bank_code}')")
+        if not country_ok:
+            errors.append(f"country code (chars 5-6) must be letters (got '{country_code}')")
+        if not location_ok:
+            errors.append(f"location code (chars 7-8) must be alphanumeric (got '{location_code}')")
+        if not branch_ok:
+            errors.append(f"branch code (chars 9-11) must be alphanumeric (got '{branch_code}')")
+        return False, f"BIC format invalid: {'; '.join(errors)}"
 
     # Validate country code against known codes
     if country_code not in VALID_COUNTRY_CODES:
@@ -197,23 +206,6 @@ def validate_bic_format(
             False,
             f"BIC country code '{country_code}' is not a valid ISO 3166-1 alpha-2 code",
         )
-
-    # Check location code (characters 7-8 must be alphanumeric)
-    location_code = bic_clean[6:8]
-    if not location_code.isalnum():
-        return (
-            False,
-            f"BIC location code (characters 7-8) must be alphanumeric (got '{location_code}')",
-        )
-
-    # Check branch code if present (characters 9-11 must be alphanumeric)
-    if len(bic_clean) == 11:
-        branch_code = bic_clean[8:11]
-        if not branch_code.isalnum():
-            return (
-                False,
-                f"BIC branch code (characters 9-11) must be alphanumeric (got '{branch_code}')",
-            )
 
     return True, ""
 
