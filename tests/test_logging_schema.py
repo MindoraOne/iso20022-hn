@@ -582,8 +582,6 @@ class TestLoggingSchema(unittest.TestCase):  # pylint: disable=R0904
 
     def test_execution_summary_tracker_manual_usage(self) -> None:
         """Test ExecutionSummaryTracker with manual start/stop."""
-        from pain001.logging_schema import ExecutionSummaryTracker
-
         tracker = ExecutionSummaryTracker(
             self.logger, dry_run=False, message_type="pain.001.001.09"
         )
@@ -609,8 +607,6 @@ class TestLoggingSchema(unittest.TestCase):  # pylint: disable=R0904
 
     def test_execution_summary_tracker_with_errors(self) -> None:
         """Test ExecutionSummaryTracker status with errors."""
-        from pain001.logging_schema import ExecutionSummaryTracker
-
         tracker = ExecutionSummaryTracker(self.logger)
         tracker.start()
         tracker.increment_event_count("error")
@@ -624,8 +620,6 @@ class TestLoggingSchema(unittest.TestCase):  # pylint: disable=R0904
 
     def test_execution_summary_tracker_aborted(self) -> None:
         """Test ExecutionSummaryTracker abort status."""
-        from pain001.logging_schema import ExecutionSummaryTracker
-
         tracker = ExecutionSummaryTracker(self.logger)
         tracker.start()
         tracker.abort()
@@ -637,8 +631,6 @@ class TestLoggingSchema(unittest.TestCase):  # pylint: disable=R0904
 
     def test_execution_summary_tracker_exception_handling(self) -> None:
         """Test ExecutionSummaryTracker handles exceptions in context."""
-        from pain001.logging_schema import ExecutionSummaryTracker
-
         try:
             with ExecutionSummaryTracker(self.logger) as tracker:
                 tracker.increment_processed_records(100)
