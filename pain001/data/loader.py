@@ -15,7 +15,7 @@
 
 """Universal data loader supporting multiple input sources."""
 
-from typing import Any, Iterator, Union
+from typing import Any, Union
 
 from pain001.csv.load_csv_data import load_csv_data
 from pain001.csv.validate_csv_data import validate_csv_data

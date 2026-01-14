@@ -15,8 +15,6 @@
 
 """Tests for pain001.exceptions module."""
 
-import pytest
-
 from pain001.exceptions import (
     ConfigurationError,
     DataSourceError,

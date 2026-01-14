@@ -37,7 +37,7 @@ from pain001.logging_schema import (
 )
 
 
-class TestLoggingSchema(unittest.TestCase):
+class TestLoggingSchema(unittest.TestCase):  # pylint: disable=too-many-public-methods
     """Test structured logging schema functionality."""
 
     def setUp(self) -> None:
@@ -377,7 +377,7 @@ class TestLoggingSchema(unittest.TestCase):
             "other_field": "not_sensitive",
         }
         redacted = _redact_pii_from_dict(data)
-        
+
         # IBANs show first 4 and last 4 characters, middle chars masked
         # GB29NWBK60161331926819 -> GB29 (14 *) 6819
         self.assertEqual(redacted["debtor_iban"], "GB29**************6819")
@@ -508,4 +508,3 @@ class TestLoggingSchema(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
