@@ -364,7 +364,9 @@ If successful, you'll see:
 
 ### Safe Validation (Dry-Run Mode)
 
-You can validate your data against the ISO 20022 schema **without generating an output file** using the `--dry-run` flag (alias: `--validate-only`). This is ideal for:
+You can validate your data against the ISO 20022 schema **without
+generating an output file** using the `--dry-run` flag (alias:
+`--validate-only`). This is ideal for:
 
 - **CI/CD Pipelines:** Pre-flight validation in automated builds
 - **Data Quality Checks:** Verify payment data before batch processing
@@ -389,16 +391,19 @@ python3 -m pain001 \
 ```
 
 **Exit Codes:**
+
 - `0` - Validation succeeded (safe to proceed)
 - `1` - Validation failed (data or schema errors detected)
 
 **What Gets Validated:**
+
 - ✓ XML template structure and syntax
 - ✓ XSD schema compliance
 - ✓ Payment data integrity (required fields, data types, formats)
 - ✓ Business rules (amounts > 0, valid IBANs/BICs, etc.)
 
-**Note:** Dry-run mode uses the same validation logic as XML generation, ensuring your data will be valid when you generate the actual file.
+**Note:** Dry-run mode uses the same validation logic as XML generation,
+ensuring your data will be valid when you generate the actual file.
 
 ### Arguments
 
