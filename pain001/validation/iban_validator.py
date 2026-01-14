@@ -118,7 +118,9 @@ IBAN_LENGTHS = {
 }
 
 
-def validate_iban_format(iban: str) -> tuple[bool, str]:  # pylint: disable=too-many-return-statements
+def validate_iban_format(
+    iban: str,
+) -> tuple[bool, str]:  # pylint: disable=too-many-return-statements
     """Validate IBAN format structure.
 
     Checks:

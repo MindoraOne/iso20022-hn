@@ -140,7 +140,9 @@ VALID_COUNTRY_CODES = {
 }
 
 
-def validate_bic_format(bic: str) -> tuple[bool, str]:  # pylint: disable=too-many-return-statements
+def validate_bic_format(
+    bic: str,
+) -> tuple[bool, str]:  # pylint: disable=too-many-return-statements
     """Validate BIC format structure according to ISO 9362.
 
     BIC Structure:
