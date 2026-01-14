@@ -20,6 +20,55 @@ from pain001.csv.validate_csv_data import validate_csv_data
 
 
 class TestValidateCsvData(unittest.TestCase):
+    def test_validate_csv_with_invalid_date_format_fallback(self) -> None:
+        """Test CSV validation with date that fails both fromisoformat and strptime."""
+        data = [
+            {
+                "id": "1",
+                "date": "invalid-date-format",  # Triggers ValueError in both parsers
+                "nb_of_txs": "1",
+                "initiator_name": "John Doe",
+                "initiator_street_name": "John's Street",
+                "initiator_building_number": "123",
+                "initiator_postal_code": "12345",
+                "initiator_town_name": "City",
+                "initiator_country": "US",
+                "ctrl_sum": "100.00",
+                "payment_information_id": "PMT001",
+                "payment_method": "TRF",
+                "batch_booking": "true",
+                "service_level_code": "SEPA",
+                "requested_execution_date": "2023-03-10",
+                "debtor_name": "John Doe",
+                "debtor_street_name": "Debtor Street",
+                "debtor_building_number": "456",
+                "debtor_postal_code": "67890",
+                "debtor_town_name": "Town",
+                "debtor_country": "US",
+                "debtor_account_IBAN": "US12345678901234567890",
+                "debtor_agent_BIC": "BANKUS33",
+                "forwarding_agent_BIC": "FWDUS55",  # Added missing field
+                "charge_bearer": "SLEV",
+                "payment_id": "PAY001",
+                "payment_amount": "100.00",
+                "currency": "USD",
+                "creditor_agent_BIC": "CREDUS44",
+                "creditor_name": "Jane Smith",
+                "creditor_street_name": "Creditor Street",
+                "creditor_building_number": "789",
+                "creditor_postal_code": "11111",
+                "creditor_town_name": "City2",
+                "creditor_country": "US",
+                "creditor_account_IBAN": "US98765432109876543210",
+                "remittance_information": "Payment for invoice",
+            }
+        ]
+        # The invalid date format should be caught during validation
+        # validate_csv_data returns True/False, not raise
+        result = validate_csv_data(data)
+        # Should return False due to invalid date
+        self.assertFalse(result)
+
     def test_validate_csv_with_valid_data(self) -> None:
         data = [
             {

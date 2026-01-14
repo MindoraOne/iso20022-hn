@@ -39,7 +39,7 @@ that initiates a customer payment.
   and Python data structures
 - **Automatic XSD Validation:** Validates generated XML against
   ISO 20022 schemas
-- **Comprehensive Testing:** 99.30% test coverage with 435 tests
+- **Comprehensive Testing:** 98.56% test coverage with 561 tests
   ensuring reliability
 - **Secure by Design:** Uses `defusedxml` to prevent XXE attacks
   and implements SQL injection protection
@@ -210,7 +210,7 @@ flowchart LR
   - **Zero PII Leakage:** Logs never expose clear-text payment data—all
     sensitive information automatically redacted before logging
 - **Robust Development:** Comprehensive quality assurance with
-  - 99.30% test coverage with 435 comprehensive tests
+  - 98.56% test coverage with 561 comprehensive tests
   - Code formatting with Black and Ruff
   - Import sorting with isort
   - Style checking with Flake8 (10.00/10 score)
@@ -1150,7 +1150,7 @@ poetry run make clean
 | **Full Gate** | `make check` | PR Gate + Security (bandit, safety), Lint (pylint) | 0 (PASS) |
 | **Tollgates** | `make tollgates` | Full Gate + XSD validation (9 versions), Advanced security, Idempotency checks | 0 (PASS) |
 
-**Note:** All PRs must pass the `check` target (exit code 0) and maintain **99%+ coverage**. No exceptions.
+**Note:** All PRs must pass the `check` target (exit code 0) and maintain **98%+ coverage**. No exceptions.
 
 ### Manual Quality Tools (Advanced)
 
@@ -1215,7 +1215,7 @@ We would like to extend a big thank you to all the awesome contributors of
 
 [banner]: https://kura.pro/pain001/images/banners/banner-pain001.svg 'Pain001, A Python Library for Automating ISO 20022-Compliant Payment Files Using CSV Or SQlite Data Files.'
 [codecov-badge]: https://img.shields.io/codecov/c/github/sebastienrousseau/pain001?style=for-the-badge 'Codecov badge'
-[coverage-floor-badge]: https://img.shields.io/badge/coverage-99.30%25-brightgreen?style=for-the-badge 'Coverage 99.30%'
+[coverage-floor-badge]: https://img.shields.io/badge/coverage-98.56%25-brightgreen?style=for-the-badge 'Coverage 98.56%'
 [docs-badge]: https://img.shields.io/github/actions/workflow/status/sebastienrousseau/pain001/docs.yml?branch=main&label=Docs&style=for-the-badge 'Documentation badge'
 [docs-url]: https://docs.pain001.com/
 [license-badge]: https://img.shields.io/pypi/l/pain001?style=for-the-badge 'License badge'

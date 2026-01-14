@@ -463,7 +463,10 @@ class TestXMLCreation(unittest.TestCase):
         """
         create_xml_v4(self.root, [self.row_v4])
         # Check if the root contains the expected elements and values
-        self.assertIsNotNone(self.root.find(".//CstmrCdtTrfInitn"), "CstmrCdtTrfInitn element should exist")
+        self.assertIsNotNone(
+            self.root.find(".//CstmrCdtTrfInitn"),
+            "CstmrCdtTrfInitn element should exist",
+        )
 
     def test_create_common_elements_v5(self) -> None:
         """

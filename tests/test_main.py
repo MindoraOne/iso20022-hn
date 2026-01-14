@@ -108,7 +108,9 @@ class TestMain:
             ],
         )
         assert result.exit_code == 1
-        assert "Invalid XML message type: invalid." in result.output
+        # Strip ANSI color codes before assertion
+        clean_output = re.sub(r"\x1b\[[0-9;]*m", "", result.output)
+        assert "Invalid XML message type: invalid" in clean_output
 
     def test_main_with_invalid_xml_template_file(self) -> None:
         result = self.runner.invoke(
@@ -127,9 +129,7 @@ class TestMain:
         assert result.exit_code == 1
         # Strip ANSI color codes before assertion
         clean_output = re.sub(r"\x1b\[[0-9;]*m", "", result.output)
-        assert (
-            "The XML template file 'invalid' does not exist." in clean_output
-        )
+        assert "XML template file does not exist: invalid" in clean_output
 
     def test_main_with_invalid_xsd_template_file(self) -> None:
         result = self.runner.invoke(
@@ -146,9 +146,9 @@ class TestMain:
             ],
         )
         assert result.exit_code == 1
-        assert (
-            "The XSD template file 'invalid' does not exist." in result.output
-        )
+        # Strip ANSI color codes before assertion
+        clean_output = re.sub(r"\x1b\[[0-9;]*m", "", result.output)
+        assert "XSD schema file does not exist: invalid" in clean_output
 
     def test_main_with_invalid_data_file(self) -> None:
         result = self.runner.invoke(
@@ -165,7 +165,9 @@ class TestMain:
             ],
         )
         assert result.exit_code == 1
-        assert "The data file 'invalid' does not exist." in result.output
+        # Strip ANSI color codes before assertion
+        clean_output = re.sub(r"\x1b\[[0-9;]*m", "", result.output)
+        assert "Data file does not exist: invalid" in clean_output
 
     def test_main_with_missing_xml_template_file_path(self) -> None:
         """Test CLI when XML template file path is missing."""

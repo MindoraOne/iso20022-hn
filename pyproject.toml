@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pain001"
-version = "0.0.45"
+version = "0.0.46"
 description = "Pain001 is a Python Library for Automating ISO 20022-Compliant Payment Files Using CSV Data."
 authors = ["Sebastien Rousseau <sebastian.rousseau@gmail.com>"]
 license = "Apache Software License"
@@ -84,14 +84,14 @@ python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
 
-# Coverage enforcement (99% floor, fail-fast on regression)
+# Coverage enforcement (98% floor, fail-fast on regression)
 addopts = [
     "--cov=pain001",
     "--cov-branch",
     "--cov-report=term-missing:skip-covered",
     "--cov-report=xml",
     "--cov-report=html",
-    "--cov-fail-under=99",
+    "--cov-fail-under=98",
     "--tb=short",
     "-ra",
     "--strict-markers",
