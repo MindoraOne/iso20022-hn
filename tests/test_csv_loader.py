@@ -520,7 +520,7 @@ class TestLoadCsvData(unittest.TestCase):
         finally:
             # Restore permissions and clean up
             try:
-                os.chmod(temp_file, 0o644)  # nosec B103 - Test file only
+                os.chmod(temp_file, 0o600)  # Owner read/write only
                 os.remove(temp_file)
             except (OSError, PermissionError) as e:
                 # Expected in permission test cleanup
@@ -631,7 +631,7 @@ class TestLoadCsvDataStreaming(unittest.TestCase):
         finally:
             # Restore permissions and clean up
             try:
-                os.chmod(temp_file, 0o644)  # nosec B103 - Test file only
+                os.chmod(temp_file, 0o600)  # Owner read/write only
                 os.remove(temp_file)
             except (OSError, PermissionError) as e:
                 # Expected in permission test cleanup

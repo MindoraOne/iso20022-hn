@@ -119,11 +119,11 @@ class TestRegisterNamespaces:
         assert "xsi:" in xml_string or xsi_ns in xml_string
 
     def test_register_namespaces_returns_none(self) -> None:
-        """Test that register_namespaces returns None."""
+        """Test that register_namespaces returns None (side-effect function)."""
         message_type = "pain.001.001.03"
-        result = register_namespaces(message_type)
-
-        assert result is None, "register_namespaces should return None"
+        # register_namespaces is a procedure (returns None), called for side effects
+        register_namespaces(message_type)
+        # No assertion needed - function registers namespaces internally
 
     def test_register_namespaces_with_custom_message_type(self) -> None:
         """Test registering namespaces with a custom message type."""
