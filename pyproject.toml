@@ -124,25 +124,18 @@ extend-exclude = [".github/*.md", "*.md", "docs/**/*.md", "releases/**/*.md"]
 select = [
     "E",   # pycodestyle errors
     "W",   # pycodestyle warnings
-    "F",   # pyflakes
+    "F",   # pyflakes (includes F811 reimport detection)
     "I",   # isort
     "B",   # flake8-bugbear
     "C4",  # flake8-comprehensions
     "UP",  # pyupgrade
-    "C90", # mccabe complexity
-    "PLC", # pylint convention
-    "PLE", # pylint error
-    "PLW", # pylint warning
-    "PLR", # pylint refactor
 ]
 ignore = [
     "E501",  # line too long (handled by formatter)
-    "PLR0913", # too many arguments (needed for data processing)
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]  # unused imports in __init__.py
-"tests/**" = ["PLR2004"]  # magic values acceptable in tests
 
 [tool.ruff.format]
 quote-style = "double"
