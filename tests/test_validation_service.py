@@ -113,7 +113,7 @@ def test_validation_report_creation():
     report = ValidationReport(is_valid=True)
     assert report.is_valid
     assert not report.errors
-    assert report.results == {}
+    assert not report.results
 
 
 def test_validation_report_with_errors():

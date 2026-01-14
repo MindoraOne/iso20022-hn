@@ -42,7 +42,7 @@ class TestBICFormatValidation:
 
     def test_valid_bic_with_spaces(self):
         """Test BIC validation with spaces (should be removed)."""
-        is_valid, error = validate_bic_format("DEUT DEFF")
+        is_valid, _ = validate_bic_format("DEUT DEFF")
         assert is_valid
 
     def test_bic_empty_string(self):
@@ -177,7 +177,7 @@ class TestBICFullValidation:
         assert not validate_bic_safe("123")
 
 
-class TestBICCountryVariants:
+class TestBICCountryVariants:  # pylint: disable=too-few-public-methods
     """Test BIC validation for various countries."""
 
     @pytest.mark.parametrize(
@@ -211,12 +211,12 @@ class TestBICEdgeCases:
 
     def test_bic_lowercase(self):
         """Test BIC validation with lowercase letters."""
-        is_valid, error = validate_bic("deutdeff", strict=False)
+        is_valid, _ = validate_bic("deutdeff", strict=False)
         assert is_valid
 
     def test_bic_mixed_case(self):
         """Test BIC validation with mixed case."""
-        is_valid, error = validate_bic("DeUtDeFf", strict=False)
+        is_valid, _ = validate_bic("DeUtDeFf", strict=False)
         assert is_valid
 
     def test_bic_with_numbers_in_location_code(self):
@@ -226,12 +226,12 @@ class TestBICEdgeCases:
 
     def test_bic_with_numbers_in_branch_code(self):
         """Test BIC with numbers in branch code (allowed)."""
-        is_valid, error = validate_bic("DEUTDEFF123", strict=False)
+        is_valid, _ = validate_bic("DEUTDEFF123", strict=False)
         assert is_valid
 
     def test_bic_all_uppercase(self):
         """Test BIC in all uppercase (standard format)."""
-        is_valid, error = validate_bic("DEUTDEFF500", strict=False)
+        is_valid, _ = validate_bic("DEUTDEFF500", strict=False)
         assert is_valid
 
     def test_bic_none_value(self):

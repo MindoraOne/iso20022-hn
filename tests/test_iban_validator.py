@@ -106,7 +106,7 @@ class TestIBANChecksumValidation:
 
     def test_valid_iban_checksum_france(self):
         """Test valid French IBAN checksum."""
-        is_valid, error = validate_iban_checksum("FR1420041010050500013M02606")
+        is_valid, _ = validate_iban_checksum("FR1420041010050500013M02606")
         assert is_valid
 
     def test_invalid_iban_checksum(self):
@@ -119,7 +119,7 @@ class TestIBANChecksumValidation:
 
     def test_iban_checksum_with_spaces(self):
         """Test IBAN checksum validation with spaces."""
-        is_valid, error = validate_iban_checksum("DE89 3704 0044 0532 0130 00")
+        is_valid, _ = validate_iban_checksum("DE89 3704 0044 0532 0130 00")
         assert is_valid
 
     def test_iban_checksum_invalid_character(self):
@@ -231,7 +231,7 @@ class TestIBANEdgeCases:
 
     def test_iban_mixed_case(self):
         """Test IBAN validation with mixed case."""
-        is_valid, error = validate_iban("De89370400440532013000", strict=False)
+        is_valid, _ = validate_iban("De89370400440532013000", strict=False)
         assert is_valid
 
     def test_iban_unknown_country_code(self):
