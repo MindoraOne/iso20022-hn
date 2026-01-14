@@ -37,12 +37,12 @@ class TestIBANFormatValidation:
 
     def test_valid_iban_format_austria(self):
         """Test valid Austrian IBAN format."""
-        is_valid, error = validate_iban_format("AT611904300234573201")
+        is_valid, _ = validate_iban_format("AT611904300234573201")
         assert is_valid
 
     def test_valid_iban_format_with_spaces(self):
         """Test IBAN format validation with spaces (should be removed)."""
-        is_valid, error = validate_iban_format("DE89 3704 0044 0532 0130 00")
+        is_valid, _ = validate_iban_format("DE89 3704 0044 0532 0130 00")
         assert is_valid
 
     def test_iban_empty_string(self):
@@ -101,7 +101,7 @@ class TestIBANChecksumValidation:
 
     def test_valid_iban_checksum_austria(self):
         """Test valid Austrian IBAN checksum."""
-        is_valid, error = validate_iban_checksum("AT611904300234573201")
+        is_valid, _ = validate_iban_checksum("AT611904300234573201")
         assert is_valid
 
     def test_valid_iban_checksum_france(self):
@@ -191,7 +191,7 @@ class TestIBANFullValidation:
         assert not validate_iban_safe("DE00370400440532013000")
 
 
-class TestIBANCountryVariants:
+class TestIBANCountryVariants:  # pylint: disable=too-few-public-methods
     """Test IBAN validation for various countries."""
 
     @pytest.mark.parametrize(
@@ -219,14 +219,14 @@ class TestIBANEdgeCases:
 
     def test_iban_with_hyphens(self):
         """Test IBAN validation with hyphens (should be removed)."""
-        is_valid, error = validate_iban(
+        is_valid, _ = validate_iban(
             "DE89-3704-0044-0532-0130-00", strict=False
         )
         assert is_valid
 
     def test_iban_lowercase(self):
         """Test IBAN validation with lowercase letters."""
-        is_valid, error = validate_iban("de89370400440532013000", strict=False)
+        is_valid, _ = validate_iban("de89370400440532013000", strict=False)
         assert is_valid
 
     def test_iban_mixed_case(self):
@@ -238,7 +238,7 @@ class TestIBANEdgeCases:
         """Test IBAN with unknown country code (should not fail format check)."""
         # ZZ is not in known country codes, but format validation should pass
         # Only checksum validation would fail if the checksum is wrong
-        is_valid, error = validate_iban_format("ZZ8937040044053201300012")
+        is_valid, _ = validate_iban_format("ZZ8937040044053201300012")
         # Should pass format check (structure is valid)
         assert is_valid
 

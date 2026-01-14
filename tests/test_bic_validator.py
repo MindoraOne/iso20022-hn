@@ -206,7 +206,7 @@ class TestBICEdgeCases:
 
     def test_bic_with_hyphens(self):
         """Test BIC validation with hyphens (should be removed)."""
-        is_valid, error = validate_bic("DEUT-DEFF", strict=False)
+        is_valid, _ = validate_bic("DEUT-DEFF", strict=False)
         assert is_valid
 
     def test_bic_lowercase(self):
@@ -221,7 +221,7 @@ class TestBICEdgeCases:
 
     def test_bic_with_numbers_in_location_code(self):
         """Test BIC with numbers in location code (allowed)."""
-        is_valid, error = validate_bic("DEUTDE2F", strict=False)
+        is_valid, _ = validate_bic("DEUTDE2F", strict=False)
         assert is_valid
 
     def test_bic_with_numbers_in_branch_code(self):

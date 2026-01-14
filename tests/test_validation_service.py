@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# pylint: disable=redefined-outer-name
+# ^ Pytest fixtures intentionally redefine names - this is standard practice
+
 """Tests for pain001.validation.service module."""
 
 from pathlib import Path
@@ -109,7 +112,7 @@ def test_validation_report_creation():
     """Test ValidationReport creation."""
     report = ValidationReport(is_valid=True)
     assert report.is_valid
-    assert report.errors == []
+    assert not report.errors
     assert report.results == {}
 
 
