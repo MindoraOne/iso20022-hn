@@ -19,6 +19,7 @@ import sqlite3
 import pytest
 
 from pain001.db.load_db_data import load_db_data, sanitize_table_name
+from pain001.exceptions import ConfigurationError
 
 
 # Test sanitize_table_name function
@@ -30,8 +31,8 @@ def test_sanitize_table_name():
 
 
 def test_sanitize_table_name_empty() -> None:
-    """Test that sanitize_table_name raises ValueError for empty string."""
-    with pytest.raises(ValueError, match="Table name cannot be empty"):
+    """Test that sanitize_table_name raises ConfigurationError for empty string."""
+    with pytest.raises(ConfigurationError, match="Table name cannot be empty"):
         sanitize_table_name("")
 
 

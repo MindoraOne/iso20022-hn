@@ -25,6 +25,7 @@ from typing import Any
 from pain001.logging_schema import (
     Events,
     Fields,
+    _redact_pii_from_dict,
     log_data_load_event,
     log_event,
     log_process_error,
@@ -368,6 +369,143 @@ class TestLoggingSchema(unittest.TestCase):
         self.assertEqual(entry["field3"], True)
         self.assertEqual(entry["field4"], {"nested": "dict"})
 
+    def test_pii_redaction_iban(self) -> None:
+        """Test that IBANs are properly redacted in logs."""
+        data = {
+            "debtor_iban": "GB29NWBK60161331926819",  # 22 chars
+            "creditor_iban": "DE89370400440532013000",  # 22 chars
+            "other_field": "not_sensitive",
+        }
+        redacted = _redact_pii_from_dict(data)
+        
+        # IBANs show first 4 and last 4 characters, middle chars masked
+        # GB29NWBK60161331926819 -> GB29 (14 *) 6819
+        self.assertEqual(redacted["debtor_iban"], "GB29**************6819")
+        self.assertEqual(redacted["creditor_iban"], "DE89**************3000")
+        self.assertEqual(redacted["other_field"], "not_sensitive")
+
+    def test_pii_redaction_bic(self) -> None:
+        """Test that BICs are properly redacted in logs."""
+        data = {
+            "debtor_bic": "NWBKGB2L",  # 8 chars
+            "creditor_bic": "COBADEFF",  # 8 chars
+            "another_bic": "CHASUS33XXX",  # 11 chars
+        }
+        redacted = _redact_pii_from_dict(data)
+        
+        # BICs show first 4 and last 2 characters only
+        self.assertEqual(redacted["debtor_bic"], "NWBK**2L")
+        self.assertEqual(redacted["creditor_bic"], "COBA**FF")
+        # 11 char BIC: CHAS + ** + XX (fixed 2-star separator)
+        self.assertEqual(redacted["another_bic"], "CHAS**XX")
+
+    def test_pii_redaction_names(self) -> None:
+        """Test that names are properly redacted in logs."""
+        data = {
+            "debtor_name": "John Smith Ltd",
+            "creditor_name": "Acme Corporation",
+            # Note: 'debtor' and 'cdtr' don't contain 'name' so won't be redacted
+            "debtor": "Jane Doe",
+            "cdtr": "Bob Johnson",
+        }
+        redacted = _redact_pii_from_dict(data)
+        
+        # Only fields containing 'name' are redacted
+        self.assertEqual(redacted["debtor_name"], "[REDACTED]")
+        self.assertEqual(redacted["creditor_name"], "[REDACTED]")
+        # Fields without 'name' in key are NOT redacted
+        self.assertEqual(redacted["debtor"], "Jane Doe")
+        self.assertEqual(redacted["cdtr"], "Bob Johnson")
+
+    def test_pii_redaction_accounts(self) -> None:
+        """Test that account numbers are properly redacted in logs."""
+        data = {
+            "account_number": "1234567890123456",
+            "account": "9876543210",
+        }
+        redacted = _redact_pii_from_dict(data)
+        
+        # Account numbers should show first 4 and last 4 only
+        self.assertEqual(redacted["account_number"], "1234********3456")
+        self.assertEqual(redacted["account"], "9876**3210")
+
+    def test_pii_redaction_nested_structures(self) -> None:
+        """Test PII redaction in nested dictionaries and lists."""
+        data = {
+            "transaction": {
+                "debtor_iban": "GB29NWBK60161331926819",
+                "creditor": {
+                    "name": "Secret Corp",
+                    "bic": "NWBKGB2L",
+                },
+            },
+            "payments": [
+                {"iban": "DE89370400440532013000", "amount": 100.00},
+                {"iban": "FR1420041010050500013M02606", "amount": 200.00},
+            ],
+        }
+        redacted = _redact_pii_from_dict(data)
+        
+        # Nested dict redaction
+        self.assertEqual(
+            redacted["transaction"]["debtor_iban"], "GB29**************6819"
+        )
+        self.assertEqual(
+            redacted["transaction"]["creditor"]["name"], "[REDACTED]"
+        )
+        self.assertEqual(
+            redacted["transaction"]["creditor"]["bic"], "NWBK**2L"
+        )
+        
+        # List redaction (FR IBAN is 27 chars -> 4 + 19* + 4)
+        self.assertEqual(
+            redacted["payments"][0]["iban"], "DE89**************3000"
+        )
+        self.assertEqual(redacted["payments"][0]["amount"], 100.00)
+        self.assertEqual(
+            redacted["payments"][1]["iban"], "FR14*******************2606"
+        )
+
+    def test_pii_redaction_preserves_non_sensitive_data(self) -> None:
+        """Test that non-sensitive data is preserved during redaction."""
+        data = {
+            "message_type": "pain.001.001.03",
+            "record_count": 42,
+            "timestamp": "2025-01-15T10:30:00Z",
+            "success": True,
+            "debtor_iban": "GB29NWBK60161331926819",
+        }
+        redacted = _redact_pii_from_dict(data)
+        
+        # Non-sensitive fields unchanged
+        self.assertEqual(redacted["message_type"], "pain.001.001.03")
+        self.assertEqual(redacted["record_count"], 42)
+        self.assertEqual(redacted["timestamp"], "2025-01-15T10:30:00Z")
+        self.assertEqual(redacted["success"], True)
+        
+        # Sensitive field redacted (22 chars -> 4 + 14* + 4)
+        self.assertEqual(redacted["debtor_iban"], "GB29**************6819")
+
+    def test_log_event_auto_redacts_pii(self) -> None:
+        """Test that log_event automatically redacts PII before logging."""
+        log_event(
+            self.logger,
+            logging.INFO,
+            Events.DATA_LOAD_SUCCESS,
+            debtor_iban="GB29NWBK60161331926819",  # 22 chars
+            debtor_name="John Doe",
+            record_count=10,
+        )
+        
+        entry = self._get_last_log_entry()
+        
+        # PII should be automatically redacted (22 chars -> 4 + 14* + 4)
+        self.assertEqual(entry["debtor_iban"], "GB29**************6819")
+        self.assertEqual(entry["debtor_name"], "[REDACTED]")
+        # Non-PII preserved
+        self.assertEqual(entry["record_count"], 10)
+
 
 if __name__ == "__main__":
     unittest.main()
+

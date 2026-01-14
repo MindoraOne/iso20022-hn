@@ -17,6 +17,8 @@ import os
 import sqlite3
 from typing import Any
 
+from pain001.exceptions import ConfigurationError
+
 
 def sanitize_table_name(table_name: str) -> str:
     """
@@ -33,7 +35,7 @@ def sanitize_table_name(table_name: str) -> str:
         ValueError: If the table name is empty.
     """
     if not table_name:
-        raise ValueError("Table name cannot be empty")
+        raise ConfigurationError("Table name cannot be empty")
 
     # Use list comprehension for better performance
     sanitized_chars = [

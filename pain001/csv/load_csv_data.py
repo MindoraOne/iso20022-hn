@@ -18,6 +18,8 @@ import logging
 from collections.abc import Generator
 from typing import Any
 
+from pain001.exceptions import DataSourceError
+
 logging.basicConfig(level=logging.ERROR, format="%(levelname)s: %(message)s")
 
 
@@ -61,7 +63,7 @@ def load_csv_data(file_path: str) -> list[dict[str, Any]]:
         raise
 
     if not data:
-        raise ValueError(f"The CSV file '{file_path}' is empty.")
+        raise DataSourceError(f"The CSV file '{file_path}' is empty.")
 
     return data
 
@@ -129,4 +131,4 @@ def load_csv_data_streaming(
         raise
 
     if row_count == 0:
-        raise ValueError(f"The CSV file '{file_path}' is empty.")
+        raise DataSourceError(f"The CSV file '{file_path}' is empty.")

@@ -20,6 +20,7 @@ import unittest
 
 from pain001.csv.load_csv_data import load_csv_data, load_csv_data_streaming
 from pain001.csv.validate_csv_data import validate_csv_data
+from pain001.exceptions import DataSourceError
 
 
 class TestLoadCsvData(unittest.TestCase):
@@ -478,7 +479,7 @@ class TestLoadCsvData(unittest.TestCase):
 
     def test_load_empty_csv(self) -> None:
         file_path = "tests/data/empty.csv"
-        with self.assertRaises(ValueError):
+        with self.assertRaises(DataSourceError):
             load_csv_data(file_path)
 
     def test_load_single_column_csv(self) -> None:
@@ -603,7 +604,7 @@ class TestLoadCsvDataStreaming(unittest.TestCase):
             f.write("col1,col2\n")
 
         try:
-            with self.assertRaises(ValueError):
+            with self.assertRaises(DataSourceError):
                 list(load_csv_data_streaming(temp_file))
         finally:
             if os.path.exists(temp_file):

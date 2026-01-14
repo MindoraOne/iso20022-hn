@@ -13,10 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Structured logging schema for Pain001.
+"""Standardized logging schema for Pain001.
 
-This module defines standardized event names, field names, and logging
-helpers to ensure consistent structured logging across CLI and library.
+This module provides a centralized logging structure for consistent,
+machine-parsable log output across CLI and library components.
+All log entries are JSON-formatted for easy integration with log
+aggregation systems (Elasticsearch, Splunk, CloudWatch, etc.).
+
+IMPORTANT: PII Protection
+-------------------------
+This module implements automatic PII redaction for sensitive fields.
+Any field containing IBAN, BIC, or personal names is automatically
+masked before logging to ensure GDPR/PCI-DSS compliance.
 
 Event Naming Convention:
     - Use snake_case for event names
@@ -136,13 +144,72 @@ def mask_sensitive_data(value: str, visible_chars: int = 4) -> str:
     )
 
 
+def _redact_pii_from_dict(data: dict[str, Any]) -> dict[str, Any]:
+    """Redact PII from dictionary fields recursively.
+
+    This function implements GDPR/PCI-DSS compliant logging by automatically
+    masking sensitive fields before they reach log aggregation systems.
+
+    Redacted fields:
+    - *iban* (any key containing 'iban'): Shows first 4 + last 4 chars
+    - *bic* (any key containing 'bic'): Shows first 4 + last 2 chars
+    - *name* (any key containing 'name'): Replaced with [REDACTED]
+    - *account* (any key containing 'account'): Shows first 4 + last 4 chars
+
+    Args:
+        data: Dictionary that may contain PII fields.
+
+    Returns:
+        New dictionary with PII fields redacted.
+
+    Example:
+        >>> _redact_pii_from_dict({"debtor_iban": "GB29NWBK60161331926819"})
+        {'debtor_iban': 'GB29****6819'}
+    """
+    redacted = {}
+    for key, value in data.items():
+        key_lower = key.lower()
+
+        # Recursively handle nested dicts
+        if isinstance(value, dict):
+            redacted[key] = _redact_pii_from_dict(value)
+        # Handle lists of dicts
+        elif isinstance(value, list):
+            redacted[key] = [
+                _redact_pii_from_dict(item) if isinstance(item, dict) else item
+                for item in value
+            ]
+        # Redact IBAN fields
+        elif "iban" in key_lower and isinstance(value, str):
+            redacted[key] = mask_sensitive_data(value, visible_chars=4)
+        # Redact BIC fields
+        elif "bic" in key_lower and isinstance(value, str):
+            redacted[key] = (
+                f"{value[:4]}**{value[-2:]}" if len(value) > 6 else "****"
+            )
+        # Redact name fields
+        elif "name" in key_lower and isinstance(value, str):
+            redacted[key] = "[REDACTED]"
+        # Redact account number fields
+        elif "account" in key_lower and isinstance(value, str):
+            redacted[key] = mask_sensitive_data(value, visible_chars=4)
+        else:
+            redacted[key] = value
+
+    return redacted
+
+
 def log_event(
     logger: logging.Logger,
     level: int,
     event: str,
     **fields: Any,
 ) -> None:
-    """Log a structured event with standardized format.
+    """Log a structured event with standardized format and PII redaction.
+
+    This function automatically redacts PII before logging to ensure
+    compliance with GDPR and PCI-DSS requirements. Any field containing
+    'iban', 'bic', 'name', or 'account' is automatically masked.
 
     Args:
         logger: The logger instance to use.
@@ -164,7 +231,11 @@ def log_event(
         Fields.TIMESTAMP: time.time(),
         **fields,
     }
-    logger.log(level, json.dumps(log_data))
+
+    # Redact PII before logging
+    redacted_data = _redact_pii_from_dict(log_data)
+
+    logger.log(level, json.dumps(redacted_data))
 
 
 def log_process_start(

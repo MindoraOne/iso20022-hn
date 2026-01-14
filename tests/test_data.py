@@ -21,6 +21,7 @@ import unittest
 from pain001.core.core import process_files
 from pain001.csv.load_csv_data import load_csv_data
 from pain001.csv.validate_csv_data import validate_csv_data
+from pain001.exceptions import DataSourceError
 
 
 class TestLoadCsvData(unittest.TestCase):
@@ -475,7 +476,7 @@ class TestLoadCsvData(unittest.TestCase):
 
     def test_load_empty_csv(self) -> None:
         file_path = "tests/data/empty.csv"
-        with self.assertRaises(ValueError):
+        with self.assertRaises(DataSourceError):
             load_csv_data(file_path)
 
     def test_load_csv_with_invalid_data(self) -> None:
