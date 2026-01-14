@@ -168,3 +168,48 @@ class TestWriteXmlToFile:
         finally:
             if os.path.exists(temp_file):
                 os.remove(temp_file)
+
+    def test_write_xml_with_empty_elements(self) -> None:
+        """Test indent_xml with empty leaf elements at various levels."""
+        # Create XML with elements that have text to cover all branches:
+        # - Elements with children (len(elem) > 0)
+        # - Elements with existing text and tail
+        # - Empty leaf elements (len(elem) == 0) at level > 0
+        root = et.Element("root")
+
+        # Empty child at level 1 (triggers else branch with level > 0)
+        empty_child = et.SubElement(root, "empty_child")
+        assert empty_child is not None  # Verify element created
+
+        # Parent with children (triggers if len(elem) branch)
+        parent = et.SubElement(root, "parent")
+        parent.text = "  "  # Has text that needs stripping
+
+        # Nested child with whitespace tail
+        child_with_tail = et.SubElement(parent, "child")
+        child_with_tail.text = "Content"
+        child_with_tail.tail = "   "  # Whitespace tail to be replaced
+
+        # Nested empty at deeper level
+        nested_empty = et.SubElement(parent, "nested_empty")
+        assert nested_empty is not None  # Verify element created
+
+        with tempfile.NamedTemporaryFile(
+            mode="w", delete=False, suffix=".xml"
+        ) as f:
+            temp_file = f.name
+
+        try:
+            write_xml_to_file(temp_file, root)
+
+            with open(temp_file) as f:
+                content = f.read()
+                # Verify proper indentation applied
+                assert "<empty_child" in content
+                assert "<parent>" in content
+                assert "<child>Content</child>" in content
+                assert "<nested_empty" in content
+
+        finally:
+            if os.path.exists(temp_file):
+                os.remove(temp_file)

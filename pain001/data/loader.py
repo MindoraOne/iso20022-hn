@@ -21,6 +21,7 @@ from pain001.csv.load_csv_data import load_csv_data
 from pain001.csv.validate_csv_data import validate_csv_data
 from pain001.db.load_db_data import load_db_data
 from pain001.db.validate_db_data import validate_db_data
+from pain001.exceptions import DataSourceError, PaymentValidationError
 
 
 def load_payment_data(
@@ -75,7 +76,7 @@ def load_payment_data(
         return _load_from_dict(data_source)
 
     else:
-        raise ValueError(
+        raise DataSourceError(
             f"Unsupported data source type: {type(data_source).__name__}. "
             f"Expected str (file path), list, or dict."
         )
@@ -90,19 +91,21 @@ def _load_from_file(file_path: str) -> list[dict[str, Any]]:
     if file_path.endswith(".csv"):
         data = load_csv_data(file_path)
         if not validate_csv_data(data):
-            raise ValueError(f"CSV data validation failed for {file_path}")
+            raise PaymentValidationError(
+                f"CSV data validation failed for {file_path}"
+            )
         return data
 
     elif file_path.endswith(".db"):
         data = load_db_data(file_path, table_name="pain001")
         if not validate_db_data(data):
-            raise ValueError(
+            raise PaymentValidationError(
                 f"Database data validation failed for {file_path}"
             )
         return data
 
     else:
-        raise ValueError(
+        raise DataSourceError(
             f"Unsupported file type: {file_path}. Expected .csv or .db file."
         )
 
@@ -114,17 +117,17 @@ def _load_from_list(data_list: list[dict[str, Any]]) -> list[dict[str, Any]]:
     New feature for direct Python data input.
     """
     if not data_list:
-        raise ValueError("Empty data list provided.")
+        raise DataSourceError("Empty data list provided.")
 
     if not all(isinstance(item, dict) for item in data_list):
-        raise ValueError(
+        raise PaymentValidationError(
             "All items in data list must be dictionaries. "
             f"Found: {[type(item).__name__ for item in data_list if not isinstance(item, dict)]}"
         )
 
     # Mandatory validation for data integrity
     if not validate_csv_data(data_list):
-        raise ValueError("Data list validation failed")
+        raise PaymentValidationError("Data list validation failed")
     return data_list
 
 
@@ -135,10 +138,10 @@ def _load_from_dict(data_dict: dict[str, Any]) -> list[dict[str, Any]]:
     New feature for single transaction input.
     """
     if not data_dict:
-        raise ValueError("Empty data dictionary provided.")
+        raise DataSourceError("Empty data dictionary provided.")
 
     # Wrap single dict in list and validate
     data_list = [data_dict]
     if not validate_csv_data(data_list):
-        raise ValueError("Data dictionary validation failed")
+        raise PaymentValidationError("Data dictionary validation failed")
     return data_list

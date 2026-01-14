@@ -1,5 +1,5 @@
 # Coverage.py configuration for Pain001
-# Enforces 95% branch coverage floor with per-module precision
+# Enforces 99% branch coverage floor with per-module precision
 
 [run]
 # Python version
@@ -59,13 +59,13 @@ omit =
     */site-packages/*
     */distutils/*
 
-# Per-module enforcement (95% minimum, 100% for critical)
+# Per-module enforcement (99% minimum, 100% for critical)
 [paths]
 source =
     pain001
     */site-packages/pain001
 
-# Module fail-thresholds (enforce 95% minimum across all modules)
+# Module fail-thresholds (enforce 99% minimum across all modules)
 [html]
 # HTML report output directory
 directory = htmlcov
@@ -76,6 +76,6 @@ title = Pain001 Coverage Report
 # Generated to coverage.xml for GitHub/SonarQube
 
 # PySentinel enforcement: NEVER relax these thresholds
-# If a module drops below 95%, halt and investigate before proceeding
+# If a module drops below 99%, halt and investigate before proceeding
 # New code MUST hit 100% branch coverage
 # Regressing coverage triggers automatic failure in CI/CD

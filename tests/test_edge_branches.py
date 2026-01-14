@@ -9,6 +9,7 @@ from click.testing import CliRunner
 from pain001.cli.cli import main as cli_main
 from pain001.core import core
 from pain001.csv.validate_csv_data import _validate_field_type
+from pain001.exceptions import XMLGenerationError
 from pain001.xml.write_xml_to_file import write_xml_to_file
 
 
@@ -46,7 +47,7 @@ def test_process_files_invalid_message_type(tmp_path: Path) -> None:
     template.write_text("<xml></xml>", encoding="utf-8")
     schema.write_text("<xsd></xsd>", encoding="utf-8")
 
-    with pytest.raises(ValueError):
+    with pytest.raises(XMLGenerationError):
         core.process_files("invalid.type", str(template), str(schema), [])
 
 

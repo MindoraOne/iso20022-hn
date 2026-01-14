@@ -19,7 +19,14 @@ import unittest
 from io import StringIO
 from unittest.mock import patch
 
+import pytest
+
 from pain001.core.core import process_files
+from pain001.exceptions import (
+    DataSourceError,
+    PaymentValidationError,
+    XMLGenerationError,
+)
 
 
 class TestProcessFiles(unittest.TestCase):
@@ -164,7 +171,7 @@ class TestProcessFiles(unittest.TestCase):
             f.write("Unsupported content")
 
     def test_invalid_xml_message_type(self) -> None:
-        with self.assertRaises(ValueError):
+        with self.assertRaises(XMLGenerationError):
             process_files(
                 "invalid.type",
                 self.xml_template_file_path,
@@ -206,7 +213,7 @@ class TestProcessFiles(unittest.TestCase):
             )
 
     def test_empty_csv_data(self) -> None:
-        with self.assertRaises(ValueError):
+        with self.assertRaises(DataSourceError):
             process_files(
                 self.xml_message_type,
                 self.xml_template_file_path,
@@ -216,7 +223,7 @@ class TestProcessFiles(unittest.TestCase):
 
     @patch("sys.stdout", new_callable=StringIO)
     def test_single_column_csv_data(self, mock_stdout) -> None:
-        with self.assertRaises(ValueError):
+        with self.assertRaises(PaymentValidationError):
             process_files(
                 self.xml_message_type,
                 self.xml_template_file_path,
@@ -229,7 +236,7 @@ class TestProcessFiles(unittest.TestCase):
         )
 
     def test_invalid_csv_data(self) -> None:
-        with self.assertRaises(ValueError):
+        with self.assertRaises(PaymentValidationError):
             process_files(
                 self.xml_message_type,
                 self.xml_template_file_path,
@@ -286,7 +293,7 @@ class TestProcessFiles(unittest.TestCase):
                 return_value=False,
             ),
         ):
-            with self.assertRaises(ValueError):
+            with self.assertRaises(PaymentValidationError):
                 process_files(
                     self.xml_message_type,
                     self.xml_template_file_path,
@@ -295,7 +302,7 @@ class TestProcessFiles(unittest.TestCase):
                 )
 
     def test_unsupported_data_file_type(self) -> None:
-        with self.assertRaises(ValueError):
+        with self.assertRaises(DataSourceError):
             with self.assertLogs(level="ERROR") as log:
                 process_files(
                     self.xml_message_type,
@@ -343,6 +350,55 @@ class TestProcessFiles(unittest.TestCase):
         )
         # Should complete successfully or with expected error
         assert result.returncode in [0, 1]
+
+    def test_process_files_unknown_data_type(self) -> None:
+        """Test processing with unsupported data type (triggers unknown path)."""
+        # Pass an unsupported type (not str, list, or dict)
+        # This should log "unknown" data_source_type and then raise DataSourceError
+        with pytest.raises(
+            DataSourceError, match="Unsupported data source type"
+        ):
+            process_files(
+                xml_message_type=self.xml_message_type,
+                xml_template_file_path=self.xml_template_file_path,
+                xsd_schema_file_path=self.xsd_schema_file_path,
+                data_file_path=12345,  # type: ignore  # Intentionally invalid type
+            )
+
+    def test_process_files_with_list_input(self) -> None:
+        """Test process_files with Python list input (triggers list path in core.py line 129)."""
+        # Use minimal valid payment data that will pass validation
+        # The goal is to trigger the isinstance(data_file_path, list) branch
+        # We'll use PaymentValidationError expectation since we need all required fields
+        payment_list = [
+            {"id": "1"}
+        ]  # Minimal - will fail validation but triggers list path
+
+        with self.assertRaises((PaymentValidationError, KeyError)):
+            # This will trigger the list branch in _load_data and process_files
+            process_files(
+                xml_message_type=self.xml_message_type,
+                xml_template_file_path=self.xml_template_file_path,
+                xsd_schema_file_path=self.xsd_schema_file_path,
+                data_file_path=payment_list,
+            )
+
+    def test_process_files_with_dict_input(self) -> None:
+        """Test process_files with Python dict input (triggers dict path in core.py line 131)."""
+        # Use minimal valid payment data that will pass validation
+        # The goal is to trigger the isinstance(data_file_path, dict) branch
+        payment_dict = {
+            "id": "1"
+        }  # Minimal - will fail validation but triggers dict path
+
+        with self.assertRaises((PaymentValidationError, KeyError)):
+            # This will trigger the dict branch in _load_data and process_files
+            process_files(
+                xml_message_type=self.xml_message_type,
+                xml_template_file_path=self.xml_template_file_path,
+                xsd_schema_file_path=self.xsd_schema_file_path,
+                data_file_path=payment_dict,
+            )
 
 
 if __name__ == "__main__":

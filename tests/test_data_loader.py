@@ -21,6 +21,7 @@ import sqlite3
 import pytest
 
 from pain001.data.loader import load_payment_data
+from pain001.exceptions import DataSourceError, PaymentValidationError
 
 
 class TestDataLoader:
@@ -145,8 +146,8 @@ class TestDataLoader:
             load_payment_data("/nonexistent/path/data.csv")
 
     def test_unsupported_file_type(self) -> None:
-        """Test that ValueError is raised for unsupported file types."""
-        with pytest.raises(ValueError, match="Unsupported file type"):
+        """Test that DataSourceError is raised for unsupported file types."""
+        with pytest.raises(DataSourceError, match="Unsupported file type"):
             load_payment_data("data.txt")
 
     # ========== NEW FEATURE TESTS ==========
@@ -195,30 +196,35 @@ class TestDataLoader:
         assert data[4]["id"] == "5"
 
     def test_empty_list_raises_error(self) -> None:
-        """Test that empty list raises ValueError."""
-        with pytest.raises(ValueError, match="Empty data list"):
+        """Test that empty list raises DataSourceError."""
+        with pytest.raises(DataSourceError, match="Empty data list"):
             load_payment_data([])
 
     def test_empty_dict_raises_error(self) -> None:
-        """Test that empty dict raises ValueError."""
-        with pytest.raises(ValueError, match="Empty data dictionary"):
+        """Test that empty dict raises DataSourceError."""
+        with pytest.raises(DataSourceError, match="Empty data dictionary"):
             load_payment_data({})
 
     def test_list_with_non_dict_raises_error(self) -> None:
-        """Test that list with non-dict items raises ValueError."""
+        """Test that list with non-dict items raises PaymentValidationError."""
         invalid_data = [{"id": "MSG001"}, "not a dict", {"id": "MSG003"}]
 
         with pytest.raises(
-            ValueError, match="All items in data list must be dictionaries"
+            PaymentValidationError,
+            match="All items in data list must be dictionaries",
         ):
             load_payment_data(invalid_data)
 
     def test_unsupported_type_raises_error(self) -> None:
-        """Test that unsupported data types raise ValueError."""
-        with pytest.raises(ValueError, match="Unsupported data source type"):
+        """Test that unsupported data types raise DataSourceError."""
+        with pytest.raises(
+            DataSourceError, match="Unsupported data source type"
+        ):
             load_payment_data(12345)
 
-        with pytest.raises(ValueError, match="Unsupported data source type"):
+        with pytest.raises(
+            DataSourceError, match="Unsupported data source type"
+        ):
             load_payment_data(None)
 
     # ========== INTEGRATION TESTS ==========
@@ -261,7 +267,7 @@ class TestDataLoader:
             return_value=False,
         ):
             with pytest.raises(
-                ValueError, match="Data list validation failed"
+                PaymentValidationError, match="Data list validation failed"
             ):
                 load_payment_data(invalid_data_list)
 
@@ -277,6 +283,7 @@ class TestDataLoader:
             return_value=False,
         ):
             with pytest.raises(
-                ValueError, match="Data dictionary validation failed"
+                PaymentValidationError,
+                match="Data dictionary validation failed",
             ):
                 load_payment_data(invalid_data_dict)

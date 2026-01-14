@@ -1,3 +1,18 @@
+# Copyright (C) 2023-2026 Sebastien Rousseau.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 .PHONY: format lint type test cov sec pr check perf slos clean help tollgate-deps tollgate-xsd tollgate-idempotency tollgate-envparity tollgates
 
 # Color output
@@ -22,7 +37,7 @@ help:
 	@echo "  lint          - Run linting checks (ruff, flake8, pylint) with SLO timing"
 	@echo "  type          - Type checking with mypy + SLO timing"
 	@echo "  test          - Run tests with timing verification"
-	@echo "  cov           - Generate coverage report (95% enforced)"
+	@echo "  cov           - Generate coverage report (99% enforced)"
 	@echo "  sec           - Security checks (bandit, safety)"
 	@echo "  perf          - Performance benchmarks (XML generation < 500ms/1000tx)"
 	@echo "  complex       - Code complexity analysis"
@@ -86,9 +101,9 @@ type:
 	fi
 
 test:
-	@echo "$(YELLOW)Running tests (SLO: < $(SLO_TEST)s, Coverage floor: 95%)...$(NC)"
-	@time_start=$$(date +%s%N); \
-	poetry run pytest --tb=short -v --cov=pain001 --cov-branch --cov-report=term-missing --cov-report=xml --cov-report=html --cov-fail-under=95; \
+	@echo "$(YELLOW)Running tests (SLO: < $(SLO_TEST)s, Coverage floor: 99%)...$(NC)"
+	@time_start=$$(date +%s); \
+	poetry run pytest --tb=short -v --cov=pain001 --cov-branch --cov-report=term-missing --cov-report=xml --cov-report=html --cov-fail-under=99;
 	test_result=$$?; \
 	time_end=$$(date +%s%N); \
 	elapsed=$$(( ($$time_end - $$time_start) / 1000000000 )); \
@@ -102,8 +117,8 @@ test:
 	echo "$(GREEN)✓ Tests passed ($${elapsed}s < $(SLO_TEST)s)$(NC)"
 
 cov:
-	@echo "$(YELLOW)Generating coverage report (floor: 95%)...$(NC)"
-	@poetry run pytest --cov=pain001 --cov-branch --cov-report=term-missing --cov-report=xml --cov-report=html --cov-fail-under=95
+	@echo "$(YELLOW)Generating coverage report (floor: 99%)...$(NC)"
+	@poetry run pytest --cov=pain001 --cov-branch --cov-report=term-missing --cov-report=xml --cov-report=html --cov-fail-under=99
 	@echo "$(GREEN)✓ Coverage report generated in htmlcov/index.html$(NC)"
 
 sec:

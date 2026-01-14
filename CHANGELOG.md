@@ -5,9 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.0.45] - 2026-01-13
 
-- No changes yet.
+---
+
+## [0.0.45] - 2026-01-13
+
+### Added
+
+- **CLI Dry-Run Mode** - Added `--dry-run` / `--validate-only` flag for validation without XML generation (Resolves #81):
+  - Validates XML template, XSD schema, and payment data using the same validation paths as generation
+  - Returns exit code 0 on success, 1 on validation failure
+  - Skips XML file generation to enable pre-flight checks and CI/CD integration
+  - Supports all input sources (CSV, SQLite via CLI; Python list/dict via programmatic API)
+  - Available in both `pain001.cli.cli` and `pain001.__main__` entry points
+  - Example: `python3 -m pain001 -t pain.001.001.03 -m template.xml -s schema.xsd -d data.csv --dry-run`
+
+- **Structured Logging Normalization** - Standardized event names and fields across CLI and library (Resolves #102):
+  - Created `pain001.logging_schema` module with standardized Events and Fields classes
+  - Implemented helper functions for common logging patterns (process lifecycle, validation, data loading, XML generation)
+  - All log entries now use consistent JSON format with standardized field names
+  - Added PII masking utility for sensitive data (IBAN, BIC, names, amounts)
+  - Updated `pain001.core.core` and `pain001.cli.cli` to use structured logging
+  - Added comprehensive test coverage in `tests/test_logging_schema.py`
+  - Added documentation guide in `docs/structured_logging.rst`
+  - Enables integration with log aggregation systems (Elasticsearch, Splunk, CloudWatch)
+
+---
 
 ## [0.0.44] - 2026-01-13
 
@@ -29,8 +53,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Code Quality**: 392 tests passing with 99.14% total coverage (exceeds 95% requirement)
 - **Type Hints**: Full strict typing across all new and refactored functions
-- **Linting**: All linters pass (ruff, black, isort, mypy)
-- **Performance**: No performance degradation; generation duration timing preserved
+- **Linting**: All linters pass (ruff, black, isort, mypy, pylint 9.89/10)
+- **Security**: 0 vulnerabilities (bandit, safety)
+- **Performance**: No degradation; test suite < 39s (target < 60s)
 
 ### Notes
 

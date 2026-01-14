@@ -2,7 +2,9 @@
 
 ![Pain001 banner][banner]
 
-## A Powerful Python Library that enables you to create ISO 20022-Compliant Payment Files from CSV, SQLite, or Python data structures
+## Enterprise-Grade ISO 20022 Payment Generation from 4 Data
+
+Sources: CSV, SQLite, Python Dict, Python List
 
 [![PyPI Version][pypi-badge]][03]
 [![Python Versions][python-versions-badge]][03]
@@ -13,7 +15,13 @@
 [![Quality][quality-badge]][quality-url]
 [![Documentation][docs-badge]][docs-url]
 
-> **Latest Release: v0.0.44** - Core orchestration refactor with expanded regression coverage. [See what's new →](https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.44)
+![Python Versions][python-matrix-badge]
+![Coverage 99%][coverage-floor-badge]
+![Security: Hardened][security-hardened-badge]
+
+> **Latest Release: v0.0.45** - CLI dry-run mode and
+> enterprise-grade structured logging.
+> [See what's new →][release-045]
 
 ## Overview
 
@@ -31,27 +39,47 @@ that initiates a customer payment.
 
 **Key Features:**
 
-- **Mandatory Data Validation:** Ensures all payment files are ISO 20022-compliant before creation
-- **Multi-source Support:** Works with CSV files, SQLite databases, and Python data structures
-- **Automatic XSD Validation:** Validates generated XML against ISO 20022 schemas
-- **Comprehensive Testing:** 99.14% test coverage with 392 tests ensuring reliability
-- **Secure by Design:** Uses `defusedxml` to prevent XXE attacks and implements SQL injection protection
-- **Type-Safe:** Full type hints for better IDE support and type checking with mypy
-- **Robust Error Handling:** Specific exception types for precise error handling and debugging
-- **9 ISO 20022 Versions Supported:** From pain.001.001.03 to pain.001.001.11
-- **Production-Ready:** Used in production environments for SEPA and international payments
+- **Mandatory Data Validation:** Ensures all payment files are
+  ISO 20022-compliant before creation
+- **Multi-source Support:** Works with CSV files, SQLite databases,
+  and Python data structures
+- **Automatic XSD Validation:** Validates generated XML against
+  ISO 20022 schemas
+- **Comprehensive Testing:** 99.30% test coverage with 435 tests
+  ensuring reliability
+- **Secure by Design:** Uses `defusedxml` to prevent XXE attacks
+  and implements SQL injection protection
+- **Type-Safe:** Full type hints for better IDE support and type
+  checking with mypy
+- **Robust Error Handling:** Specific exception types for precise
+  error handling and debugging
+- **9 ISO 20022 Versions Supported:** Supports all 9 Customer Credit
+  Transfer Initiation versions: pain.001.001.03 through
+  pain.001.001.11
+- **Production-Ready:** Used in production environments for SEPA
+  and international payments
 
 As of today, the library is designed to be compatible with the:
 
-- **Payments Initiation V03 (pain.001.001.03):** This version is used for initiating credit transfers within the SEPA (Single Euro Payments Area)
-- **Payments Initiation V04 (pain.001.001.04):** Enhanced with additional optional fields and improved data structures
-- **Payments Initiation V05 (pain.001.001.05):** Brings further refinements and clarifications to the ISO 20022 standard
-- **Payments Initiation V06 (pain.001.001.06):** Focused on supporting instant credit transfers within the SEPA region
-- **Payments Initiation V07 (pain.001.001.07):** Extended schema with additional optional elements for enhanced payment requests
-- **Payments Initiation V08 (pain.001.001.08):** Introduces support for new transaction types and enhanced validation rules
-- **Payments Initiation V09 (pain.001.001.09):** Simplified message structure with consolidated required fields
-- **Payments Initiation V10 (pain.001.001.10):** Enhanced with improved data structures and additional compliance requirements
-- **Payments Initiation V11 (pain.001.001.11):** The latest version with extended ISO 20022 compliance and advanced payment features
+- **Payments Initiation V03 (pain.001.001.03):** This version is
+  used for initiating credit transfers within the SEPA (Single Euro
+  Payments Area)
+- **Payments Initiation V04 (pain.001.001.04):** Enhanced with
+  additional optional fields and improved data structures
+- **Payments Initiation V05 (pain.001.001.05):** Brings further
+  refinements and clarifications to the ISO 20022 standard
+- **Payments Initiation V06 (pain.001.001.06):** Focused on
+  supporting instant credit transfers within the SEPA region
+- **Payments Initiation V07 (pain.001.001.07):** Extended schema
+  with additional optional elements for enhanced payment requests
+- **Payments Initiation V08 (pain.001.001.08):** Introduces support
+  for new transaction types and enhanced validation rules
+- **Payments Initiation V09 (pain.001.001.09):** Simplified message
+  structure with consolidated required fields
+- **Payments Initiation V10 (pain.001.001.10):** Enhanced with
+  improved data structures and additional compliance requirements
+- **Payments Initiation V11 (pain.001.001.11):** The latest version
+  with extended ISO 20022 compliance and advanced payment features
 
 ### Version Comparison
 
@@ -177,8 +205,18 @@ flowchart LR
   - All dependencies kept up to date to address known vulnerabilities
   - No sensitive data storage—all information remains confidential
   - OWASP Top 10 security best practices implemented
+- **🛡️ Enterprise Logging & Compliance:**
+  - **Structured Logging:** All logs emitted as JSON for seamless
+    integration with Splunk, Datadog, Elasticsearch, and CloudWatch
+  - **PII Protection:** Automatic masking of sensitive fields (IBANs,
+    BICs, names, account numbers) in logs to ensure GDPR Article 32 and
+    PCI-DSS Requirement 3.4 compliance
+  - **Event Standardization:** 17 standardized event types for
+    consistent observability across payment processing lifecycle
+  - **Zero PII Leakage:** Logs never expose clear-text payment data—all
+    sensitive information automatically redacted before logging
 - **Robust Development:** Comprehensive quality assurance with
-    - 99.14% test coverage with 392 comprehensive tests
+  - 99.30% test coverage with 435 comprehensive tests
   - Code formatting with Black and Ruff
   - Import sorting with isort
   - Style checking with Flake8 (10.00/10 score)
@@ -323,6 +361,49 @@ python3 -m pain001 \
 If successful, you'll see:
 - ✓ Validation messages in your terminal
 - ✓ A new ISO 20022-compliant XML file at your specified location
+
+### Safe Validation (Dry-Run Mode)
+
+You can validate your data against the ISO 20022 schema **without
+generating an output file** using the `--dry-run` flag (alias:
+`--validate-only`). This is ideal for:
+
+- **CI/CD Pipelines:** Pre-flight validation in automated builds
+- **Data Quality Checks:** Verify payment data before batch processing
+- **Template Development:** Test XML templates and schemas without file clutter
+- **Pre-Commit Hooks:** Validate data before committing to version control
+
+**Command:**
+
+```sh
+python3 -m pain001 \
+    -t pain.001.001.03 \
+    -m pain001/templates/pain.001.001.03/template.xml \
+    -s pain001/templates/pain.001.001.03/pain.001.001.03.xsd \
+    -d pain001/templates/pain.001.001.03/template.csv \
+    --dry-run  # <--- Validation-only mode
+```
+
+**Output:**
+
+```plaintext
+[SUCCESS] Validation passed. No XML file created.
+```
+
+**Exit Codes:**
+
+- `0` - Validation succeeded (safe to proceed)
+- `1` - Validation failed (data or schema errors detected)
+
+**What Gets Validated:**
+
+- ✓ XML template structure and syntax
+- ✓ XSD schema compliance
+- ✓ Payment data integrity (required fields, data types, formats)
+- ✓ Business rules (amounts > 0, valid IBANs/BICs, etc.)
+
+**Note:** Dry-run mode uses the same validation logic as XML generation,
+ensuring your data will be valid when you generate the actual file.
 
 ### Arguments
 
@@ -1042,39 +1123,69 @@ poetry install
 poetry shell
 ```
 
-### Running Tests
+### Development Workflow (Zero-Trust Quality Model)
+
+We enforce a **Zero-Trust Quality Model** with mandatory quality gates. Before submitting a PR, you **must** run the local tollgates to ensure your changes meet our enterprise standards.
+
+#### Enterprise Quality Gates (Makefile)
+
+We use a `Makefile` to orchestrate all quality checks. This ensures consistency between local development and CI/CD pipelines.
 
 ```bash
-# Run all tests
-poetry run pytest
+# Fast PR gate (non-blocking for iterative dev)
+poetry run make pr
 
-# Run tests with coverage
-poetry run pytest --cov=pain001 --cov-report=html
+# Full quality gate (REQUIRED before commit)
+poetry run make check
+
+# Release preparation (advanced security, XSD, idempotency)
+poetry run make tollgates
+
+# Performance benchmarks (XML generation < 500ms/1000 transactions)
+poetry run make perf
+
+# Cleanup build artifacts
+poetry run make clean
 ```
 
-### Code Quality Tools
+**Quality Gate Requirements:**
 
-The project uses several tools to maintain code quality:
+| Gate | Command | What It Checks | Exit Code Required |
+|------|---------|----------------|--------------------|
+| **PR Gate** | `make pr` | Formatting (ruff, black, isort), Type checking (mypy), Tests (pytest), Coverage (≥99%) | 0 (PASS) |
+| **Full Gate** | `make check` | PR Gate + Security (bandit, safety), Lint (pylint) | 0 (PASS) |
+| **Tollgates** | `make tollgates` | Full Gate + XSD validation (9 versions), Advanced security, Idempotency checks | 0 (PASS) |
+
+**Note:** All PRs must pass the `check` target (exit code 0) and maintain **99%+ coverage**. No exceptions.
+
+### Manual Quality Tools (Advanced)
+
+If you need to run individual tools:
 
 ```bash
-# Format code with Black
-poetry run black .
+# Linting
+poetry run ruff check .
+poetry run pylint pain001
 
-# Sort imports with isort
+# Formatting
+poetry run black .
+poetry run ruff format .
+
+# Import sorting
 poetry run isort .
 
-# Check style with Flake8
-poetry run flake8 pain001 tests
-
-# Type checking with mypy
+# Type checking
 poetry run mypy pain001
 
 # Security scanning
 poetry run bandit -r pain001
 poetry run safety check
+
+# Testing
+poetry run pytest --cov=pain001 --cov-report=html
 ```
 
-All code contributions must pass these quality checks before being merged.
+**However, we strongly recommend using `make check` instead of individual commands to ensure nothing is missed.**
 
 ## License
 
@@ -1106,16 +1217,20 @@ We would like to extend a big thank you to all the awesome contributors of
 [05]: https://github.com/sebastienrousseau/pain001/graphs/contributors
 [06]: https://codecov.io/github/sebastienrousseau/pain001?branch=main
 [07]: https://pypi.org/project/pain001/
+[release-045]: https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.45
 
 [banner]: https://kura.pro/pain001/images/banners/banner-pain001.svg 'Pain001, A Python Library for Automating ISO 20022-Compliant Payment Files Using CSV Or SQlite Data Files.'
 [codecov-badge]: https://img.shields.io/codecov/c/github/sebastienrousseau/pain001?style=for-the-badge 'Codecov badge'
+[coverage-floor-badge]: https://img.shields.io/badge/coverage-99.30%25-brightgreen?style=for-the-badge 'Coverage 99.30%'
 [docs-badge]: https://img.shields.io/github/actions/workflow/status/sebastienrousseau/pain001/docs.yml?branch=main&label=Docs&style=for-the-badge 'Documentation badge'
 [docs-url]: https://docs.pain001.com/
 [license-badge]: https://img.shields.io/pypi/l/pain001?style=for-the-badge 'License badge'
 [pypi-badge]: https://img.shields.io/pypi/v/pain001?style=for-the-badge 'PyPI version badge'
 [pypi-downloads-badge]: https://img.shields.io/pypi/dm/pain001.svg?style=for-the-badge 'PyPI Downloads badge'
+[python-matrix-badge]: https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue?style=for-the-badge 'Python 3.9-3.12'
 [python-versions-badge]: https://img.shields.io/pypi/pyversions/pain001.svg?style=for-the-badge 'Python versions badge'
 [quality-badge]: https://img.shields.io/github/actions/workflow/status/sebastienrousseau/pain001/quality.yml?branch=main&label=Quality&style=for-the-badge 'Code quality badge'
 [quality-url]: https://github.com/sebastienrousseau/pain001/actions/workflows/quality.yml
+[security-hardened-badge]: https://img.shields.io/badge/security-hardened-blueviolet?style=for-the-badge 'Security: Hardened'
 [tests-badge]: https://img.shields.io/github/actions/workflow/status/sebastienrousseau/pain001/ci.yml?branch=main&label=Tests&style=for-the-badge 'Tests badge'
 [tests-url]: https://github.com/sebastienrousseau/pain001/actions/workflows/ci.yml

@@ -203,6 +203,42 @@ class TestCliModule(unittest.TestCase):
             assert result.exit_code == 1
             assert "Schema validation failed" in result.output
 
+    def test_cli_dry_run_validates_without_generation(self) -> None:
+        """Test CLI dry-run flag validates data but skips XML generation."""
+
+        with patch(
+            "pain001.cli.cli.process_files", autospec=True
+        ) as mock_process:
+            with patch(
+                "pain001.cli.cli.validate_via_xsd",
+                autospec=True,
+                return_value=True,
+            ):
+                with patch(
+                    "pain001.cli.cli.load_payment_data",
+                    autospec=True,
+                    return_value=[{}],
+                ) as mock_load:
+                    result = self.runner.invoke(
+                        main,
+                        [
+                            "-t",
+                            "pain.001.001.03",
+                            "-m",
+                            self.xml_template,
+                            "-s",
+                            self.xsd_schema,
+                            "-d",
+                            self.csv_file,
+                            "--dry-run",
+                        ],
+                    )
+
+        assert result.exit_code == 0
+        assert "No XML generated" in result.output
+        mock_load.assert_called_once_with(self.csv_file)
+        mock_process.assert_not_called()
+
     def test_cli_expanduser_paths(self) -> None:
         """Test that CLI expands user paths correctly."""
         # Create a file in the temp directory
