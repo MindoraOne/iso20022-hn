@@ -108,7 +108,7 @@ class TestContext(unittest.TestCase):
 
         # Verify logger was initialized
         self.assertIsNotNone(context.logger)
-        self.assertTrue(len(context.logger.handlers) > 0)
+        self.assertGreater(len(context.logger.handlers), 0, "Logger should have at least one handler")
 
 
 if __name__ == "__main__":

@@ -217,7 +217,8 @@ class TestPerformanceBenchmarks:
             """Generate XML."""
             try:
                 generate_xml(data, "pain.001.001.03", None, None)
-            except Exception:
-                pass
+            except Exception as e:
+                # Expected: validation errors in benchmark scenario
+                print(f"Benchmark validation error (expected): {type(e).__name__}")
 
         benchmark(generate)

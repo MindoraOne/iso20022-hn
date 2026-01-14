@@ -23,6 +23,7 @@ import unittest
 from pathlib import Path
 
 import pain001
+from pain001 import process_files
 
 
 class TestReadmeExamples(unittest.TestCase):
