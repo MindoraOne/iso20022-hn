@@ -13,11 +13,13 @@
 [![Quality][quality-badge]][quality-url]
 [![Documentation][docs-badge]][docs-url]
 
-![Python 3.9 | 3.10 | 3.11 | 3.12](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue?style=for-the-badge)
-![Coverage 99%](https://img.shields.io/badge/coverage-99.30%25-brightgreen?style=for-the-badge)
-![Security: Hardened](https://img.shields.io/badge/security-hardened-blueviolet?style=for-the-badge)
+![Python Versions][python-matrix-badge]
+![Coverage 99%][coverage-floor-badge]
+![Security: Hardened][security-hardened-badge]
 
-> **Latest Release: v0.0.45** - CLI dry-run mode and enterprise-grade structured logging. [See what's new →](https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.45)
+> **Latest Release: v0.0.45** - CLI dry-run mode and
+> enterprise-grade structured logging.
+> [See what's new →][release-045]
 
 ## Overview
 
@@ -1183,16 +1185,20 @@ We would like to extend a big thank you to all the awesome contributors of
 [05]: https://github.com/sebastienrousseau/pain001/graphs/contributors
 [06]: https://codecov.io/github/sebastienrousseau/pain001?branch=main
 [07]: https://pypi.org/project/pain001/
+[release-045]: https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.45
 
 [banner]: https://kura.pro/pain001/images/banners/banner-pain001.svg 'Pain001, A Python Library for Automating ISO 20022-Compliant Payment Files Using CSV Or SQlite Data Files.'
 [codecov-badge]: https://img.shields.io/codecov/c/github/sebastienrousseau/pain001?style=for-the-badge 'Codecov badge'
+[coverage-floor-badge]: https://img.shields.io/badge/coverage-99.30%25-brightgreen?style=for-the-badge 'Coverage 99.30%'
 [docs-badge]: https://img.shields.io/github/actions/workflow/status/sebastienrousseau/pain001/docs.yml?branch=main&label=Docs&style=for-the-badge 'Documentation badge'
 [docs-url]: https://docs.pain001.com/
 [license-badge]: https://img.shields.io/pypi/l/pain001?style=for-the-badge 'License badge'
 [pypi-badge]: https://img.shields.io/pypi/v/pain001?style=for-the-badge 'PyPI version badge'
 [pypi-downloads-badge]: https://img.shields.io/pypi/dm/pain001.svg?style=for-the-badge 'PyPI Downloads badge'
+[python-matrix-badge]: https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue?style=for-the-badge 'Python 3.9-3.12'
 [python-versions-badge]: https://img.shields.io/pypi/pyversions/pain001.svg?style=for-the-badge 'Python versions badge'
 [quality-badge]: https://img.shields.io/github/actions/workflow/status/sebastienrousseau/pain001/quality.yml?branch=main&label=Quality&style=for-the-badge 'Code quality badge'
 [quality-url]: https://github.com/sebastienrousseau/pain001/actions/workflows/quality.yml
+[security-hardened-badge]: https://img.shields.io/badge/security-hardened-blueviolet?style=for-the-badge 'Security: Hardened'
 [tests-badge]: https://img.shields.io/github/actions/workflow/status/sebastienrousseau/pain001/ci.yml?branch=main&label=Tests&style=for-the-badge 'Tests badge'
 [tests-url]: https://github.com/sebastienrousseau/pain001/actions/workflows/ci.yml
