@@ -392,7 +392,7 @@ class TestLoggingSchema(unittest.TestCase):  # pylint: disable=too-many-public-m
             "another_bic": "CHASUS33XXX",  # 11 chars
         }
         redacted = _redact_pii_from_dict(data)
-        
+
         # BICs show first 4 and last 2 characters only
         self.assertEqual(redacted["debtor_bic"], "NWBK**2L")
         self.assertEqual(redacted["creditor_bic"], "COBA**FF")
