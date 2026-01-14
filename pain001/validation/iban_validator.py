@@ -120,7 +120,7 @@ IBAN_LENGTHS = {
 
 def validate_iban_format(
     iban: str,
-) -> tuple[bool, str]:  # pylint: disable=too-many-return-statements
+) -> tuple[bool, str]:
     """Validate IBAN format structure.
 
     Checks:
@@ -148,13 +148,12 @@ def validate_iban_format(
     iban_clean = iban.replace(" ", "").replace("-", "").upper()
 
     # Check length (shortest IBAN is 15, longest is 34)
-    if len(iban_clean) < 15:
-        return (
-            False,
-            f"IBAN too short: {len(iban_clean)} characters (minimum 15)",
-        )
-
-    if len(iban_clean) > 34:
+    if not 15 <= len(iban_clean) <= 34:
+        if len(iban_clean) < 15:
+            return (
+                False,
+                f"IBAN too short: {len(iban_clean)} characters (minimum 15)",
+            )
         return (
             False,
             f"IBAN too long: {len(iban_clean)} characters (maximum 34)",

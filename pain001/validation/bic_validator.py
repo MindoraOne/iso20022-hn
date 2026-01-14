@@ -142,7 +142,7 @@ VALID_COUNTRY_CODES = {
 
 def validate_bic_format(
     bic: str,
-) -> tuple[bool, str]:  # pylint: disable=too-many-return-statements
+) -> tuple[bool, str]:
     """Validate BIC format structure according to ISO 9362.
 
     BIC Structure:
@@ -177,17 +177,15 @@ def validate_bic_format(
             f"BIC must be 8 or 11 characters (got {len(bic_clean)}: '{bic_clean}')",
         )
 
-    # Check bank code (first 4 characters must be letters)
+    # Check bank code (first 4 characters) and country code (characters 5-6)
     bank_code = bic_clean[:4]
-    if not bank_code.isalpha():
-        return (
-            False,
-            f"BIC bank code (first 4 characters) must be letters (got '{bank_code}')",
-        )
-
-    # Check country code (characters 5-6 must be letters)
     country_code = bic_clean[4:6]
-    if not country_code.isalpha():
+    if not bank_code.isalpha() or not country_code.isalpha():
+        if not bank_code.isalpha():
+            return (
+                False,
+                f"BIC bank code (first 4 characters) must be letters (got '{bank_code}')",
+            )
         return (
             False,
             f"BIC country code (characters 5-6) must be letters (got '{country_code}')",
