@@ -15,10 +15,6 @@ Sources: CSV, SQLite, Python Dict, Python List
 [![Quality][quality-badge]][quality-url]
 [![Documentation][docs-badge]][docs-url]
 
-![Python Versions][python-matrix-badge]
-![Coverage 99%][coverage-floor-badge]
-![Security: Hardened][security-hardened-badge]
-
 > **Latest Release: v0.0.45** - CLI dry-run mode and
 > enterprise-grade structured logging.
 > [See what's new →][release-045]
