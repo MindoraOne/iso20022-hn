@@ -2,9 +2,7 @@
 
 ![Pain001 banner][banner]
 
-## Enterprise-Grade ISO 20022 Payment Generation from 4 Data
-
-Sources: CSV, SQLite, Python Dict, Python List
+## Enterprise-Grade ISO 20022 Payment File Generation
 
 [![PyPI Version][pypi-badge]][03]
 [![Python Versions][python-versions-badge]][03]
