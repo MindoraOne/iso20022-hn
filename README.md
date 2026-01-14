@@ -13,6 +13,10 @@
 [![Quality][quality-badge]][quality-url]
 [![Documentation][docs-badge]][docs-url]
 
+![Python 3.9 | 3.10 | 3.11 | 3.12](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue?style=for-the-badge)
+![Coverage 99%](https://img.shields.io/badge/coverage-99.30%25-brightgreen?style=for-the-badge)
+![Security: Hardened](https://img.shields.io/badge/security-hardened-blueviolet?style=for-the-badge)
+
 > **Latest Release: v0.0.45** - CLI dry-run mode and enterprise-grade structured logging. [See what's new →](https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.45)
 
 ## Overview
@@ -177,6 +181,11 @@ flowchart LR
   - All dependencies kept up to date to address known vulnerabilities
   - No sensitive data storage—all information remains confidential
   - OWASP Top 10 security best practices implemented
+- **🛡️ Enterprise Logging & Compliance:**
+  - **Structured Logging:** All logs emitted as JSON for seamless integration with Splunk, Datadog, Elasticsearch, and CloudWatch
+  - **PII Protection:** Automatic masking of sensitive fields (IBANs, BICs, names, account numbers) in logs to ensure GDPR Article 32 and PCI-DSS Requirement 3.4 compliance
+  - **Event Standardization:** 17 standardized event types for consistent observability across payment processing lifecycle
+  - **Zero PII Leakage:** Logs never expose clear-text payment data—all sensitive information automatically redacted before logging
 - **Robust Development:** Comprehensive quality assurance with
     - 99.30% test coverage with 435 comprehensive tests
   - Code formatting with Black and Ruff
@@ -324,9 +333,16 @@ If successful, you'll see:
 - ✓ Validation messages in your terminal
 - ✓ A new ISO 20022-compliant XML file at your specified location
 
-### Validate without generating XML
+### Safe Validation (Dry-Run Mode)
 
-Use `--dry-run` (alias `--validate-only`) to validate your template, XSD schema, and payment data without writing an XML file. This runs the same validation path used for generation and checks the input source you provide on the CLI (CSV or SQLite); when used programmatically, the library continues to support Python list and dict sources as well:
+You can validate your data against the ISO 20022 schema **without generating an output file** using the `--dry-run` flag (alias: `--validate-only`). This is ideal for:
+
+- **CI/CD Pipelines:** Pre-flight validation in automated builds
+- **Data Quality Checks:** Verify payment data before batch processing
+- **Template Development:** Test XML templates and schemas without file clutter
+- **Pre-Commit Hooks:** Validate data before committing to version control
+
+**Command:**
 
 ```sh
 python3 -m pain001 \
@@ -334,10 +350,26 @@ python3 -m pain001 \
     -m pain001/templates/pain.001.001.03/template.xml \
     -s pain001/templates/pain.001.001.03/pain.001.001.03.xsd \
     -d pain001/templates/pain.001.001.03/template.csv \
-    --dry-run
+    --dry-run  # <--- Validation-only mode
 ```
 
-When validation succeeds, Pain001 exits with code 0 and does not generate XML.
+**Output:**
+
+```plaintext
+[SUCCESS] Validation passed. No XML file created.
+```
+
+**Exit Codes:**
+- `0` - Validation succeeded (safe to proceed)
+- `1` - Validation failed (data or schema errors detected)
+
+**What Gets Validated:**
+- ✓ XML template structure and syntax
+- ✓ XSD schema compliance
+- ✓ Payment data integrity (required fields, data types, formats)
+- ✓ Business rules (amounts > 0, valid IBANs/BICs, etc.)
+
+**Note:** Dry-run mode uses the same validation logic as XML generation, ensuring your data will be valid when you generate the actual file.
 
 ### Arguments
 
@@ -1057,39 +1089,69 @@ poetry install
 poetry shell
 ```
 
-### Running Tests
+### Development Workflow (Zero-Trust Quality Model)
+
+We enforce a **Zero-Trust Quality Model** with mandatory quality gates. Before submitting a PR, you **must** run the local tollgates to ensure your changes meet our enterprise standards.
+
+#### Enterprise Quality Gates (Makefile)
+
+We use a `Makefile` to orchestrate all quality checks. This ensures consistency between local development and CI/CD pipelines.
 
 ```bash
-# Run all tests
-poetry run pytest
+# Fast PR gate (non-blocking for iterative dev)
+poetry run make pr
 
-# Run tests with coverage
-poetry run pytest --cov=pain001 --cov-report=html
+# Full quality gate (REQUIRED before commit)
+poetry run make check
+
+# Release preparation (advanced security, XSD, idempotency)
+poetry run make tollgates
+
+# Performance benchmarks (XML generation < 500ms/1000 transactions)
+poetry run make perf
+
+# Cleanup build artifacts
+poetry run make clean
 ```
 
-### Code Quality Tools
+**Quality Gate Requirements:**
 
-The project uses several tools to maintain code quality:
+| Gate | Command | What It Checks | Exit Code Required |
+|------|---------|----------------|--------------------|
+| **PR Gate** | `make pr` | Formatting (ruff, black, isort), Type checking (mypy), Tests (pytest), Coverage (≥99%) | 0 (PASS) |
+| **Full Gate** | `make check` | PR Gate + Security (bandit, safety), Lint (pylint) | 0 (PASS) |
+| **Tollgates** | `make tollgates` | Full Gate + XSD validation (9 versions), Advanced security, Idempotency checks | 0 (PASS) |
+
+**Note:** All PRs must pass the `check` target (exit code 0) and maintain **99%+ coverage**. No exceptions.
+
+### Manual Quality Tools (Advanced)
+
+If you need to run individual tools:
 
 ```bash
-# Format code with Black
-poetry run black .
+# Linting
+poetry run ruff check .
+poetry run pylint pain001
 
-# Sort imports with isort
+# Formatting
+poetry run black .
+poetry run ruff format .
+
+# Import sorting
 poetry run isort .
 
-# Check style with Flake8
-poetry run flake8 pain001 tests
-
-# Type checking with mypy
+# Type checking
 poetry run mypy pain001
 
 # Security scanning
 poetry run bandit -r pain001
 poetry run safety check
+
+# Testing
+poetry run pytest --cov=pain001 --cov-report=html
 ```
 
-All code contributions must pass these quality checks before being merged.
+**However, we strongly recommend using `make check` instead of individual commands to ensure nothing is missed.**
 
 ## License
 

@@ -118,6 +118,60 @@ You can also work directly with Python dictionaries and lists:
 
     result = processor.process(payment_data)
 
+Safe Validation (Dry-Run Mode)
+===============================
+
+You can validate your data against the ISO 20022 schema **without generating an output file** using the ``--dry-run`` flag. This is ideal for:
+
+- **CI/CD Pipelines:** Pre-flight validation in automated builds
+- **Data Quality Checks:** Verify payment data before batch processing
+- **Template Development:** Test XML templates and schemas without file clutter
+- **Pre-Commit Hooks:** Validate data before committing to version control
+
+Command-Line Usage
+------------------
+
+.. code-block:: bash
+
+    python3 -m pain001 \\
+        -t pain.001.001.03 \\
+        -m templates/pain.001.001.03/template.xml \\
+        -s templates/pain.001.001.03/pain.001.001.03.xsd \\
+        -d data/payments.csv \\
+        --dry-run
+
+**Exit Codes:**
+
+- ``0`` - Validation succeeded (safe to proceed)
+- ``1`` - Validation failed (data or schema errors detected)
+
+**What Gets Validated:**
+
+- ✓ XML template structure and syntax
+- ✓ XSD schema compliance
+- ✓ Payment data integrity (required fields, data types, formats)
+- ✓ Business rules (amounts > 0, valid IBANs/BICs, etc.)
+
+Programmatic Dry-Run
+--------------------
+
+.. code-block:: python
+
+    from pain001 import process_files
+
+    # Validate without generating XML
+    try:
+        result = process_files(
+            message_type='pain.001.001.03',
+            payment_data=my_data,
+            xml_template_file_path='template.xml',
+            xsd_schema_file_path='schema.xsd',
+            dry_run=True  # Validation-only mode
+        )
+        print("✅ Validation passed")
+    except ValueError as e:
+        print(f"❌ Validation failed: {e}")
+
 Data Validation
 ===============
 
