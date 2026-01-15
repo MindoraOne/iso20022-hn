@@ -97,6 +97,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     name: 📦 Publish Release
+    environment: pypi
     permissions:
       contents: write
       id-token: write
