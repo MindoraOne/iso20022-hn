@@ -160,7 +160,6 @@ class TestReadmeExamples(unittest.TestCase):
         Example shows processing CSV data files.
         """
 
-
         # Process CSV file
         pain001.process_files(
             "pain.001.001.03",
@@ -215,7 +214,6 @@ class TestReadmeExamples(unittest.TestCase):
         are not present in the basic test template. The full version tests are in
         test_pain001_vXX.py files which use appropriate test data for each version.
         """
-
 
         # Test versions that are compatible with the basic template.csv
         versions = [

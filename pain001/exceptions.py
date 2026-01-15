@@ -34,8 +34,20 @@ Example:
     ...     log.error(f"Configuration error: {e}")
 """
 
-
 from typing import Optional
+
+__all__ = [
+    "Pain001Error",
+    "PaymentValidationError",
+    "XMLGenerationError",
+    "ConfigurationError",
+    "DataSourceError",
+    "SchemaValidationError",
+    "XSDValidationError",
+    "InvalidIBANError",
+    "InvalidBICError",
+    "MissingRequiredFieldError",
+]
 
 
 class Pain001Error(Exception):
@@ -169,3 +181,121 @@ class SchemaValidationError(Pain001Error):
         """
         super().__init__(message)
         self.errors = errors or []
+
+
+# Alias for backward compatibility and API clarity
+XSDValidationError = SchemaValidationError
+
+
+class InvalidIBANError(PaymentValidationError):
+    """Raised when IBAN validation fails.
+
+    This exception indicates issues with:
+    - Invalid IBAN format (wrong structure)
+    - Failed ISO 7064 mod-97-10 checksum validation
+    - Unsupported country code
+    - IBAN length mismatch for country
+
+    Example:
+        >>> try:
+        ...     validate_iban("AT68123456")  # Too short
+        ... except InvalidIBANError as e:
+        ...     # IBAN validation failed - prompt user to correct
+        ...     print(f"Invalid IBAN: {e}")
+        ...     print(f"Field: {e.field}, Value: {e.iban}")
+    """
+
+    def __init__(
+        self,
+        message: str,
+        iban: str,
+        field: Optional[str] = None,
+        reason: Optional[str] = None,
+    ):
+        """Initialize IBAN validation error with IBAN value.
+
+        Args:
+            message: Human-readable error message.
+            iban: The invalid IBAN value.
+            field: Optional field name (e.g., "debtor_account").
+            reason: Optional specific reason for failure.
+        """
+        super().__init__(message, field=field)
+        self.iban = iban
+        self.reason = reason
+
+
+class InvalidBICError(PaymentValidationError):
+    """Raised when BIC/SWIFT validation fails.
+
+    This exception indicates issues with:
+    - Invalid BIC format (must be 8 or 11 characters)
+    - Invalid BIC structure (ISO 9362)
+    - Invalid country code in BIC
+    - Invalid bank/branch code characters
+
+    Example:
+        >>> try:
+        ...     validate_bic("INVALID123")
+        ... except InvalidBICError as e:
+        ...     # BIC validation failed - prompt user to correct
+        ...     print(f"Invalid BIC: {e}")
+        ...     print(f"Field: {e.field}, Value: {e.bic}")
+    """
+
+    def __init__(
+        self,
+        message: str,
+        bic: str,
+        field: Optional[str] = None,
+        reason: Optional[str] = None,
+    ):
+        """Initialize BIC validation error with BIC value.
+
+        Args:
+            message: Human-readable error message.
+            bic: The invalid BIC value.
+            field: Optional field name (e.g., "debtor_agent").
+            reason: Optional specific reason for failure.
+        """
+        super().__init__(message, field=field)
+        self.bic = bic
+        self.reason = reason
+
+
+class MissingRequiredFieldError(PaymentValidationError):
+    """Raised when a required field is missing from payment data.
+
+    This exception indicates issues with:
+    - Missing mandatory fields (debtor_name, creditor_account, etc.)
+    - Empty/null values for required fields
+    - Missing fields in CSV rows
+    - Missing dictionary keys
+
+    Example:
+        >>> try:
+        ...     validate_required_fields(data, ["debtor_name", "amount"])
+        ... except MissingRequiredFieldError as e:
+        ...     # Required field missing - show user what's needed
+        ...     print(f"Missing field: {e.field}")
+        ...     print(f"Row: {e.row_number}, Expected fields: {e.required_fields}")
+    """
+
+    def __init__(
+        self,
+        message: str,
+        field: str,
+        row_number: Optional[int] = None,
+        required_fields: Optional[list[str]] = None,
+    ):
+        """Initialize missing field error with field details.
+
+        Args:
+            message: Human-readable error message.
+            field: The missing field name.
+            row_number: Optional row/line number where field is missing.
+            required_fields: Optional list of all required fields.
+        """
+        super().__init__(message, field=field)
+        self.row_number = row_number
+        self.required_fields = required_fields or []

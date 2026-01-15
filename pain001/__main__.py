@@ -1,6 +1,5 @@
 # Other imports remain the same
 # pylint: disable=duplicate-code
-import os
 import sys
 from typing import Optional
 
@@ -9,11 +8,8 @@ from rich import box
 from rich.console import Console
 from rich.table import Table
 
-from pain001.constants.constants import valid_xml_types
-from pain001.context.context import Context
 from pain001.core.core import process_files
-from pain001.data.loader import load_payment_data
-from pain001.xml.validate_via_xsd import validate_via_xsd
+from pain001.validation import ValidationConfig, ValidationService
 
 console = Console()
 
@@ -122,7 +118,7 @@ def main(
             sys.exit(1)
 
         if not xml_template_file_path:
-            console.print("XXThe XML template file path is required.\nXX")
+            console.print("The XML template file path is required.\n")
             sys.exit(1)
 
         if not xsd_schema_file_path:
@@ -133,64 +129,26 @@ def main(
             console.print("The data file path is required.\n")
             sys.exit(1)
 
-        logger = Context.get_instance().get_logger()
+        # Use ValidationService for comprehensive validation
+        validation_service = ValidationService()
+        validation_config = ValidationConfig(
+            xml_message_type=xml_message_type,
+            xml_template_file_path=xml_template_file_path,
+            xsd_schema_file_path=xsd_schema_file_path,
+            data_file_path=data_file_path,
+        )
 
-        logger.info("Parsing command line arguments.\n")
+        report = validation_service.validate_all(validation_config)
 
-        # Check that the XML message type is valid
-        if xml_message_type not in valid_xml_types:
-            logger.info(f"Invalid XML message type: {xml_message_type}.")
-            console.print(f"Invalid XML message type: {xml_message_type}.")
-            sys.exit(1)
-
-        if not os.path.isfile(xml_template_file_path):
-            logger.info(
-                f"""
-            The XML template file '{xml_template_file_path}' does not exist.
-            """
-            )
-            console.print(
-                f"""
-            The XML template file '{xml_template_file_path}' does not exist.
-            """
-            )
-            sys.exit(1)
-
-        if not os.path.isfile(xsd_schema_file_path):
-            logger.info(
-                f"""
-            The XSD template file '{xsd_schema_file_path}' does not exist.
-            """
-            )
-            console.print(
-                f"""
-            The XSD template file '{xsd_schema_file_path}' does not exist.
-            """
-            )
-            sys.exit(1)
-
-        if not os.path.isfile(data_file_path):
-            logger.info(f"The data file '{data_file_path}' does not exist.")
-            console.print(f"The data file '{data_file_path}' does not exist.")
-            sys.exit(1)
-
-        try:
-            validate_via_xsd(xml_template_file_path, xsd_schema_file_path)
-        except Exception as exc:  # pylint: disable=broad-exception-caught
-            logger.error(f"Schema validation failed: {exc}")
-            console.print(f"Schema validation failed: {exc}")
+        if not report.is_valid:
+            console.print("\n[red]Validation Failed:[/red]")
+            for error in report.errors:
+                console.print(f"  • {error}")
             sys.exit(1)
 
         if dry_run:
-            try:
-                load_payment_data(data_file_path)
-            except (FileNotFoundError, ValueError) as exc:
-                logger.error(f"Data validation failed: {exc}")
-                console.print(f"Data validation failed: {exc}")
-                sys.exit(1)
-
             console.print(
-                "Validation succeeded. No XML generated (--dry-run)."
+                "[green]✓ Validation succeeded. No XML generated (--dry-run).[/green]"
             )
             return
 
@@ -201,7 +159,7 @@ def main(
             data_file_path,
         )
     except Exception as e:
-        console.print(f"An error occurred: {e}")
+        console.print(f"[red]An error occurred: {e}[/red]")
         sys.exit(1)
 
 

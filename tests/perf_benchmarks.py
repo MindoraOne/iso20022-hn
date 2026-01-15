@@ -219,6 +219,8 @@ class TestPerformanceBenchmarks:
                 generate_xml(data, "pain.001.001.03", None, None)
             except Exception as e:
                 # Expected: validation errors in benchmark scenario
-                print(f"Benchmark validation error (expected): {type(e).__name__}")
+                print(
+                    f"Benchmark validation error (expected): {type(e).__name__}"
+                )
 
         benchmark(generate)
