@@ -32,11 +32,17 @@ List specific `poetry run` or `make` commands executed.
 
 ### 3. Pre-Commit Checklist:
 
-- [ ] Feature branch created/active
-- [ ] Version bumped in all 3 files (if releasing)
+- [ ] Feature branch created/active (NOT main/master)
+- [ ] Version bumped in **all 5 files** (if releasing): __init__, toml, cfg, README.md, CHANGELOG.md
+- [ ] README.md line ~16 updated with new version
+- [ ] README.md line ~1214 release link added for new version
+- [ ] Release notes created in `releases/vX.Y.Z.md` (if version bump)
 - [ ] `make check` passed (exit 0)
+- [ ] CI/CD Pre-Flight checks passed (exit 0)
+- [ ] Stale version references hunted and removed
+- [ ] `poetry build` succeeded
+- [ ] `twine check dist/*` passed
 - [ ] README snippets verified via execution
-- [ ] Release notes created in `releases/` (if version bump)
 - [ ] All changes staged
 
 ---
@@ -60,29 +66,68 @@ git branch --show-current  # Must NOT be main/master for code changes
 - `release/vX.Y.Z` - Release preparation
 - `hotfix/<name>` - Critical production fixes
 
-### Version Synchronization (The Trinity):
+### Version Synchronization (The Five Pillars):
 
-Version must be **identical** in all three files:
+**CRITICAL:** Version must be **identical** in ALL FIVE locations (expanded from Trinity to prevent documentation drift):
 
 1. `pain001/__init__.py` (`__version__`)
 2. `pyproject.toml` (`version`)
 3. `setup.cfg` (`version`)
+4. **`README.md`** (Line ~16: "Latest Release: vX.Y.Z")
+5. **`CHANGELOG.md`** (Top header: `## [X.Y.Z] - YYYY-MM-DD` or `## [Unreleased]`)
 
-**Action:** If a version bump is required, update all three simultaneously using `multi_replace_string_in_file`.
+**Action:** If a version bump is required, update all FIVE simultaneously using `multi_replace_string_in_file`.
 
-**Verification:**
+**Verification (The Five Pillars Check):**
 ```bash
-# Extract versions
-grep "__version__" pain001/__init__.py
-grep "^version = " pyproject.toml
-grep "^version = " setup.cfg | head -1
+# 1. Trinity verification (core code files)
+V_INIT=$(grep "__version__ = " pain001/__init__.py | cut -d'"' -f2)
+V_TOML=$(grep "^version = " pyproject.toml | cut -d'"' -f2)
+V_CFG=$(grep "^version = " setup.cfg | head -1 | cut -d'=' -f2 | tr -d ' ')
 
-# All three MUST match
+# 2. Documentation verification (README.md)
+V_README=$(grep "Latest Release:" README.md | grep -oP 'v\K[0-9]+\.[0-9]+\.[0-9]+')
+
+# 3. Changelog verification
+V_CHANGELOG=$(grep "^## \[" CHANGELOG.md | head -1 | grep -oP '\[\K[0-9]+\.[0-9]+\.[0-9]+')
+
+# 4. Verify all 5 match
+echo "Trinity: $V_INIT | $V_TOML | $V_CFG"
+echo "Docs:    $V_README (README) | $V_CHANGELOG (CHANGELOG)"
+
+# 5. Automated assertion
+if [ "$V_INIT" = "$V_TOML" ] && [ "$V_TOML" = "$V_CFG" ] && [ "$V_CFG" = "$V_README" ] && [ "$V_README" = "$V_CHANGELOG" ]; then
+    echo "✓ Five Pillars Verified: v$V_INIT"
+else
+    echo "❌ VERSION DESYNC DETECTED"
+    exit 1
+fi
 ```
 
-### Release Artifacts:
+**README.md Version Anchor Points (MUST UPDATE):**
+When bumping version from `0.0.X` to `0.0.Y`, these lines MUST be updated:
+- **Line ~16:** `> **Latest Release: v0.0.Y**` (hero section)
+- **Line ~1214:** `[release-XYZ]: https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.Y` (link reference at bottom)
 
-If version changes, a new file `releases/vX.Y.Z.md` MUST be created following the enterprise template (see Section VI).
+**Search for Stale Versions:**
+```bash
+# Find any hardcoded old version references
+OLD_VER="0.0.45"  # Replace with previous version
+grep -rn "v${OLD_VER}\|${OLD_VER}" \
+    README.md CHANGELOG.md docs/*.rst \
+    --exclude-dir=releases \
+    || echo "✓ No stale version references"
+```
+
+### Release Artifacts & Documentation Sweep:
+
+**If version changes, ALL of the following MUST be updated:**
+
+1. **New Release Note:** Create `releases/vX.Y.Z.md` (see Section VI template)
+2. **CHANGELOG.md:** Move `[Unreleased]` content to new `[X.Y.Z] - YYYY-MM-DD` section
+3. **README.md:** Update "Latest Release" hero banner (line ~16)
+4. **README.md:** Add new release link reference at bottom (line ~1214)
+5. **Tag Creation:** `git tag vX.Y.Z` (only after all checks pass)
 
 ---
 
@@ -200,6 +245,74 @@ poetry run pylint pain001/ --disable=all --enable=R0801
 ```
 
 **If ANY check fails:** STOP, fix locally, re-run, then commit.
+
+### 4. CI/CD Pre-Flight (GitHub Actions Simulation)
+
+**MANDATORY BEFORE PUSHING:** Run these checks to ensure GitHub Actions will pass:
+
+```bash
+# 1. Version Desync Check (Five Pillars)
+V_INIT=$(grep "__version__ = " pain001/__init__.py | cut -d'"' -f2)
+V_TOML=$(grep "^version = " pyproject.toml | cut -d'"' -f2)
+V_CFG=$(grep "^version = " setup.cfg | head -1 | cut -d'=' -f2 | tr -d ' ')
+V_README=$(grep "Latest Release:" README.md | grep -oP 'v\K[0-9]+\.[0-9]+\.[0-9]+')
+V_CHANGELOG=$(grep "^## \[" CHANGELOG.md | head -1 | grep -oP '\[\K[0-9]+\.[0-9]+\.[0-9]+')
+
+if [ "$V_INIT" = "$V_TOML" ] && [ "$V_TOML" = "$V_CFG" ] && [ "$V_CFG" = "$V_README" ] && [ "$V_README" = "$V_CHANGELOG" ]; then
+    echo "✓ Five Pillars Verified: v$V_INIT"
+else
+    echo "❌ VERSION DESYNC: Init=$V_INIT | Toml=$V_TOML | Cfg=$V_CFG | README=$V_README | CHANGELOG=$V_CHANGELOG"
+    exit 1
+fi
+
+# 2. README.md Link Reference Check
+CURRENT_VER=$(grep "__version__ = " pain001/__init__.py | cut -d'"' -f2)
+if ! grep -q "\[release-.*\]:.*v${CURRENT_VER}" README.md; then
+    echo "❌ Missing release link for v${CURRENT_VER} in README.md bottom section"
+    exit 1
+fi
+echo "✓ README release link present for v${CURRENT_VER}"
+
+# 3. Release Note Existence Check (if not Unreleased)
+if [ "$V_CHANGELOG" != "Unreleased" ]; then
+    if [ ! -f "releases/v${CURRENT_VER}.md" ]; then
+        echo "❌ Missing release note: releases/v${CURRENT_VER}.md"
+        exit 1
+    fi
+    echo "✓ Release note exists: releases/v${CURRENT_VER}.md"
+fi
+
+# 4. Build Artifact Test (catches setup.py/pyproject.toml issues)
+poetry build 2>&1 | tee /tmp/build.log
+if [ $? -ne 0 ]; then
+    echo "❌ poetry build FAILED - GitHub Actions will fail"
+    cat /tmp/build.log
+    exit 1
+fi
+echo "✓ poetry build succeeded"
+
+# 5. Twine Check (catches README rendering issues on PyPI)
+poetry run twine check dist/* 2>&1 | tee /tmp/twine.log
+if [ $? -ne 0 ]; then
+    echo "❌ twine check FAILED - PyPI deployment will fail"
+    cat /tmp/twine.log
+    exit 1
+fi
+echo "✓ twine check passed"
+
+# 6. Stale Version Reference Hunt (catches hardcoded old versions)
+PREV_VER=$(echo "$CURRENT_VER" | awk -F. '{print $1"."$2"."$3-1}')
+STALE_REFS=$(grep -rn "v${PREV_VER}" README.md CHANGELOG.md docs/*.rst 2>/dev/null | grep -v "releases/" | wc -l)
+if [ "$STALE_REFS" -gt 0 ]; then
+    echo "⚠️  Found $STALE_REFS potential stale version references to v${PREV_VER}"
+    grep -rn "v${PREV_VER}" README.md CHANGELOG.md docs/*.rst 2>/dev/null | grep -v "releases/"
+    echo "Review above - update if these should reference v${CURRENT_VER}"
+fi
+
+echo "✅ CI/CD Pre-Flight Complete - GitHub Actions likely to pass"
+```
+
+**ABORT PUSH IF:** Any check exits with code 1.
 
 ### 4. Backward Compatibility Matrix
 
@@ -368,7 +481,7 @@ feat: Add CLI dry-run mode for validation without XML generation
 
 Quality Gate: PASSED (exit 0)
 Branch: feature/81-cli-dry-run
-Version: 0.0.45 (synced across Trinity)
+Version: 0.0.45 (synced across Five Pillars)
 Coverage: 99.15% (≥ 95% floor)
 Tests: 394/394 passing
 Security: 0 vulnerabilities
@@ -394,7 +507,7 @@ Risk Level: CRITICAL
 I cannot proceed with this request. Here's what we must do instead:
 
 1. Fix the failing gate/test
-2. Ensure version sync across the Trinity (__init__, toml, cfg)
+2. Ensure version sync across the Five Pillars (__init__, toml, cfg, README, CHANGELOG)
 3. Verify documentation accuracy
 4. Run full quality gate: `poetry run make check`
 5. Only then commit and push
@@ -413,13 +526,14 @@ Every task completion must include this report:
 
 **State & Versioning:**
 - Branch: [feature/fix name] ✓
-- Version Sync: [X.Y.Z] in __init__, toml, cfg ✓
+- Version Sync: [X.Y.Z] in __init__, toml, cfg, README, CHANGELOG ✓
 - Release Note: [releases/vX.Y.Z.md created] ✓ (if version bump)
 
 **Tollgates & Deployment:**
 - `make check`: PASSED (Exit 0) ✓
 - `poetry build`: PASSED ✓
 - `twine check`: PASSED ✓
+- CI/CD Pre-Flight: PASSED ✓
 - XSD Semantic Anchor: PASSED (9/9 versions) ✓
 - Codacy Pre-Flight: PASSED ✓
 - Backward Compatibility: PASSED (4 sources × 9 versions) ✓
@@ -448,22 +562,28 @@ Every task completion must include this report:
 # 1. Verify branch (not main)
 git branch --show-current
 
-# 2. If version bump, update Trinity
-grep "__version__" pain001/__init__.py
-grep "^version = " pyproject.toml
-grep "^version = " setup.cfg | head -1
+# 2. If version bump, verify Five Pillars synchronization
+V_INIT=$(grep "__version__ = " pain001/__init__.py | cut -d'"' -f2)
+V_TOML=$(grep "^version = " pyproject.toml | cut -d'"' -f2)
+V_CFG=$(grep "^version = " setup.cfg | head -1 | cut -d'=' -f2 | tr -d ' ')
+V_README=$(grep "Latest Release:" README.md | grep -oP 'v\K[0-9]+\.[0-9]+\.[0-9]+')
+V_CHANGELOG=$(grep "^## \[" CHANGELOG.md | head -1 | grep -oP '\[\K[0-9]+\.[0-9]+\.[0-9]+')
+echo "Init: $V_INIT | Toml: $V_TOML | Cfg: $V_CFG | README: $V_README | CHANGELOG: $V_CHANGELOG"
 
 # 3. Run quality gate
 poetry run make check
 
-# 4. Verify README examples
+# 4. Run CI/CD Pre-Flight (comprehensive gate)
+# (Execute the full script from Section IV.4)
+
+# 5. Verify README examples
 python -c "<example from README>"
 
-# 5. Stage and commit
+# 6. Stage and commit
 git add .
 git commit -m "<type>: <subject>..."
 
-# 6. Push
+# 7. Push
 git push origin <branch>
 ```
 
