@@ -3,7 +3,7 @@ name = "pain001"
 version = "0.0.46"
 description = "Pain001 is a Python Library for Automating ISO 20022-Compliant Payment Files Using CSV Data."
 authors = ["Sebastien Rousseau <sebastian.rousseau@gmail.com>"]
-license = "Apache Software License"
+license = "Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/sebastienrousseau/pain001"
 homepage = "https://pain001.com"
@@ -47,7 +47,7 @@ sphinx = "^7.0.0"
 sphinx-rtd-theme = "^1.0.0"
 sphinx-autodoc-typehints = "^1.0.0"
 pip-licenses = "^4.0.0"
-twine = "^4.0.0"
+twine = "^6.2.0"
 
 [tool.poetry.group.docs]
 optional = true
