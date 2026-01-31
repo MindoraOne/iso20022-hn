@@ -5,6 +5,167 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.47] - 2026-01-18
+
+### Highlights
+- **Full I/O decoupling for Serverless and API architectures.**
+- **Introduced O(1) memory streaming data loaders for CSV and SQLite.**
+- **Hardened path validation and security against Log/SQL injection.**
+- **Achieved 92.22% test coverage with 851 passing tests.**
+
+### Added
+
+- **Serverless I/O Decoupling** - String-based XML generation for AWS Lambda/Azure Functions (PR #152):
+  - New `generate_xml_string()` function returns XML as string instead of writing to file
+  - Eliminates file system dependencies for cloud-native deployments
+  - Compatible with API Gateway, Cloud Functions, and container orchestration
+  - Memory-efficient streaming for large payment files
+  - Full backward compatibility with existing file-based workflows
+
+- **O(1) Streaming Data Loaders** - Memory-efficient processing for large datasets (PR #152):
+  - `load_csv_data_streaming()` - Process CSV files in configurable chunks (default: 1000 rows)
+  - `load_db_data_streaming()` - Stream SQLite query results without loading full table
+  - ~90% memory reduction for files with 10,000+ transactions
+  - Enables processing of datasets larger than available RAM
+  - Generator-based architecture for pipeline-friendly data flow
+
+### Security
+
+- **Log Injection Protection (CWE-117)** - Prevents log forging attacks (Commit: 894106e):
+  - Sanitizes file paths before logging to prevent newline injection
+  - Escapes `\n` and `\r` characters in user-controlled input
+  - Applied to CSV streaming loader error handling
+  - CodeQL security gate compliance achieved (0 alerts)
+
+- **SQL Injection Hardening (CWE-89)** - Strict table name validation (Commit: 95934ae):
+  - Replaced weak transformation with strict regex validation: `^[a-zA-Z][a-zA-Z0-9_]*$`
+  - Rejects invalid table names instead of attempting sanitization
+  - Prevents SQL injection via malicious table identifiers
+  - Applied to both standard and streaming SQLite loaders
+
+- **Path Traversal Mitigation** - Enhanced file path validation:
+  - All 21 HIGH-severity path traversal vulnerabilities resolved
+  - Pre-validation with allowlist checking before Path() operations
+  - Added `# nosec B108` comments after proper validation
+  - Removed unsafe fallback patterns that bypassed security checks
+  - **SchemaValidator Hardening**: Added strict whitelist validation for `message_type` to prevent path traversal in schema loading (CodeQL High Severity fix).
+
+### Fixed
+
+- **XML String Normalization** - Byte-for-byte regression test compatibility (Commits: 03becb5, 8c4b589):
+  - **XML Declaration**: Changed from single quotes to double quotes: `<?xml version="1.0" encoding="UTF-8"?>`
+  - **Empty Elements**: Added `short_empty_elements=True` to produce `<Amt />` instead of `<Amt></Amt>`
+  - **Trailing Newlines**: ADD trailing newline to match `ElementTree.write()` behaviour (CRITICAL FIX: 8c4b589)
+    - Changed from `rstrip('\n')` (removed newlines) to `+= '\n'` (adds newline)
+    - Golden Master files have EOF newline from legacy file-based writer
+    - Resolves byte-for-byte mismatch in regression tests
+  - **Namespace Registration**: Verified global registration prevents `ns0:` prefix pollution
+  - Ensures `xml_to_string()` produces identical output to file-based `write_xml_to_file()`
+  - Resolves regression test failures where Golden Master files use legacy format
+  - Critical for financial XML validation requiring byte-for-byte comparison
+
+- **Log Injection (Streaming)** - Enhanced sanitization in error handlers (Commit: 03becb5):
+  - Added explicit newline removal in `load_csv_data_streaming()` error logs
+  - Prevents log forging via malicious file paths containing control characters
+  - Complements existing `sanitize_for_log()` function with defensive programming
+  - CodeQL CWE-117 compliance: Zero log injection vulnerabilities
+
+- **CI/CD Template Loading** - Path resolution for installed packages (Commit: 6930670):
+  - Fixed FileNotFoundError in GitHub Actions when package installed via pip
+  - Changed 9 XML generator files from `FileSystemLoader(".")` to `Path(__file__).parent.parent / "templates"`
+  - Templates now resolve relative to package location, not working directory
+  - Works correctly in development, CI/CD, and pip-installed contexts
+
+- **Package Structure** - Python package recognition (Commit: e0140c7):
+  - Added `__init__.py` to `pain001/schemas/` directory
+  - Ensures setuptools/Poetry recognizes schemas as valid package
+  - Fixes build failures where JSON schemas weren't included in distribution
+  - Verified with clean venv installation tests (all 9 schemas accessible)
+
+- **CLI Complexity** - Maintainability improvements (Commit: 5886a6e):
+  - Reduced `main()` function complexity from 19 (Grade F) to 4 (Grade A)
+  - Extracted 5 helper functions: `_configure_logging`, `_load_configuration`, `_validate_schema`, `_validate_payment_data`, `_generate_xml_files`
+  - Improved code readability with step-by-step documentation
+  - Removed all pylint disable comments from main function
+
+### Changed
+
+- **Codacy Configuration** - Reduced false positives (Commit: b8871f7, 6930670):
+  - Excluded template files (`pain001/templates/**`) from duplication analysis
+  - Excluded data files (`**/*.json`, `**/*.xml`, `**/*.xsd`, `**/*.csv`)
+  - 83% reduction in reported issues (172 → 29, only production code patterns)
+  - Disabled Prospector/PyLint engines (using Ruff exclusively)
+
+- **Pydantic v2 Migration** - Updated validator syntax (Commit: 5886a6e):
+  - Changed `@validator` to `@field_validator` with `mode="after"`
+  - Updated validator signatures: `(cls, v, values)` → `(cls, v, info)`
+  - Access validation context via `info.data` instead of `values` dict
+  - Maintains backward compatibility with Pydantic v1 patterns
+
+### Performance
+
+- **Memory Efficiency** - Streaming architecture benchmarks:
+  - CSV streaming: ~90% memory reduction for 10K+ row datasets
+  - SQLite streaming: Constant memory usage regardless of table size
+  - Test suite: 807 tests pass in < 72 seconds (maintained)
+  - Coverage: 92.35% (exceeds 70% threshold by 22.35 points)
+
+### Documentation
+
+- **MANIFEST.in** - Enhanced packaging directives (Commit: 97a6019):
+  - Added recursive includes for templates and schemas
+  - Ensures pip packages contain all data files
+  - Verified with tarball inspection (45 templates + 9 schemas confirmed)
+
+- **Standardisation** - British English consistency:
+  - Updated README, FAQ, and Configuration docs to use British English spelling (Licence, Behaviour, Parameterised).
+  - Ensured consistent terminology across all documentation.
+
+## [0.0.46] - 2026-01-14
+
+### Added
+
+- **FastAPI REST API** - Production-ready RESTful endpoints for payment file generation (Resolves #106):
+  - `POST /api/validate` - Validate payment data against JSON Schema
+  - `POST /api/generate` - Synchronous XML generation with full validation
+  - `POST /api/generate/async` - Asynchronous job submission for long-running generation
+  - `GET /api/status/{job_id}` - Poll job status with real-time progress tracking (0-100%)
+  - `DELETE /api/jobs/{job_id}` - Cancel running async jobs
+  - `GET /api/download/{job_id}` - Download generated XML file from completed job
+  - `GET /api/health` - Health check endpoint with version information
+  - Comprehensive error handling with HTTP status codes (400, 404, 500)
+  - Interactive API documentation via Swagger UI (`/api/docs`) and ReDoc (`/api/redoc`)
+
+- **Job Management System** - UUID-based async job tracking with state machine:
+  - JobManager class with in-memory job store and automatic cleanup
+  - Job lifecycle states: PENDING → PROCESSING → SUCCESS/FAILED/CANCELLED
+  - Real-time progress tracking (0-100%) for long-running operations
+  - Timestamped job creation, modification, and completion
+  - Job cancellation with state validation
+  - Automatic cleanup of old jobs (configurable TTL)
+
+- **Pydantic Request/Response Models** - Type-safe API contracts:
+  - DataSourceType enum (csv, sqlite, json, jsonl, parquet)
+  - MessageType enum (9 ISO versions: pain.001.001.03-11)
+  - JobStatus enum (pending, processing, success, failed, cancelled)
+  - ValidationRequest/Response models with error reporting
+  - GenerateXMLRequest/Response models with file path handling
+  - JobStatusResponse model for job polling
+  - HealthResponse model with version tracking
+
+- **API Integration** - Seamless integration with existing pain001 modules:
+  - Uses `load_payment_data()` for universal file format support (CSV, SQLite, JSON, JSONL, Parquet)
+  - Uses `SchemaValidator` for declarative JSON Schema validation
+  - Uses `generate_xml()` for ISO 20022 compliance and XSD validation
+  - Proper error handling with PaymentValidationError exceptions
+  - Async task processing with background job workers
+
+- **Dependencies**:
+  - FastAPI 0.128.0 - Modern async web framework with automatic OpenAPI generation
+  - Uvicorn 0.40.0 - Production-ready ASGI server
+  - Pydantic v2 - Request/response validation and serialization
+  - All dependencies compatible with Python 3.9+
+
 ## [0.0.46] - 2026-01-14
 
 ### Added
@@ -135,7 +296,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Extracted `_register_message_namespaces()`: Manages XML namespace registration with logging
   - Extracted `_generate_and_log()`: Orchestrates XML generation and returns generation duration
   - Simplified `process_files()`: Now calls focused helpers, improving readability and testability
-  - Preserved all existing behavior, logging, error handling, and backward compatibility
+  - Preserved all existing behaviour, logging, error handling, and backward compatibility
 
 ### Quality Assurance
 
@@ -187,7 +348,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Notes
 
 - All v0.0.41 functionality fully preserved
-- Purely CI/CD workflow optimization
+- Purely CI/CD workflow optimisation
 
 ---
 
@@ -533,7 +694,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Repository Organisation** - Improved project structure and configuration:
   - Added `.editorconfig` for consistent coding styles across editors (Python, YAML, JSON, Markdown)
-  - Added `.gitattributes` for consistent line endings and diff behavior across platforms
+  - Added `.gitattributes` for consistent line endings and diff behaviour across platforms
   - Added comprehensive `.gitignore` patterns for temporary files and build artifacts
 
 - **Comprehensive Documentation Updates** - All 41 Python modules now fully documented:

@@ -17,6 +17,7 @@
 
 import csv
 import sqlite3
+from pathlib import Path
 
 import pytest
 
@@ -90,7 +91,7 @@ class TestDataLoader:
     def csv_file(self, sample_payment_data, tmp_path):  # type: ignore
         """Create temporary CSV file."""
         csv_path = tmp_path / "test_data.csv"
-        with open(csv_path, "w", newline="") as f:
+        with open(csv_path, "w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(
                 f, fieldnames=sample_payment_data[0].keys()
             )
@@ -142,13 +143,77 @@ class TestDataLoader:
 
     def test_file_not_found_error(self) -> None:
         """Test that FileNotFoundError is raised for missing files."""
+        # Use a path in CWD to pass path validation, but fail existence check
+        missing_file = (
+            Path("pain001/test_fixtures") / "nonexistent_data_loader_test.csv"
+        )
+        # Ensure it really doesn't exist
+        if missing_file.exists():
+            missing_file.unlink()
+
         with pytest.raises(FileNotFoundError):
-            load_payment_data("/nonexistent/path/data.csv")
+            load_payment_data(str(missing_file))
 
     def test_unsupported_file_type(self) -> None:
         """Test that DataSourceError is raised for unsupported file types."""
         with pytest.raises(DataSourceError, match="Unsupported file type"):
             load_payment_data("data.txt")
+
+    def test_load_from_json_file(self, sample_payment_data, tmp_path) -> None:
+        """Test loading from JSON file (new feature)."""
+        import json
+
+        json_file = tmp_path / "payments.json"
+        with open(json_file, "w", encoding="utf-8") as f:
+            json.dump(sample_payment_data, f)
+
+        data = load_payment_data(str(json_file))
+
+        assert isinstance(data, list)
+        assert len(data) == 1
+        assert data[0]["id"] == "1"
+        assert data[0]["payment_amount"] == "1000.00"
+
+    def test_load_from_jsonl_file(self, sample_payment_data, tmp_path) -> None:
+        """Test loading from JSONL file (new feature)."""
+        import json
+
+        jsonl_file = tmp_path / "payments.jsonl"
+        with open(jsonl_file, "w", encoding="utf-8") as f:
+            for record in sample_payment_data:
+                f.write(json.dumps(record) + "\n")
+
+        data = load_payment_data(str(jsonl_file))
+
+        assert isinstance(data, list)
+        assert len(data) == 1
+        assert data[0]["id"] == "1"
+
+    @pytest.mark.skipif(
+        not pytest.importorskip("pyarrow", reason="pyarrow not installed"),
+        reason="pyarrow not installed",
+    )
+    def test_load_from_parquet_file(
+        self, sample_payment_data, tmp_path
+    ) -> None:
+        """Test loading from Parquet file (new feature, requires pyarrow)."""
+        pa = None  # Initialize to satisfy CodeQL
+        pq = None
+        try:
+            import pyarrow as pa  # type: ignore[import-untyped,no-redef]
+            import pyarrow.parquet as pq  # type: ignore[import-untyped,no-redef]
+        except ImportError:
+            pytest.skip("pyarrow not available")
+
+        parquet_file = tmp_path / "payments.parquet"
+        table = pa.Table.from_pylist(sample_payment_data)
+        pq.write_table(table, str(parquet_file))
+
+        data = load_payment_data(str(parquet_file))
+
+        assert isinstance(data, list)
+        assert len(data) == 1
+        assert data[0]["id"] == "1"
 
     # ========== NEW FEATURE TESTS ==========
 

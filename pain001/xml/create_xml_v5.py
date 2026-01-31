@@ -26,11 +26,14 @@ returns the root element of the modified XML tree.
 # pylint: disable=duplicate-code
 
 # Import the ElementTree package
-import xml.etree.ElementTree as et  # nosec B405 - Only used for element creation, not parsing; defused_et used for parsing
+import xml.etree.ElementTree as et  # nosec B405
+from pathlib import Path
 from typing import Any
 
-from defusedxml import ElementTree as defused_et
+import defusedxml.ElementTree as defused_et
 from jinja2 import Environment, FileSystemLoader
+
+from pain001.security.path_validator import validate_path
 
 
 def create_xml_v5(root: et.Element, data: list[dict[str, Any]]) -> et.Element:
@@ -50,13 +53,15 @@ def create_xml_v5(root: et.Element, data: list[dict[str, Any]]) -> et.Element:
     cstmr_cdt_trf_initn_element = et.Element("CstmrCdtTrfInitn")
     root.append(cstmr_cdt_trf_initn_element)
 
-    # Create a Jinja2 environment
-    env = Environment(loader=FileSystemLoader("."), autoescape=True)
+    # Create a Jinja2 environment with package-relative path
+    template_dir = Path(__file__).parent.parent / "templates"
+    validate_path(template_dir, must_exist=True)
+    env = Environment(
+        loader=FileSystemLoader(str(template_dir)), autoescape=True
+    )
 
     # Load the Jinja2 template
-    template = env.get_template(
-        "pain001/templates/pain.001.001.05/template.xml"
-    )
+    template = env.get_template("pain.001.001.05/template.xml")
 
     # Prepare the data for rendering
     xml_data_pain001_001_05 = {
@@ -77,10 +82,10 @@ def create_xml_v5(root: et.Element, data: list[dict[str, Any]]) -> et.Element:
         "payment_method": data[0]["payment_method"],
         "batch_booking": data[0]["batch_booking"],
         "debtor_name": data[0]["debtor_name"],
-        "debtor_street": data[0]["debtor_street"],
+        "debtor_street": data[0]["debtor_street_name"],
         "debtor_building_number": data[0]["debtor_building_number"],
         "debtor_postal_code": data[0]["debtor_postal_code"],
-        "debtor_town": data[0]["debtor_town"],
+        "debtor_town": data[0]["debtor_town_name"],
         "debtor_country": data[0]["debtor_country"],
         "debtor_account_IBAN": data[0]["debtor_account_IBAN"],
         "debtor_agent_BIC": data[0]["debtor_agent_BIC"],
@@ -90,10 +95,10 @@ def create_xml_v5(root: et.Element, data: list[dict[str, Any]]) -> et.Element:
         "payment_amount": data[0]["payment_amount"],
         "charge_bearer": data[0]["charge_bearer"],
         "creditor_name": data[0]["creditor_name"],
-        "creditor_street": data[0]["creditor_street"],
+        "creditor_street": data[0]["creditor_street_name"],
         "creditor_building_number": data[0]["creditor_building_number"],
         "creditor_postal_code": data[0]["creditor_postal_code"],
-        "creditor_town": data[0]["creditor_town"],
+        "creditor_town": data[0]["creditor_town_name"],
         "creditor_country": data[0]["creditor_country"],
         "creditor_account_IBAN": data[0]["creditor_account_IBAN"],
         "creditor_agent_BICFI": data[0]["creditor_agent_BICFI"],

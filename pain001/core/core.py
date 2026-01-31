@@ -20,7 +20,9 @@ import sys
 import time
 from typing import Any, Union
 
-from pain001.constants.constants import valid_xml_types
+import pain001.xml.generate_xml as xml_generate
+import pain001.xml.register_namespaces as xml_namespaces
+from pain001.constants import valid_xml_types
 from pain001.context.context import Context
 from pain001.data.loader import load_payment_data
 from pain001.exceptions import XMLGenerationError
@@ -32,8 +34,9 @@ from pain001.logging_schema import (
     log_process_start,
     log_process_success,
 )
-from pain001.xml.generate_xml import generate_xml
-from pain001.xml.register_namespaces import register_namespaces
+from pain001.security.path_validator import sanitize_for_log, validate_path
+
+# CORRECTION: Circular import workaround. Imports moved to top-level.
 
 # Configure structured logging
 logger = logging.getLogger(__name__)
@@ -52,7 +55,7 @@ def _validate_inputs(
     xml_message_type: str,
     xml_template_file_path: str,
     xsd_schema_file_path: str,
-) -> None:
+) -> tuple[str, str]:
     """Validate message type and required file paths.
 
     Raises:
@@ -65,7 +68,9 @@ def _validate_inputs(
         error_message = (
             f"Error: Invalid XML message type: '{xml_message_type}'."
         )
-        context_logger.error(error_message)
+        context_logger.error(
+            f"{sanitize_for_log(error_message)}".replace("\n", "")
+        )
         log_event(
             logger,
             logging.ERROR,
@@ -78,11 +83,15 @@ def _validate_inputs(
         )
         raise XMLGenerationError(error_message)
 
-    if not os.path.exists(xml_template_file_path):
-        error_message = (
-            f"Error: XML template '{xml_template_file_path}' does not exist."
+    try:
+        safe_template_path = validate_path(
+            xml_template_file_path, must_exist=True
         )
-        context_logger.error(error_message)
+    except Exception as e:
+        error_message = f"Error: XML template '{xml_template_file_path}' does not exist or is invalid: {e}."
+        context_logger.error(
+            f"{sanitize_for_log(error_message)}".replace("\n", "")
+        )
         log_event(
             logger,
             logging.ERROR,
@@ -93,13 +102,15 @@ def _validate_inputs(
                 Fields.ERROR_MESSAGE: error_message,
             },
         )
-        raise FileNotFoundError(error_message)
+        raise FileNotFoundError(error_message) from e
 
-    if not os.path.exists(xsd_schema_file_path):
-        error_message = (
-            f"Error: XSD schema file '{xsd_schema_file_path}' does not exist."
+    try:
+        safe_schema_path = validate_path(xsd_schema_file_path, must_exist=True)
+    except Exception as e:
+        error_message = f"Error: XSD schema file '{xsd_schema_file_path}' does not exist or is invalid: {e}."
+        context_logger.error(
+            f"{sanitize_for_log(error_message)}".replace("\n", "")
         )
-        context_logger.error(error_message)
         log_event(
             logger,
             logging.ERROR,
@@ -110,50 +121,61 @@ def _validate_inputs(
                 Fields.ERROR_MESSAGE: error_message,
             },
         )
-        raise FileNotFoundError(error_message)
+        raise FileNotFoundError(error_message) from e
+
+    return str(safe_template_path), str(safe_schema_path)
+
+
+def _determine_data_source_type(
+    data_file_path: Union[str, list[dict[str, Any]], dict[str, Any]],
+) -> str:
+    """Determine the type of the data source."""
+    if isinstance(data_file_path, list):
+        return "list"
+    if isinstance(data_file_path, dict):
+        return "dict"
+    if not isinstance(data_file_path, str):
+        return "unknown"
+
+    if data_file_path.endswith(".db") or "sqlite" in data_file_path:
+        return "sqlite"
+
+    for ext in [".csv", ".jsonl", ".json", ".parquet"]:
+        if data_file_path.endswith(ext):
+            return ext.lstrip(".")
+
+    return "file"
 
 
 def _load_data(
     data_file_path: Union[str, list[dict[str, Any]], dict[str, Any]],
     start_time: float,
 ) -> list[dict[str, Any]]:
-    """Load and validate payment data from CSV/DB or Python objects."""
+    """Load and validate payment data from files or Python objects."""
     # Determine data source type
-    if isinstance(data_file_path, str):
-        if data_file_path.endswith(".csv"):
-            data_source_type = "csv"
-        elif data_file_path.endswith(".db") or "sqlite" in data_file_path:
-            data_source_type = "sqlite"
-        else:
-            data_source_type = "file"
-    elif isinstance(data_file_path, list):
-        data_source_type = "list"
-    elif isinstance(data_file_path, dict):
-        data_source_type = "dict"
-    else:
-        data_source_type = "unknown"
+    data_source_kind = _determine_data_source_type(data_file_path)
 
     log_event(
         logger,
         logging.INFO,
         Events.DATA_LOAD_START,
-        **{Fields.DATA_SOURCE_TYPE: data_source_type},
+        **{Fields.DATA_SOURCE_TYPE: data_source_kind},
     )
 
     try:
-        data = load_payment_data(data_file_path)
+        payment_data = load_payment_data(data_file_path)
         duration_ms = int((time.time() - start_time) * 1000)
         log_event(
             logger,
             logging.INFO,
             Events.DATA_LOAD_SUCCESS,
             **{
-                Fields.DATA_SOURCE_TYPE: data_source_type,
-                Fields.RECORD_COUNT: len(data),
+                Fields.DATA_SOURCE_TYPE: data_source_kind,
+                Fields.RECORD_COUNT: len(payment_data),
                 Fields.DURATION_MS: duration_ms,
             },
         )
-        return data
+        return payment_data
     except (FileNotFoundError, ValueError) as e:
         duration_ms = int((time.time() - start_time) * 1000)
         log_event(
@@ -161,7 +183,7 @@ def _load_data(
             logging.ERROR,
             Events.DATA_LOAD_ERROR,
             **{
-                Fields.DATA_SOURCE_TYPE: data_source_type,
+                Fields.DATA_SOURCE_TYPE: data_source_kind,
                 Fields.ERROR_TYPE: type(e).__name__,
                 Fields.ERROR_MESSAGE: str(e),
                 Fields.DURATION_MS: duration_ms,
@@ -178,11 +200,11 @@ def _register_message_namespaces(xml_message_type: str) -> None:
         Events.NAMESPACE_REGISTER,
         **{Fields.MESSAGE_TYPE: xml_message_type},
     )
-    register_namespaces(xml_message_type)
+    xml_namespaces.register_namespaces(xml_message_type)
 
 
 def _generate_and_log(
-    data: list[dict[str, Any]],
+    payment_data: list[dict[str, Any]],
     xml_message_type: str,
     xml_template_file_path: str,
     xsd_schema_file_path: str,
@@ -195,12 +217,12 @@ def _generate_and_log(
         Events.XML_GENERATE_START,
         **{
             Fields.MESSAGE_TYPE: xml_message_type,
-            Fields.RECORD_COUNT: len(data),
+            Fields.RECORD_COUNT: len(payment_data),
         },
     )
 
-    generate_xml(
-        data,
+    xml_generate.generate_xml(
+        payment_data,
         xml_message_type,
         xml_template_file_path,
         xsd_schema_file_path,
@@ -222,7 +244,7 @@ def process_files(
         xml_message_type: XML message type (e.g., 'pain.001.001.03').
         xml_template_file_path: Path to the XML template file.
         xsd_schema_file_path: Path to the XSD schema file.
-        data_file_path: CSV/DB path or Python data (list/dict).
+        data_file_path: File path (CSV/DB/JSON/Parquet) or Python data (list/dict).
 
     Raises:
         ValueError: If the XML message type is not supported or data is invalid.
@@ -233,60 +255,52 @@ def process_files(
     context_logger = Context.get_instance().get_logger()
 
     # Determine data source type
-    if isinstance(data_file_path, str):
-        if data_file_path.endswith(".csv"):
-            data_source_type = "csv"
-        elif data_file_path.endswith(".db") or "sqlite" in data_file_path:
-            data_source_type = "sqlite"
-        else:
-            data_source_type = "file"
-    elif isinstance(data_file_path, list):
-        data_source_type = "list"
-    elif isinstance(data_file_path, dict):
-        data_source_type = "dict"
-    else:
-        data_source_type = "unknown"
+    data_source_kind = _determine_data_source_type(data_file_path)
 
     # Log process start
-    start_time = log_process_start(logger, xml_message_type, data_source_type)
+    start_time = log_process_start(logger, xml_message_type, data_source_kind)
 
     try:
-        _validate_inputs(
+        safe_template_path, safe_schema_path = _validate_inputs(
             xml_message_type, xml_template_file_path, xsd_schema_file_path
         )
-        data = _load_data(data_file_path, start_time)
+        payment_data = _load_data(data_file_path, start_time)
         _register_message_namespaces(xml_message_type)
         gen_duration = _generate_and_log(
-            data,
+            payment_data,
             xml_message_type,
-            xml_template_file_path,
-            xsd_schema_file_path,
+            safe_template_path,
+            safe_schema_path,
         )
 
         # Confirm success (template existence check retained for backward compatibility)
-        if os.path.exists(xml_template_file_path):
+        if os.path.exists(safe_template_path):
             context_logger.info(
-                f"Successfully generated XML file '{xml_template_file_path}'"
+                f"Successfully generated XML file '{safe_template_path}'".replace(
+                    "\n", ""
+                )
             )
             log_process_success(
                 logger,
                 start_time,
                 xml_message_type,
-                len(data),
+                len(payment_data),
                 generation_ms=gen_duration,
             )
         else:
             error_msg = (
-                f"Failed to generate XML file at '{xml_template_file_path}'"
+                f"Failed to generate XML file at '{safe_template_path}'"
             )
-            context_logger.error(error_msg)
+            context_logger.error(
+                f"{sanitize_for_log(error_msg)}".replace("\n", "")
+            )
             log_event(
                 logger,
                 logging.ERROR,
                 Events.XML_GENERATE_ERROR,
                 **{
                     Fields.MESSAGE_TYPE: xml_message_type,
-                    Fields.TEMPLATE_PATH: xml_template_file_path,
+                    Fields.TEMPLATE_PATH: safe_template_path,
                     Fields.ERROR_MESSAGE: error_msg,
                 },
             )

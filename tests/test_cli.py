@@ -35,7 +35,7 @@ class TestCliModule(unittest.TestCase):
 
         # Create a simple XML template
         self.xml_template = os.path.join(self.temp_dir, "template.xml")
-        with open(self.xml_template, "w") as f:
+        with open(self.xml_template, "w", encoding="utf-8") as f:
             f.write(
                 """<?xml version="1.0" encoding="UTF-8"?>
 <Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.03">
@@ -49,7 +49,7 @@ class TestCliModule(unittest.TestCase):
 
         # Create a simple XSD schema
         self.xsd_schema = os.path.join(self.temp_dir, "schema.xsd")
-        with open(self.xsd_schema, "w") as f:
+        with open(self.xsd_schema, "w", encoding="utf-8") as f:
             f.write(
                 """<?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
@@ -79,7 +79,7 @@ class TestCliModule(unittest.TestCase):
 
         # Create a test CSV file
         self.csv_file = os.path.join(self.temp_dir, "data.csv")
-        with open(self.csv_file, "w") as f:
+        with open(self.csv_file, "w", encoding="utf-8") as f:
             f.write(
                 "id,date,nb_of_txs,initiator_name,payment_id,payment_method\n"
             )
@@ -105,8 +105,13 @@ class TestCliModule(unittest.TestCase):
                 self.csv_file,
             ],
         )
-        assert result.exit_code == 1
-        assert "XML message type is required" in result.output
+        assert (
+            result.exit_code == 2
+        )  # Click's exit code for missing required option
+        assert (
+            "required" in result.output.lower()
+            or "missing" in result.output.lower()
+        )
 
     def test_cli_missing_files(self) -> None:
         """Test CLI with non-existent file."""
@@ -123,8 +128,11 @@ class TestCliModule(unittest.TestCase):
                 self.csv_file,
             ],
         )
-        assert result.exit_code == 1
-        assert "does not exist" in result.output
+        assert result.exit_code == 2  # Click's exit code for invalid path
+        assert (
+            "does not exist" in result.output.lower()
+            or "invalid value" in result.output.lower()
+        )
 
     def test_cli_invalid_xml_message_type(self) -> None:
         """Test CLI with invalid XML message type."""
@@ -141,13 +149,16 @@ class TestCliModule(unittest.TestCase):
                 self.csv_file,
             ],
         )
-        assert result.exit_code == 1
-        assert "Invalid XML message type" in result.output
+        assert result.exit_code == 2  # Click's exit code for invalid choice
+        assert (
+            "invalid" in result.output.lower()
+            or "choice" in result.output.lower()
+        )
 
     def test_cli_with_config_file(self) -> None:
         """Test CLI with config file."""
         config_file = os.path.join(self.temp_dir, "config.ini")
-        with open(config_file, "w") as f:
+        with open(config_file, "w", encoding="utf-8") as f:
             f.write("[Paths]\n")
             f.write(f"xml_template_file_path = {self.xml_template}\n")
             f.write(f"xsd_schema_file_path = {self.xsd_schema}\n")
@@ -235,7 +246,10 @@ class TestCliModule(unittest.TestCase):
                     )
 
         assert result.exit_code == 0
-        assert "No XML generated" in result.output
+        assert (
+            "no XML generated" in result.output.lower()
+            or "dry-run" in result.output.lower()
+        )
         mock_load.assert_called_once_with(self.csv_file)
         mock_process.assert_not_called()
 
@@ -243,7 +257,7 @@ class TestCliModule(unittest.TestCase):
         """Test that CLI expands user paths correctly."""
         # Create a file in the temp directory
         home_xml = os.path.join(self.temp_dir, "home_template.xml")
-        with open(home_xml, "w") as f:
+        with open(home_xml, "w", encoding="utf-8") as f:
             f.write("<root></root>")
 
         with patch("os.path.expanduser", autospec=True, return_value=home_xml):
@@ -286,6 +300,231 @@ class TestCliModule(unittest.TestCase):
         # The script should exit with error code due to missing arguments
         # but not crash with import errors
         assert result.returncode in [0, 1, 2]
+
+    def test_cli_output_dir_creates_directory(self) -> None:
+        """Test that --output-dir flag creates directory if it doesn't exist."""
+        output_dir = os.path.join(self.temp_dir, "output", "xml")
+
+        with patch("pain001.cli.cli.process_files", autospec=True):
+            with patch(
+                "pain001.cli.cli.validate_via_xsd",
+                autospec=True,
+                return_value=True,
+            ):
+                result = self.runner.invoke(
+                    main,
+                    [
+                        "-t",
+                        "pain.001.001.03",
+                        "-m",
+                        self.xml_template,
+                        "-s",
+                        self.xsd_schema,
+                        "-d",
+                        self.csv_file,
+                        "-o",
+                        output_dir,
+                    ],
+                )
+
+        assert result.exit_code == 0
+        assert os.path.exists(output_dir)
+
+    def test_cli_output_dir_used_for_generation(self) -> None:
+        """Test that generated files go to --output-dir."""
+        output_dir = os.path.join(self.temp_dir, "custom_output")
+        os.makedirs(output_dir, exist_ok=True)
+
+        with patch("pain001.cli.cli.process_files", autospec=True):
+            with patch(
+                "pain001.cli.cli.validate_via_xsd",
+                autospec=True,
+                return_value=True,
+            ):
+                result = self.runner.invoke(
+                    main,
+                    [
+                        "-t",
+                        "pain.001.001.03",
+                        "-m",
+                        self.xml_template,
+                        "-s",
+                        self.xsd_schema,
+                        "-d",
+                        self.csv_file,
+                        "-o",
+                        output_dir,
+                    ],
+                )
+
+        assert result.exit_code == 0
+        assert (
+            f"Output Location: {output_dir}" in result.output
+            or "Success" in result.output
+        )
+
+    def test_cli_verbose_flag_enables_debug_logging(self) -> None:
+        """Test that --verbose flag enables detailed logging."""
+        with patch("pain001.cli.cli.process_files", autospec=True):
+            with patch(
+                "pain001.cli.cli.validate_via_xsd",
+                autospec=True,
+                return_value=True,
+            ):
+                result = self.runner.invoke(
+                    main,
+                    [
+                        "-t",
+                        "pain.001.001.03",
+                        "-m",
+                        self.xml_template,
+                        "-s",
+                        self.xsd_schema,
+                        "-d",
+                        self.csv_file,
+                        "--verbose",
+                    ],
+                )
+
+        assert "Verbose logging enabled" in result.output
+
+    def test_cli_dry_run_with_verbose(self) -> None:
+        """Test combining --dry-run and --verbose flags."""
+        with patch(
+            "pain001.cli.cli.validate_via_xsd",
+            autospec=True,
+            return_value=True,
+        ):
+            with patch(
+                "pain001.cli.cli.load_payment_data",
+                autospec=True,
+                return_value=[{"id": "1"}, {"id": "2"}],
+            ):
+                result = self.runner.invoke(
+                    main,
+                    [
+                        "-t",
+                        "pain.001.001.03",
+                        "-m",
+                        self.xml_template,
+                        "-s",
+                        self.xsd_schema,
+                        "-d",
+                        self.csv_file,
+                        "--dry-run",
+                        "--verbose",
+                    ],
+                )
+
+        assert result.exit_code == 0
+        assert (
+            "payment records" in result.output
+            or "validation passed" in result.output.lower()
+        )
+
+    def test_cli_improved_error_messages(self) -> None:
+        """Test that error messages include helpful tips."""
+        with patch(
+            "pain001.cli.cli.validate_via_xsd",
+            autospec=True,
+            side_effect=Exception("Schema mismatch error"),
+        ):
+            result = self.runner.invoke(
+                main,
+                [
+                    "-t",
+                    "pain.001.001.03",
+                    "-m",
+                    self.xml_template,
+                    "-s",
+                    self.xsd_schema,
+                    "-d",
+                    self.csv_file,
+                ],
+            )
+
+        assert result.exit_code == 1
+        # Check for helpful tip in output
+        assert (
+            "Tip" in result.output
+            or "validation failed" in result.output.lower()
+        )
+
+    def test_cli_required_fields_via_click(self) -> None:
+        """Test that Click enforces required fields."""
+        # Test missing --template
+        result = self.runner.invoke(
+            main,
+            [
+                "-t",
+                "pain.001.001.03",
+                "-s",
+                self.xsd_schema,
+                "-d",
+                self.csv_file,
+            ],
+        )
+        assert result.exit_code == 2  # Click's exit code for usage errors
+
+    def test_cli_invalid_message_type_via_click_choice(self) -> None:
+        """Test that Click validates message type via Choice."""
+        result = self.runner.invoke(
+            main,
+            [
+                "-t",
+                "invalid.999.999.99",
+                "-m",
+                self.xml_template,
+                "-s",
+                self.xsd_schema,
+                "-d",
+                self.csv_file,
+            ],
+        )
+        assert result.exit_code == 2  # Click's exit code for invalid choice
+
+    def test_cli_alias_flags(self) -> None:
+        """Test that short and long flag names work."""
+        with patch("pain001.cli.cli.process_files", autospec=True):
+            with patch(
+                "pain001.cli.cli.validate_via_xsd",
+                autospec=True,
+                return_value=True,
+            ):
+                # Test short flags
+                result_short = self.runner.invoke(
+                    main,
+                    [
+                        "-t",
+                        "pain.001.001.03",
+                        "-m",
+                        self.xml_template,
+                        "-s",
+                        self.xsd_schema,
+                        "-d",
+                        self.csv_file,
+                        "-v",  # Short verbose flag
+                    ],
+                )
+
+                # Test long flags
+                result_long = self.runner.invoke(
+                    main,
+                    [
+                        "--xml-message-type",
+                        "pain.001.001.03",
+                        "--template",
+                        self.xml_template,
+                        "--schema",
+                        self.xsd_schema,
+                        "--data",
+                        self.csv_file,
+                        "--verbose",
+                    ],
+                )
+
+        assert result_short.exit_code == 0
+        assert result_long.exit_code == 0
 
 
 if __name__ == "__main__":

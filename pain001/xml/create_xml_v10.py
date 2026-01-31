@@ -26,11 +26,14 @@ returns the root element of the modified XML tree.
 # pylint: disable=duplicate-code
 
 # Import the ElementTree package
-import xml.etree.ElementTree as et  # nosec B405 - Only used for element creation, not parsing; defused_et used for parsing
+import xml.etree.ElementTree as et  # nosec B405
+from pathlib import Path
 from typing import Any
 
-from defusedxml import ElementTree as defused_et
+import defusedxml.ElementTree as defused_et
 from jinja2 import Environment, FileSystemLoader
+
+from pain001.security.path_validator import validate_path
 
 
 def create_xml_v10(root: et.Element, data: list[dict[str, Any]]) -> et.Element:
@@ -50,13 +53,15 @@ def create_xml_v10(root: et.Element, data: list[dict[str, Any]]) -> et.Element:
     cstmr_cdt_trf_initn_element = et.Element("CstmrCdtTrfInitn")
     root.append(cstmr_cdt_trf_initn_element)
 
-    # Create a Jinja2 environment
-    env = Environment(loader=FileSystemLoader("."), autoescape=True)
+    # Create a Jinja2 environment with package-relative path
+    template_dir = Path(__file__).parent.parent / "templates"
+    validate_path(template_dir, must_exist=True)
+    env = Environment(
+        loader=FileSystemLoader(str(template_dir)), autoescape=True
+    )
 
     # Load the Jinja2 template
-    template = env.get_template(
-        "pain001/templates/pain.001.001.10/template.xml"
-    )
+    template = env.get_template("pain.001.001.10/template.xml")
 
     # Prepare the data
     xml_data_pain001_001_10 = {

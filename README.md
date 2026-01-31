@@ -7,14 +7,14 @@
 [![PyPI Version][pypi-badge]][03]
 [![Python Versions][python-versions-badge]][03]
 [![PyPI Downloads][pypi-downloads-badge]][07]
-[![License][license-badge]][01]
+[![Licence][licence-badge]][01]
 [![Codecov][codecov-badge]][06]
 [![Tests][tests-badge]][tests-url]
 [![Quality][quality-badge]][quality-url]
 [![Documentation][docs-badge]][docs-url]
 
-> **Latest Release: v0.0.46** - Enhanced exception hierarchy, validation service architecture, and IBAN/BIC pre-validation.
-> [See what's new →][release-046]
+> **Latest Release: v0.0.47** - Enhanced exception hierarchy, validation service architecture, and IBAN/BIC pre-validation.
+> [See what's new →][release-047]
 
 ## Overview
 
@@ -172,7 +172,7 @@ flowchart LR
     - [Setting Up Development Environment](#setting-up-development-environment)
     - [Running Tests](#running-tests)
     - [Code Quality Tools](#code-quality-tools)
-  - [License](#license)
+  - [Licence](#licence)
   - [Contribution](#contribution)
   - [Acknowledgements](#acknowledgements)
 
@@ -204,7 +204,7 @@ flowchart LR
   - **PII Protection:** Automatic masking of sensitive fields (IBANs,
     BICs, names, account numbers) in logs to ensure GDPR Article 32 and
     PCI-DSS Requirement 3.4 compliance
-  - **Event Standardization:** 17 standardized event types for
+  - **Event Standardisation:** 17 standardised event types for
     consistent observability across payment processing lifecycle
   - **Zero PII Leakage:** Logs never expose clear-text payment data—all
     sensitive information automatically redacted before logging
@@ -752,6 +752,100 @@ if __name__ == '__main__':
         print(f"Payment file ready for submission: {result}")
 ```
 
+## REST API (FastAPI)
+
+Starting from v0.0.47, Pain001 provides a **production-ready REST API** for
+integration with web services and microservices architectures.
+
+### Starting the API Server
+
+```sh
+# Install with FastAPI support
+pip install pain001
+
+# Start the development server
+python -m uvicorn pain001.api:app --reload --host 0.0.0.0 --port 8000
+
+# Or use production server (gunicorn + uvicorn)
+pip install gunicorn
+gunicorn --workers 4 --worker-class uvicorn.workers.UvicornWorker \
+  --bind 0.0.0.0:8000 pain001.api:app
+```
+
+### API Endpoints
+
+**Health Check:**
+
+```bash
+curl -X GET http://localhost:8000/api/health
+```
+
+Response:
+```json
+{
+  "status": "healthy",
+  "version": "0.0.47",
+  "message": "Pain001 API is running"
+}
+```
+
+**Validate Payment Data:**
+
+```bash
+curl -X POST http://localhost:8000/api/validate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "file_path": "/path/to/payments.csv",
+    "data_source": "csv",
+    "message_type": "pain.001.001.03"
+  }'
+```
+
+**Generate XML (Synchronous):**
+
+```bash
+curl -X POST http://localhost:8000/api/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "file_path": "/path/to/payments.csv",
+    "data_source": "csv",
+    "message_type": "pain.001.001.03",
+    "output_dir": "/tmp/output",
+    "validate_only": false
+  }'
+```
+
+**Generate XML (Asynchronous):**
+
+```bash
+# Submit job
+curl -X POST http://localhost:8000/api/generate/async \
+  -H "Content-Type: application/json" \
+  -d '{
+    "file_path": "/path/to/payments.csv",
+    "data_source": "csv",
+    "message_type": "pain.001.001.03"
+  }'
+```
+
+**Poll Job Status:**
+
+```bash
+curl -X GET http://localhost:8000/api/status/550e8400-e29b-41d4-a716-446655440000
+```
+
+**Download Generated XML:**
+
+```bash
+curl -X GET http://localhost:8000/api/download/550e8400-e29b-41d4-a716-446655440000 \
+  --output payment.xml
+```
+
+**Interactive API Documentation:**
+
+Once the server is running, visit `http://localhost:8000/api/docs` for
+interactive Swagger UI or `http://localhost:8000/api/redoc` for ReDoc.
+
 ### Validation
 
 **Pain001** implements **mandatory data validation** to ensure all payment files are ISO 20022-compliant.
@@ -1180,13 +1274,13 @@ poetry run pytest --cov=pain001 --cov-report=html
 
 **However, we strongly recommend using `make check` instead of individual commands to ensure nothing is missed.**
 
-## License
+## Licence
 
-The project is licensed under the terms of both the MIT license and the Apache
-License (Version 2.0).
+The project is licensed under the terms of both the MIT licence and the Apache
+Licence (Version 2.0).
 
-- [Apache License, Version 2.0][01]
-- [MIT license][02]
+- [Apache Licence, Version 2.0][01]
+- [MIT licence][02]
 
 ## Contribution
 
@@ -1194,7 +1288,7 @@ We welcome contributions to **Pain001**. Please see the
 [contributing instructions][04] for more information.
 
 Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in the work by you, as defined in the Apache-2.0 license, shall
+for inclusion in the work by you, as defined in the Apache-2.0 licence, shall
 be dual licensed as above, without any additional terms or conditions.
 
 ## Acknowledgements
@@ -1212,13 +1306,14 @@ We would like to extend a big thank you to all the awesome contributors of
 [07]: https://pypi.org/project/pain001/
 [release-045]: https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.45
 [release-046]: https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.46
+[release-047]: https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.47
 
 [banner]: https://kura.pro/pain001/images/banners/banner-pain001.svg 'Pain001, A Python Library for Automating ISO 20022-Compliant Payment Files Using CSV Or SQlite Data Files.'
 [codecov-badge]: https://img.shields.io/codecov/c/github/sebastienrousseau/pain001?style=for-the-badge 'Codecov badge'
 [coverage-floor-badge]: https://img.shields.io/badge/coverage-98.55%25-brightgreen?style=for-the-badge 'Coverage 98.55%'
 [docs-badge]: https://img.shields.io/github/actions/workflow/status/sebastienrousseau/pain001/docs.yml?branch=main&label=Docs&style=for-the-badge 'Documentation badge'
 [docs-url]: https://docs.pain001.com/
-[license-badge]: https://img.shields.io/pypi/l/pain001?style=for-the-badge 'License badge'
+[licence-badge]: https://img.shields.io/pypi/l/pain001?style=for-the-badge 'Licence badge'
 [pypi-badge]: https://img.shields.io/pypi/v/pain001?style=for-the-badge 'PyPI version badge'
 [pypi-downloads-badge]: https://img.shields.io/pypi/dm/pain001.svg?style=for-the-badge 'PyPI Downloads badge'
 [python-matrix-badge]: https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue?style=for-the-badge 'Python 3.9-3.12'

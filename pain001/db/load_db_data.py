@@ -12,42 +12,48 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# CodeQL: This module uses parameterized queries where possible.
+# For table names (which cannot be parameterized), we use strict allowlist validation
+# via enable_sanitize_table_name() to prevent SQL injection (CWE-89).
 
 import os
+import re
 import sqlite3
 from typing import Any
 
 from pain001.exceptions import ConfigurationError
+from pain001.security import validate_path
 
 
 def sanitize_table_name(table_name: str) -> str:
     """
-    Sanitize a table name by replacing all characters that are not alphanumeric
-    or underscores with underscores.
+    Validate and sanitize a table name to prevent SQL injection.
+    Uses strict validation: only alphanumeric characters and underscores allowed.
+    MUST start with a letter (SQL identifier rules).
 
     Args:
-        table_name (str): The table name to sanitize.
+        table_name (str): The table name to validate.
 
     Returns:
-        str: The sanitized table name.
+        str: The validated table name (unchanged if valid).
 
     Raises:
-        ValueError: If the table name is empty.
+        ConfigurationError: If the table name is empty or contains invalid characters.
     """
+
     if not table_name:
         raise ConfigurationError("Table name cannot be empty")
 
-    # Use list comprehension for better performance
-    sanitized_chars = [
-        char if (char.isalnum() or char == "_") else "_" for char in table_name
-    ]
-    sanitized_name = "".join(sanitized_chars)
+    # Strict validation: only alphanumeric and underscore, must start with letter
+    if not re.match(r"^[a-zA-Z][a-zA-Z0-9_]*$", table_name):
+        raise ConfigurationError(
+            f"Invalid table name '{table_name}'. "
+            "Table names must start with a letter and contain only "
+            "alphanumeric characters and underscores."
+        )
 
-    # Ensure the resulting name starts with an alphabetic character
-    if not sanitized_name or not sanitized_name[0].isalpha():
-        sanitized_name = "table_" + sanitized_name
-
-    return sanitized_name
+    return table_name
 
 
 def load_db_data(data_file_path: str, table_name: str) -> list[dict[str, Any]]:
@@ -75,28 +81,42 @@ def load_db_data(data_file_path: str, table_name: str) -> list[dict[str, Any]]:
         data = load_db_data("my_database.db", "my_table")
     """
 
-    # Check if the SQLite file exists
-    if not os.path.exists(data_file_path):
+    # Validate path to prevent traversal attacks
+
+    try:
+        # must_exist=True ensures both validation and existence check
+        safe_path = validate_path(
+            data_file_path,
+            must_exist=True,
+        )  # nosec B108 - Returns sanitized string
+    except Exception as e:
+        raise FileNotFoundError(
+            f"SQLite file path validation failed: {data_file_path}"
+        ) from e
+
+    # Check file existence using os.path for string path
+    if not os.path.isfile(safe_path):
         raise FileNotFoundError(
             f"SQLite file '{data_file_path}' does not exist."
         )
 
-    # Connect to the SQLite database
-    conn = sqlite3.connect(data_file_path)
+    # Connect to the SQLite database (now safe after validation)
+    conn = sqlite3.connect(str(safe_path))  # nosec B108
     try:
         cursor = conn.cursor()
 
-        # Sanitize the table_name before using it in the query
+        # Validate the table_name before using it in the query (strict regex validation)
         table_name = sanitize_table_name(table_name)
 
         # Fetch column names from the table
-        cursor.execute(f"PRAGMA table_info({table_name})")
+        # Safe: table_name validated via regex to contain only [a-zA-Z0-9_]
+        cursor.execute(f"PRAGMA table_info({table_name})")  # nosec B608
         columns = [column[1] for column in cursor.fetchall()]
 
-        # Use parameterized query to prevent SQL injection
-        # Note: Table names cannot be parameterized, but sanitize_table_name
-        # ensures only safe characters are used
-        query = f"SELECT * FROM [{table_name}]"  # nosec B608
+        # Use parameterised query to prevent SQL injection
+        # Note: SQLite does not support ? placeholders for table names.
+        # sanitize_table_name() enforces strict validation: ^[a-zA-Z][a-zA-Z0-9_]*$
+        query = f"SELECT * FROM [{table_name}]"  # nosec B608 # CodeQL: py/sql-injection (Sanitized)
         cursor.execute(query)
         rows = cursor.fetchall()
 
