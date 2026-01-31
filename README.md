@@ -13,7 +13,7 @@
 [![Quality][quality-badge]][quality-url]
 [![Documentation][docs-badge]][docs-url]
 
-> **Latest Release: v0.0.47** - Enhanced exception hierarchy, validation service architecture, and IBAN/BIC pre-validation.
+> **Latest Release: v0.0.47** - REST API, streaming loaders, security hardening, unified CLI, and XSD caching.
 > [See what's new →][release-047]
 
 ## Overview
@@ -38,7 +38,7 @@ that initiates a customer payment.
   and Python data structures
 - **Automatic XSD Validation:** Validates generated XML against
   ISO 20022 schemas
-- **Comprehensive Testing:** 98.55% test coverage with 568 tests
+- **Comprehensive Testing:** 1,022 tests with branch coverage
   ensuring reliability
 - **Secure by Design:** Uses `defusedxml` to prevent XXE attacks
   and implements SQL injection protection
@@ -129,7 +129,6 @@ flowchart LR
 ## Table of Contents
 
 - [Pain001: Automate ISO 20022-Compliant Payment File Creation](#pain001-automate-iso-20022-compliant-payment-file-creation)
-  - [A Powerful Python Library that enables you to create ISO 20022-Compliant Payment Files directly from CSV or SQLite data files](#a-powerful-python-library-that-enables-you-to-create-iso-20022-compliant-payment-files-directly-from-csv-or-sqlite-data-files)
   - [Overview](#overview)
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
@@ -209,7 +208,7 @@ flowchart LR
   - **Zero PII Leakage:** Logs never expose clear-text payment data—all
     sensitive information automatically redacted before logging
 - **Robust Development:** Comprehensive quality assurance with
-  - 98.56% test coverage with 561 comprehensive tests
+  - 1,022 tests with branch coverage across Python 3.9–3.12
   - Code formatting with Black and Ruff
   - Import sorting with isort
   - Style checking with Flake8 (10.00/10 score)
@@ -380,7 +379,7 @@ python3 -m pain001 \
 **Output:**
 
 ```plaintext
-[SUCCESS] Validation passed. No XML file created.
+✓ All validations passed (--dry-run: no XML generated)
 ```
 
 **Exit Codes:**
@@ -1239,11 +1238,11 @@ poetry run make clean
 
 | Gate | Command | What It Checks | Exit Code Required |
 |------|---------|----------------|--------------------|
-| **PR Gate** | `make pr` | Formatting (ruff, black, isort), Type checking (mypy), Tests (pytest), Coverage (≥99%) | 0 (PASS) |
+| **PR Gate** | `make pr` | Formatting (ruff, black, isort), Type checking (mypy), Tests (pytest), Coverage (≥70%) | 0 (PASS) |
 | **Full Gate** | `make check` | PR Gate + Security (bandit, safety), Lint (pylint) | 0 (PASS) |
 | **Tollgates** | `make tollgates` | Full Gate + XSD validation (9 versions), Advanced security, Idempotency checks | 0 (PASS) |
 
-**Note:** All PRs must pass the `check` target (exit code 0) and maintain **98%+ coverage**. No exceptions.
+**Note:** All PRs must pass the `check` target (exit code 0) and maintain the coverage threshold. No exceptions.
 
 ### Manual Quality Tools (Advanced)
 
@@ -1310,7 +1309,7 @@ We would like to extend a big thank you to all the awesome contributors of
 
 [banner]: https://kura.pro/pain001/images/banners/banner-pain001.svg 'Pain001, A Python Library for Automating ISO 20022-Compliant Payment Files Using CSV Or SQlite Data Files.'
 [codecov-badge]: https://img.shields.io/codecov/c/github/sebastienrousseau/pain001?style=for-the-badge 'Codecov badge'
-[coverage-floor-badge]: https://img.shields.io/badge/coverage-98.55%25-brightgreen?style=for-the-badge 'Coverage 98.55%'
+[coverage-floor-badge]: https://img.shields.io/badge/coverage-branch-brightgreen?style=for-the-badge 'Branch coverage'
 [docs-badge]: https://img.shields.io/github/actions/workflow/status/sebastienrousseau/pain001/docs.yml?branch=main&label=Docs&style=for-the-badge 'Documentation badge'
 [docs-url]: https://docs.pain001.com/
 [licence-badge]: https://img.shields.io/pypi/l/pain001?style=for-the-badge 'Licence badge'
