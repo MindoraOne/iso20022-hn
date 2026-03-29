@@ -201,6 +201,14 @@ def _prepare_xml_data_v05_to_v08(data: list[dict[str, Any]]) -> dict[str, Any]:
         ),
         "debtor_account_IBAN": data[0].get("debtor_account_IBAN", ""),
         "debtor_agent_BIC": data[0].get("debtor_agent_BIC", ""),
+        
+        # [HN] new fields — local
+        "initiator_org_id": data[0].get("initiator_org_id", ""),
+        "initiator_contact_name": data[0].get("initiator_contact_name", ""),
+        "category_purpose_code": data[0].get("category_purpose_code", ""),
+        "debtor_clearing_member_id": data[0].get("debtor_clearing_member_id", ""),
+        "remittance_information": data[0].get("remittance_information", ""),
+        
         "transactions": [
             {
                 "payment_id": row.get("payment_id", ""),
@@ -234,6 +242,14 @@ def _prepare_xml_data_v05_to_v08(data: list[dict[str, Any]]) -> dict[str, Any]:
                 "remittance_information": row.get(
                     "remittance_information", ""
                 ),
+                
+                # [HN] new fields — local
+                "creditor_clearing_member_id": row.get("creditor_clearing_member_id", ""),
+                "creditor_private_id": row.get("creditor_private_id", ""),
+                "creditor_private_id_scheme": row.get("creditor_private_id_scheme", ""),
+                "creditor_mobile_number": row.get("creditor_mobile_number", ""),
+                "creditor_email_address": row.get("creditor_email_address", ""),
+                "creditor_account_type": row.get("creditor_account_type", ""),              
             }
             for row in data
         ],

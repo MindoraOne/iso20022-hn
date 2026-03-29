@@ -89,6 +89,19 @@ def create_xml_v5(root: et.Element, data: list[dict[str, Any]]) -> et.Element:
         "debtor_country": data[0]["debtor_country"],
         "debtor_account_IBAN": data[0]["debtor_account_IBAN"],
         "debtor_agent_BIC": data[0]["debtor_agent_BIC"],
+        
+        # [HN] new fields — local
+        "debtor_clearing_member_id": data[0].get("debtor_clearing_member_id", ""),
+        "initiator_org_id": data[0].get("initiator_org_id", ""),
+        "initiator_contact_name": data[0].get("initiator_contact_name", ""),
+        "category_purpose_code": data[0].get("category_purpose_code", ""),
+        "creditor_clearing_member_id": data[0].get("creditor_clearing_member_id", ""),
+        "creditor_private_id": data[0].get("creditor_private_id", ""),
+        "creditor_private_id_scheme": data[0].get("creditor_private_id_scheme", ""),
+        "creditor_mobile_number": data[0].get("creditor_mobile_number", ""),
+        "creditor_email_address": data[0].get("creditor_email_address", ""),
+        "creditor_account_type": data[0].get("creditor_account_type", ""),        
+        
         "payment_instruction_id": data[0]["payment_instruction_id"],
         "payment_end_to_end_id": data[0]["payment_end_to_end_id"],
         "payment_currency": data[0]["payment_currency"],
