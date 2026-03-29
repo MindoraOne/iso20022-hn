@@ -157,3 +157,9 @@ tests/data/valid_data_unique.csv
 tests/data/valid_data_unique.db
 tmp_env/
 pain001/tmp/
+
+# Local configuration files
+pain001/templates/local/
+
+# Markdownlint configuration
+.markdownlint.json

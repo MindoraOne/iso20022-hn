@@ -140,6 +140,7 @@ flowchart LR
     - [Getting Started](#getting-started)
   - [Quick Start](#quick-start)
     - [Arguments](#arguments)
+  - [Local Bank Templates](#local-bank-templates)
   - [CSV Data Format](#csv-data-format)
     - [Required CSV Columns](#required-csv-columns)
   - [Examples](#examples)
@@ -169,8 +170,6 @@ flowchart LR
       - [Payments Initiation](#payments-initiation)
   - [Development](#development)
     - [Setting Up Development Environment](#setting-up-development-environment)
-    - [Running Tests](#running-tests)
-    - [Code Quality Tools](#code-quality-tools)
   - [Licence](#licence)
   - [Contribution](#contribution)
   - [Acknowledgements](#acknowledgements)
@@ -275,11 +274,13 @@ python -m venv venv
 ### Activate environment
 
 **On macOS/Linux:**
+
 ```sh
 source venv/bin/activate
 ```
 
 **On Windows:**
+
 ```cmd
 venv\Scripts\activate
 ```
@@ -320,6 +321,7 @@ After installation, you can run **Pain001** directly from the command line. Foll
 **Step 1:** Prepare your files
 
 You'll need:
+
 - **XML template file** - Contains the structure for your payment message
 - **XSD schema file** - Used to validate the generated XML file
 - **Data source** - Your payment instructions from:
@@ -351,6 +353,7 @@ python3 -m pain001 \
 **Step 3:** Check the output
 
 If successful, you'll see:
+
 - ✓ Validation messages in your terminal
 - ✓ A new ISO 20022-compliant XML file at your specified location
 
@@ -426,6 +429,22 @@ When running **Pain001**, you will need to specify four arguments:
 - A `data_file_path`: This is the path to the CSV or SQLite Data file you want
   to convert to XML format.
 
+## Local Bank Templates
+
+This fork includes support for bank-specific payment templates that are maintained separately from the public codebase.
+
+Local templates are **not included** in this repository. They contain bank-specific XML structures, field mappings, and internal documentation that cannot be made public.
+
+If you are part of the team working on a local integration, refer to the internal private repository for setup instructions. Once you have access, follow the instructions there to place the templates in the correct location before running the library.
+
+The expected path for local templates within this repository is:
+
+```bash
+pain001/templates/local/
+```
+
+This path is listed in `.gitignore` and will never be committed to this repository.
+
 ## CSV Data Format
 
 Before using **Pain001**, prepare your CSV file with the payment data. The CSV
@@ -469,6 +488,7 @@ cd <path_from_above>/templates/
 ```
 
 Each template directory contains:
+
 - `template.csv` - Sample CSV file with required columns
 - `template.xml` - XML template file
 - `pain.001.001.XX.xsd` - XSD schema file for validation
@@ -780,6 +800,7 @@ curl -X GET http://localhost:8000/api/health
 ```
 
 Response:
+
 ```json
 {
   "status": "healthy",
@@ -856,6 +877,7 @@ interactive Swagger UI or `http://localhost:8000/api/redoc` for ReDoc.
 **Stage 1: Data Validation (Automatic)**
 
 Every time you load data (from CSV, SQLite, or Python objects), **Pain001** automatically validates:
+
 - ✓ All required fields are present
 - ✓ Data types are correct (strings, numbers, booleans)
 - ✓ Boolean values are valid ('true'/'false' or 'yes'/'no')
@@ -864,6 +886,7 @@ Every time you load data (from CSV, SQLite, or Python objects), **Pain001** auto
 **Stage 2: XSD Schema Validation (Automatic)**
 
 After generating the XML file, **Pain001** validates it against the XSD schema to ensure:
+
 - ✓ XML structure is correct
 - ✓ All elements are properly formatted
 - ✓ File is ready for bank submission
@@ -907,6 +930,7 @@ else:
 **Why Mandatory Validation?**
 
 Mandatory validation is the core principle of Pain001. It ensures:
+
 - Payment files are always ISO 20022-compliant
 - Banks won't reject files due to data errors
 - Issues are caught early in the development process
@@ -1062,7 +1086,7 @@ if __name__ == '__main__':
 
 **Expected Output:**
 
-```
+```bash
 ✓ Payment file generated successfully!
 ✓ Location: output/payment.xml
 ✓ File is ready for bank submission
@@ -1075,6 +1099,7 @@ if __name__ == '__main__':
 **Issue: "ModuleNotFoundError: No module named 'pain001'"**
 
 Solution: Ensure you have installed pain001 and are using the correct Python environment:
+
 ```sh
 python -m pip install pain001
 # Or if you're using a virtual environment:
@@ -1085,6 +1110,7 @@ python -m pip install pain001
 **Issue: "Error: Invalid XML message type"**
 
 Solution: Ensure you're using one of the supported message types:
+
 - pain.001.001.03
 - pain.001.001.04
 - pain.001.001.05
@@ -1098,6 +1124,7 @@ Solution: Ensure you're using one of the supported message types:
 **Issue: "Error: XML template file does not exist"**
 
 Solution: Verify the file path is correct and the file exists:
+
 ```sh
 ls -la /path/to/your/template.xml
 ```
@@ -1105,6 +1132,7 @@ ls -la /path/to/your/template.xml
 **Issue: "Error: Invalid CSV data"**
 
 Solution: Check that your CSV file:
+
 - Contains all required columns
 - Has valid data in each column
 - Uses proper CSV formatting (commas as delimiters, quotes for text with commas)
@@ -1113,6 +1141,7 @@ Solution: Check that your CSV file:
 **Issue: "Validation failed"**
 
 Solution: This means the generated XML doesn't match the XSD schema:
+
 - Ensure your data values match ISO 20022 format requirements
 - Check that IBANs, BICs, and currency codes are valid
 - Verify date/time formats are correct (ISO 8601: YYYY-MM-DDTHH:MM:SS)
@@ -1121,6 +1150,7 @@ Solution: This means the generated XML doesn't match the XSD schema:
 **Issue: Permission denied when writing output file**
 
 Solution: Ensure you have write permissions for the output directory:
+
 ```sh
 chmod u+w /path/to/output/directory
 ```
@@ -1128,6 +1158,7 @@ chmod u+w /path/to/output/directory
 ### Getting Help
 
 If you encounter issues not covered here:
+
 1. Check the [GitHub Issues](https://github.com/sebastienrousseau/pain001/issues) for similar problems
 2. Review the [Documentation](https://pain001.com) for detailed guides
 3. Create a new issue with:
@@ -1303,22 +1334,17 @@ We would like to extend a big thank you to all the awesome contributors of
 [05]: https://github.com/sebastienrousseau/pain001/graphs/contributors
 [06]: https://codecov.io/github/sebastienrousseau/pain001?branch=main
 [07]: https://pypi.org/project/pain001/
-[release-045]: https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.45
-[release-046]: https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.46
 [release-047]: https://github.com/sebastienrousseau/pain001/releases/tag/v0.0.47
 
 [banner]: https://kura.pro/pain001/images/banners/banner-pain001.svg 'Pain001, A Python Library for Automating ISO 20022-Compliant Payment Files Using CSV Or SQlite Data Files.'
 [codecov-badge]: https://img.shields.io/codecov/c/github/sebastienrousseau/pain001?style=for-the-badge 'Codecov badge'
-[coverage-floor-badge]: https://img.shields.io/badge/coverage-branch-brightgreen?style=for-the-badge 'Branch coverage'
 [docs-badge]: https://img.shields.io/github/actions/workflow/status/sebastienrousseau/pain001/docs.yml?branch=main&label=Docs&style=for-the-badge 'Documentation badge'
 [docs-url]: https://docs.pain001.com/
 [licence-badge]: https://img.shields.io/pypi/l/pain001?style=for-the-badge 'Licence badge'
 [pypi-badge]: https://img.shields.io/pypi/v/pain001?style=for-the-badge 'PyPI version badge'
 [pypi-downloads-badge]: https://img.shields.io/pypi/dm/pain001.svg?style=for-the-badge 'PyPI Downloads badge'
-[python-matrix-badge]: https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue?style=for-the-badge 'Python 3.9-3.12'
 [python-versions-badge]: https://img.shields.io/pypi/pyversions/pain001.svg?style=for-the-badge 'Python versions badge'
 [quality-badge]: https://img.shields.io/github/actions/workflow/status/sebastienrousseau/pain001/quality.yml?branch=main&label=Quality&style=for-the-badge 'Code quality badge'
 [quality-url]: https://github.com/sebastienrousseau/pain001/actions/workflows/quality.yml
-[security-hardened-badge]: https://img.shields.io/badge/security-hardened-blueviolet?style=for-the-badge 'Security: Hardened'
 [tests-badge]: https://img.shields.io/github/actions/workflow/status/sebastienrousseau/pain001/ci.yml?branch=main&label=Tests&style=for-the-badge 'Tests badge'
 [tests-url]: https://github.com/sebastienrousseau/pain001/actions/workflows/ci.yml
