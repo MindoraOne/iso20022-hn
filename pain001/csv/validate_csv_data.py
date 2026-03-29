@@ -197,6 +197,14 @@ def validate_csv_data(data: list[dict[str, Any]]) -> bool:
         "remittance_information": str,
     }
 
+    # [HN] columns that are optional in local bank templates
+    # These are required by the opensource schema but not applicable
+    hn_optional_columns = {
+        "creditor_account_IBAN",
+        "creditor_account_type",
+    }
+
+
     if not data:
         print("Error: The CSV data is empty.")
         return False
@@ -205,13 +213,20 @@ def validate_csv_data(data: list[dict[str, Any]]) -> bool:
     all_errors = []  # Batch error messages for better performance
 
     for row in data:
-        missing_columns, invalid_columns = _validate_row(row, required_columns)
+        # [HN] exclude optional columns from validation entirely
+        effective_required = {
+            col: dtype
+            for col, dtype in required_columns.items()
+            if col not in hn_optional_columns
+        }
+
+        missing_columns, invalid_columns = _validate_row(row, effective_required)
 
         if missing_columns or invalid_columns:
             is_valid = False
             all_errors.extend(
                 _format_errors(
-                    row, missing_columns, invalid_columns, required_columns
+                    row, missing_columns, invalid_columns, effective_required
                 )
             )
 
