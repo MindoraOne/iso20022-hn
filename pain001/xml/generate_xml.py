@@ -212,6 +212,9 @@ def _prepare_xml_data_v05_to_v08(data: list[dict[str, Any]]) -> dict[str, Any]:
         "debtor_account_IBAN": data[0].get("debtor_account_IBAN", ""),
         "debtor_agent_BIC": data[0].get("debtor_agent_BIC", ""),
         
+        # [HN] control markers
+        "DELETE_MARKER": DELETE_MARKER,
+        
         # [HN] new fields — local
         "initiator_org_id": data[0].get("initiator_org_id", ""),
         "initiator_contact_name": _resolve_field(data[0].get("initiator_contact_name", "")), # Testing value empty
