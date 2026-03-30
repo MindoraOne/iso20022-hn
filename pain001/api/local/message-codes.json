@@ -1,0 +1,26 @@
+{
+  "success": {
+    "payment": {
+      "XML_GENERATED": "xml_generated",
+      "TEMPLATES_LISTED": "templates_listed",
+      "HEALTH_OK": "health_ok"
+    }
+  },
+  "error": {
+    "payment": {
+      "TEMPLATE_NOT_FOUND": "template_not_found",
+      "GENERATION_FAILED": "generation_failed",
+      "XSD_INVALID": "xsd_invalid",
+      "CSV_INVALID": "csv_invalid"
+    },
+    "fields": {
+      "INVALID_FILE_TYPE": "invalid_file_type",
+      "FILE_TOO_LARGE": "file_too_large",
+      "FILE_READ_ERROR": "file_read_error"
+    },
+    "generic": {
+      "RATE_LIMIT_EXCEEDED": "rate_limit_exceeded",
+      "INTERNAL_ERROR": "internal_error"
+    }
+  }
+}
