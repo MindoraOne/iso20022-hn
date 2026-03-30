@@ -5,9 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — Local bank integration
+
+### Added
+
+- Local bank template support via `pain001/templates/local/` directory (ignored in version control)
+- `generate_xml.py`: 4 new root-level fields and 6 new transaction-level fields in `_prepare_xml_data_v05_to_v08` for local bank integration
+- `create_xml_v5.py`: same 10 fields added to `xml_data_pain001_001_05` context
+- `validate_csv_data.py`: `hn_optional_columns` set to exclude specific columns from mandatory validation when not applicable to all local payment types
+- `generate_xml.py`: `EMPTY_MARKER` and `DELETE_MARKER` constants for special CSV values that control XML node content and presence
+- `generate_xml.py`: `_resolve_field()` helper to convert empty markers to empty strings before template rendering
+- `generate_xml.py`: `DELETE_MARKER` passed to Jinja2 template context for conditional node rendering
+
+### Changed
+
+- `_prepare_xml_data_v05_to_v08`: `remittance_information` added at root level (in addition to existing transaction level) to support `<InstrForDbtrAgt>` outside the transaction loop
+
 ## [0.0.47] - 2026-01-18
 
 ### Highlights
+
 - **Full I/O decoupling for Serverless and API architectures.**
 - **Introduced O(1) memory streaming data loaders for CSV and SQLite.**
 - **Hardened path validation and security against Log/SQL injection.**
