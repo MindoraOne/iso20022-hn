@@ -29,3 +29,7 @@ MESSAGE_TYPE = "pain.001.001.05"
 
 # Maximum allowed CSV upload size
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
+MAX_FILE_SIZE_MB = MAX_FILE_SIZE // (1024 * 1024)
+
+# Chunk size for streaming upload reads
+UPLOAD_CHUNK_SIZE = 64 * 1024  # 64 KB
