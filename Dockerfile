@@ -1,19 +1,25 @@
-# Multi-stage build for minimal image size
-FROM python:3.9-slim as builder
-
-WORKDIR /build
-RUN pip install --no-cache-dir poetry
-COPY pyproject.toml poetry.lock* ./
-RUN poetry config virtualenvs.in-project true && \
-    poetry install --no-interaction --no-dev
-
-FROM python:3.9-slim
-
+FROM python:3.12-slim
+ 
+RUN groupadd -r pain001 && useradd -r -g pain001 pain001
+ 
 WORKDIR /app
-COPY --from=builder /build/.venv /app/.venv
-ENV PATH=/app/.venv/bin:$PATH
-COPY pain001 /app/pain001
+ 
+COPY requirements.dev.txt ./
+RUN pip install --no-cache-dir -r requirements.dev.txt
 
-ENTRYPOINT ["python", "-m", "pain001"]
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import pain001; print('healthy')" || exit 1
+# Copy templates before switching to non-root user
+# Local templates must be present at build time:
+#   cp -r <private-repo>/templates/hn/bancatlan pain001/templates/local/bancatlan
+COPY pain001 /app/pain001
+ 
+RUN mkdir -p /app/tmp && chown -R pain001:pain001 /app/tmp
+ 
+EXPOSE 8000
+ 
+USER pain001
+ 
+CMD ["uvicorn", "pain001.api.app_local:app", \
+     "--host", "0.0.0.0", \
+     "--port", "8000", \
+     "--workers", "2"]
+ 
