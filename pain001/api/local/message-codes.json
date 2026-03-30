@@ -19,7 +19,8 @@
       "FILE_READ_ERROR": "file_read_error",
       "VALIDATION_FAILED": "validation_failed",
       "MISSING_FIELD": "missing_field",
-      "INVALID_FIELD": "invalid_field"
+      "INVALID_FIELD": "invalid_field",
+      "UNKNOWN_FIELD": "unknown_field"
     },
     "generic": {
       "RATE_LIMIT_EXCEEDED": "rate_limit_exceeded",

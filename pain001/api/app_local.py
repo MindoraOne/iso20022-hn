@@ -180,8 +180,23 @@ async def generate_xml(
     check_content_length(request)
     logger.info("Generate — template=%s file=%s", template.name, csv_file.filename)
 
+    # Reject unknown form fields
+    ALLOWED_FIELDS = {"template", "csv_file"}
+    form_data = await request.form()
+    extra_fields = set(form_data.keys()) - ALLOWED_FIELDS
+    if extra_fields:
+        code = MESSAGE_CODES["error"]["fields"]["UNKNOWN_FIELD"]
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=error_response(code, errors=[{
+                "field": field,
+                "code": code,
+                "message": "This field is not allowed",
+            } for field in sorted(extra_fields)]),
+        )
+
+    logger.info("Generate — template=%s file=%s", template.name, csv_file.filename)
     xml_template_path = resolve_template_path(template)
-    tmp_csv_path: Path | None = None
 
     try:
         contents = validate_upload(csv_file)
