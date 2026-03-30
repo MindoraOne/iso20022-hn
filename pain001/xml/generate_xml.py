@@ -31,6 +31,16 @@ from pain001.xml.generate_updated_xml_file_path import (
 )
 from pain001.xml.validate_via_xsd import validate_xml_string_via_xsd
 
+EMPTY_MARKER = "VACIAR"
+EMPTY_VALUE = " "
+DELETE_MARKER = "ELIMINAR"
+
+def _resolve_field(value: str) -> str:
+    """Resolve a CSV field value applying HN special markers for empty"""
+    if value == EMPTY_MARKER:
+        return EMPTY_VALUE
+    return value
+
 
 def _prepare_xml_data_v03(data: list[dict[str, Any]]) -> dict[str, Any]:
     """Prepare XML data for pain.001.001.03 message type."""
@@ -204,7 +214,7 @@ def _prepare_xml_data_v05_to_v08(data: list[dict[str, Any]]) -> dict[str, Any]:
         
         # [HN] new fields — local
         "initiator_org_id": data[0].get("initiator_org_id", ""),
-        "initiator_contact_name": data[0].get("initiator_contact_name", ""),
+        "initiator_contact_name": _resolve_field(data[0].get("initiator_contact_name", "")), # Testing value empty
         "category_purpose_code": data[0].get("category_purpose_code", ""),
         "debtor_clearing_member_id": data[0].get("debtor_clearing_member_id", ""),
         "remittance_information": data[0].get("remittance_information", ""),
