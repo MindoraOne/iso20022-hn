@@ -8,8 +8,6 @@ COPY requirements.dev.txt ./
 RUN pip install --no-cache-dir -r requirements.dev.txt
 
 # Copy templates before switching to non-root user
-# Local templates must be present at build time:
-#   cp -r <private-repo>/templates/hn/bancatlan pain001/templates/local/bancatlan
 COPY pain001 /app/pain001
  
 RUN mkdir -p /app/tmp && chown -R pain001:pain001 /app/tmp

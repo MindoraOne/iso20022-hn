@@ -16,10 +16,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `generate_xml.py`: `EMPTY_MARKER` and `DELETE_MARKER` constants for special CSV values that control XML node content and presence
 - `generate_xml.py`: `_resolve_field()` helper to convert empty markers to empty strings before template rendering
 - `generate_xml.py`: `DELETE_MARKER` passed to Jinja2 template context for conditional node rendering
+- `pain001/api/app_local.py`: new FastAPI application exposing local bank template endpoints
+- `pain001/api/local/`: new package with modular structure for the local bank API extension
+  - `constants.py`: paths, size limits and message type constants
+  - `enums.py`: `LocalTemplateType` enum — single place to register new templates
+  - `limiter.py`: shared `slowapi` rate limiter instance
+  - `message-codes.json`: single source of truth for all API response codes
+  - `responses.py`: `success_response()` and `error_response()` contracts matching the project standard
+  - `validators.py`: upload validation (extension, size via chunked read, content-length pre-check) and temp file handling
+- `requirements.dev.in` and `requirements.dev.txt`: consolidated dependency file combining base `requirements.txt` with local API extras (`fastapi`, `uvicorn`, `python-multipart`, `jsonschema`, `slowapi`, `pydantic`)
+- `Dockerfile`: updated to install from `requirements.dev.txt` and create `/app/tmp` with correct ownership for the non-root user
+- `docker-compose.yml`: local development compose file for the `pain001-local` service
 
 ### Changed
 
 - `_prepare_xml_data_v05_to_v08`: `remittance_information` added at root level (in addition to existing transaction level) to support `<InstrForDbtrAgt>` outside the transaction loop
+- `Dockerfile`: base image updated to `python:3.12-slim`, multi-stage build removed in favour of single-stage with `requirements.dev.txt`
+
+### API Endpoints (`/api/v1/`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/v1/health` | Service health check — 60 req/min |
+| `GET` | `/api/v1/local/hn/templates` | List available local templates — 30 req/min |
+| `POST` | `/api/v1/local/hn/generate` | Generate ISO 20022 XML from CSV upload — 10 req/min |
+
+### Error codes added (`message-codes.json`)
+
+| Code | Trigger |
+|------|---------|
+| `health_ok` | Health check success |
+| `templates_listed` | Templates listed successfully |
+| `xml_generated` | XML generated successfully |
+| `template_not_found` | Template file missing in container |
+| `generation_failed` | Unexpected error during XML generation |
+| `xsd_invalid` | Generated XML fails XSD validation |
+| `csv_invalid` | CSV missing or has invalid required columns |
+| `invalid_file_type` | Uploaded file is not `.csv` |
+| `file_too_large` | File exceeds 5MB limit |
+| `file_read_error` | File could not be read |
+| `validation_failed` | Top-level form validation error |
+| `missing_field` | Required form field not sent |
+| `invalid_field` | Form field value is invalid |
+| `unknown_field` | Unexpected form field received |
+| `rate_limit_exceeded` | Rate limit hit |
+| `internal_error` | Unhandled server error |
 
 ## [0.0.47] - 2026-01-18
 
