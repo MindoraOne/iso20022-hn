@@ -163,3 +163,13 @@ pain001/templates/local/
 
 # Markdownlint configuration
 .markdownlint.json
+
+# iso20022-hn
+graphify-out/
+sessions/
+
+# Fixtures reales (PII) para golden-file tests de la API local — ver
+# docs/pruebas-con-datos-reales.md. Se colocan manualmente en dev/CI privado,
+# nunca se commitean.
+tests/fixtures/real/*
+!tests/fixtures/real/.gitkeep
