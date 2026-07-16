@@ -1312,6 +1312,8 @@ Licence (Version 2.0).
 - [Apache Licence, Version 2.0][01]
 - [MIT licence][02]
 
+Based on pain001 (Sebastien Rousseau), dual-licensed Apache-2.0/MIT. Modifications and API layer by MindoraOne.
+
 ## Contribution
 
 We welcome contributions to **Pain001**. Please see the
