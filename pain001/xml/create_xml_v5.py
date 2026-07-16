@@ -12,6 +12,7 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# Modified by MindoraOne on 2026-07-07; changes: Populate new HN payment fields (initiator/creditor identifiers, category purpose code, clearing member id, private id, mobile/email, account type) in the pain.001.001.05 XML data dict.
 
 """
 This module contains the function `create_xml_v5`, which constructs an XML tree

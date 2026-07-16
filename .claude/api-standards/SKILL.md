@@ -27,6 +27,12 @@ GET  /api/v1/deleteUser
 
 ---
 
+## camelCase en Python (Pydantic)
+
+El contrato externo (JSON de request/response) va en camelCase; el codigo Python interno sigue en snake_case (PEP 8). La conversion se hace con **alias de Pydantic** (`Field(alias="camelCase")` + `model_config = ConfigDict(populate_by_name=True)`), nunca con un mapa/normalizador manual (dict de conversion + funcion aplicada a mano sobre los dicts). Ver `pain001/api/local/models.py` (repo `iso20022-hn`) o `pain002/mapping/contract.py` (repo `iso20022-response-hn`) como referencia del patron.
+
+---
+
 ## Estructura de rutas
 
 ### Patron base

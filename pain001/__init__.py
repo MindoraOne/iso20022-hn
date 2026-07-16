@@ -12,10 +12,16 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# Modified by MindoraOne on 2026-07-07; changes: Resolve __version__ from installed package metadata (importlib.metadata) instead of a hardcoded string, falling back to it when the package is not installed.
 
 """The Python pain001 module."""
 
-__version__ = "0.0.47"
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("pain001")
+except PackageNotFoundError:  # paquete no instalado (ej. correr desde fuente sin pip install)
+    __version__ = "0.0.47"
 
 from pain001.__main__ import main
 from pain001.core.core import process_files

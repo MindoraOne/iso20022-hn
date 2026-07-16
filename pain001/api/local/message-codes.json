@@ -11,7 +11,8 @@
       "TEMPLATE_NOT_FOUND": "template_not_found",
       "GENERATION_FAILED": "generation_failed",
       "XSD_INVALID": "xsd_invalid",
-      "CSV_INVALID": "csv_invalid"
+      "CSV_INVALID": "csv_invalid",
+      "INCONSISTENT_DEBTOR": "inconsistent_debtor"
     },
     "fields": {
       "INVALID_FILE_TYPE": "invalid_file_type",
@@ -24,6 +25,8 @@
     },
     "generic": {
       "RATE_LIMIT_EXCEEDED": "rate_limit_exceeded",
+      "NOT_FOUND": "not_found",
+      "METHOD_NOT_ALLOWED": "method_not_allowed",
       "INTERNAL_ERROR": "internal_error"
     }
   }
