@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] — Local bank integration
 
+### Changed
+
+- **Optional nodes now follow the bank's rule "no data, no node".** The four Bancatlan
+  templates emit optional nodes only when a value is present (`{% if value %}`), guarding
+  the parent block when all of its children may be absent. Previously any of 17 optional
+  fields left empty produced an empty node and a `400 xsd_invalid` — a beneficiary without
+  a phone number could not be paid.
+- **API contract limited to what Banco Atlantida actually uses**: `PaymentRow` went from 63
+  to 31 fields. The removed ones belong to the full ISO surface of the upstream `pain001`
+  template and are never emitted by the local templates; they stay available upstream.
+  `nb_of_txs` was also removed — the service computes it and ignored whatever the caller sent.
+- `Cdtr/PstlAdr/Ctry` now comes from `creditor_country` (falling back to `HN`) instead of
+  being hardcoded, so a non-Honduran beneficiary is no longer misreported. The `Ctry` of
+  `DbtrAgt`/`CdtrAgt` stays fixed: it is the bank's own country.
+
+### Removed
+
+- **`DELETE` / `EMPTY` CSV markers.** They were a local invention to force node omission by
+  hand. `DELETE` is now redundant (leaving the field out omits the node) and was unsafe: it
+  was only implemented for `initiator_contact_name`, so using it in any other field shipped
+  the literal word to the bank inside a valid XML. `EMPTY` contradicted the bank's rule, as a
+  node holding a blank space is still a node with no data.
+
+### Fixed
+
+- `DELETE` was not honoured by the `entre_cuentas` and `odp` templates, which emitted
+  `<Nm>DELETE</Nm>` to the bank without failing. Superseded by the removal above; the
+  regression is covered for all four templates by `tests/api_local/test_optional_nodes.py`.
+
 ### Added
 
 - Local bank template support via `pain001/templates/local/` directory (ignored in version control)
