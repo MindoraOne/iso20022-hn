@@ -173,12 +173,17 @@ class TestValidateCsvData(unittest.TestCase):
         self.assertFalse(validate_csv_data(data))
 
     def test_validate_csv_with_missing_column_values(self) -> None:
-        """Test validation with missing required column values."""
+        """Test validation with missing required column values.
+
+        Usa `id` como disparador (requerido y no exento); `nb_of_txs` ya no
+        sirve porque el servicio lo computa y quedo exento — ver [HN]
+        `hn_optional_columns`.
+        """
         data = [
             {
-                "id": "1",
+                "id": "",  # Empty value
                 "date": "2023-03-10T15:30:47.000Z",
-                "nb_of_txs": "",  # Empty value
+                "nb_of_txs": "1",
                 "initiator_name": "John Doe",
                 "initiator_street_name": "John's Street",
                 "initiator_building_number": "1",
@@ -222,13 +227,21 @@ class TestValidateCsvData(unittest.TestCase):
         ]
         self.assertFalse(validate_csv_data(data))
 
-    def test_validate_csv_with_invalid_boolean(self) -> None:
-        """Test validation with invalid boolean value."""
+    def test_validate_csv_with_invalid_type(self) -> None:
+        """Test validation with a wrongly-typed value in a required column.
+
+        Este test usaba `batch_booking` (bool) y despues `nb_of_txs` (int)
+        como disparador, pero ambos quedaron exentos via el set [HN]
+        `hn_optional_columns` (los exige el schema del OSS pero los templates
+        de Banco Atlantida no los emiten). Se usa `id` (int): es requerido,
+        tipado, y no es candidato a exencion, asi que el test no se vuelve a
+        romper cada vez que se exime una columna.
+        """
         data = [
             {
-                "id": "1",
+                "id": "not-a-number",  # Invalid int
                 "date": "2023-03-10T15:30:47.000Z",
-                "nb_of_txs": "2",
+                "nb_of_txs": "1",
                 "initiator_name": "John Doe",
                 "initiator_street_name": "John's Street",
                 "initiator_building_number": "1",
@@ -237,7 +250,7 @@ class TestValidateCsvData(unittest.TestCase):
                 "initiator_country_code": "DE",
                 "payment_information_id": "Payment-Info-12345",
                 "payment_method": "TRF",
-                "batch_booking": "not-a-boolean",  # Invalid boolean
+                "batch_booking": "true",
                 "requested_execution_date": "2023-03-12",
                 "debtor_name": "Acme Corp",
                 "debtor_street_name": "Acme Street",
