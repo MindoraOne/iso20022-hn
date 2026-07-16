@@ -13,63 +13,147 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-.PHONY: format lint type test cov sec pr check perf slos clean help tollgate-deps tollgate-xsd tollgate-idempotency tollgate-envparity tollgates
+.PHONY: help check setup env run dev up start stop logs ps lint test load graph graph-label clean \
+	pr format type sec perf complex mutate mutate-fast docs xml-examples slos quality \
+	lint-poetry test-slo cov \
+	tollgate-deps tollgate-xsd tollgate-idempotency tollgate-envparity tollgates
 
-# Color output
+.DEFAULT_GOAL := help
+
+VENV := .venv
+
+# Configuración (una sola fuente). Si existe .env, sus valores tienen prioridad;
+# si no, se usan los defaults de acá. Se puede sobrescribir por comando:
+# make dev PORT=9000
+-include .env
+
+PORT ?= 8000
+HOST ?= 0.0.0.0
+N ?= 40
+
+# Banco local activo (ver pain001/api/local/settings.py, Settings.local_template_bank).
+LOCAL_TEMPLATE_BANK ?= bancatlan
+LOCAL_TEMPLATE_DIR := pain001/templates/local/$(LOCAL_TEMPLATE_BANK)/pain.001.001.05/xml
+
+# Color output (usado por los targets heredados de CI)
 RED := \033[0;31m
 GREEN := \033[0;32m
 YELLOW := \033[0;33m
 NC := \033[0m # No Color
 
-# SLO Thresholds (in seconds)
+# SLO Thresholds (in seconds) — usados por los targets heredados de CI
 SLO_LINT := 45
 SLO_TYPE := 20
 SLO_TEST := 90
 SLO_XML_GEN := 0.5
 
-# Help target
-help:
-	@echo "Available targets:"
-	@echo "  pr            - Fast PR gate (ruff, black, isort, mypy, pytest)"
-	@echo "  check         - Full quality gate (lint + type + cov + sec) + SLO verification"
-	@echo "  slos          - Verify SLO compliance (lint, type, test, perf)"
-	@echo "  format        - Auto-format code (ruff, isort, black)"
-	@echo "  lint          - Run linting checks (ruff, flake8, pylint) with SLO timing"
-	@echo "  type          - Type checking with mypy + SLO timing"
-	@echo "  test          - Run tests with timing verification"
-	@echo "  cov           - Generate coverage report (70% enforced)"
-	@echo "  sec           - Security checks (bandit, safety)"
-	@echo "  perf          - Performance benchmarks (XML generation < 500ms/1000tx)"
-	@echo "  complex       - Code complexity analysis"
-	@echo "  mutate        - Mutation testing"
-	@echo "  docs          - Build documentation"
-	@echo "  xml-examples  - Generate XML example files for XSD validation tests"
-	@echo ""
-	@echo "Advanced Tollgates (Enterprise Production):"
-	@echo "  tollgate-deps        - Verify no new dependencies (Dependency Governance)"
-	@echo "  tollgate-xsd         - Validate XML against XSD (XSD Semantic Anchor)"
-	@echo "  tollgate-idempotency - Verify deterministic output (Idempotency Gate)"
-	@echo "  tollgate-envparity   - Check cross-platform paths (Environmental Parity)"
-	@echo "  tollgates            - Run all 4 advanced tollgates"
-	@echo ""
-	@echo "  clean         - Clean build artifacts"
+help: ## Lista los targets disponibles con su descripcion
+	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
-# --- Fast PR gate (recommended on every PR) ---
-pr:
+check: ## Verifica que el entorno este listo (python, venv, deps, plantillas locales, .env, docker)
+	@echo "Verificando el entorno de iso20022-hn:"
+	@command -v python3 >/dev/null 2>&1 && echo "  [ok]    python3 presente" || echo "  [falta] python3 no encontrado  ->  instala Python 3.10+"
+	@python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3,10) else 1)' 2>/dev/null && echo "  [ok]    Python 3.10+" || echo "  [falta] se requiere Python 3.10+"
+	@test -d $(VENV) && echo "  [ok]    entorno virtual ($(VENV))" || echo "  [falta] no hay venv  ->  corre: make setup"
+	@test -x $(VENV)/bin/uvicorn && echo "  [ok]    dependencias instaladas en el venv" || echo "  [falta] dependencias no instaladas  ->  corre: make setup"
+	@test -d $(LOCAL_TEMPLATE_DIR) && echo "  [ok]    plantillas locales ($(LOCAL_TEMPLATE_BANK))" || echo "  [falta] faltan las plantillas locales en $(LOCAL_TEMPLATE_DIR)  ->  copialas desde el repo iso20022-local-templates"
+	@test -f .env && echo "  [ok]    archivo .env" || echo "  [nota]  sin .env: se usan los valores por defecto  ->  para personalizar: make env"
+	@command -v docker >/dev/null 2>&1 && echo "  [ok]    docker presente" || echo "  [nota]  docker no encontrado  ->  solo hace falta si vas a correr con make up/start"
+	@echo "Si todo dice [ok], podes: make run  (local)  o  make start  (docker)"
+
+setup: ## Crea el venv e instala las dependencias (pip + requirements.dev.txt + lxml)
+	@command -v python3 >/dev/null 2>&1 || { echo "ERROR: no se encontro python3. Instala Python 3.10+ y reintenta."; exit 1; }
+	@python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3,10) else 1)' 2>/dev/null || { echo "ERROR: se requiere Python 3.10+ (tu version es anterior)."; exit 1; }
+	python3 -m venv $(VENV)
+	$(VENV)/bin/pip install --upgrade pip
+	$(VENV)/bin/pip install -r requirements.dev.txt
+	$(VENV)/bin/pip install lxml
+	@echo ""
+	@echo "Entorno listo. Proximo paso:  make run   (o  make start  para Docker)"
+
+env: ## Crea .env desde .env.example si no existe
+	@if [ -f .env ]; then \
+		echo ".env ya existe (no se sobrescribe)."; \
+	else \
+		cp .env.example .env && echo "Creado .env desde .env.example. Ajusta los valores si hace falta."; \
+	fi
+
+run: ## Levanta la API local con uvicorn (usa PORT/HOST del .env o los defaults)
+	@test -x $(VENV)/bin/uvicorn || { echo "ERROR: el entorno no esta instalado. Corre primero:  make setup"; exit 1; }
+	@test -d $(LOCAL_TEMPLATE_DIR) || { echo "ERROR: faltan las plantillas locales en $(LOCAL_TEMPLATE_DIR). Copialas desde iso20022-local-templates (ver docs-intern/instalacion.md)."; exit 1; }
+	$(VENV)/bin/uvicorn pain001.api.app_local:app --host $(HOST) --port $(PORT)
+
+dev: ## Igual que run pero con recarga en caliente (hot-reload, como nodemon)
+	@test -x $(VENV)/bin/uvicorn || { echo "ERROR: el entorno no esta instalado. Corre primero:  make setup"; exit 1; }
+	@test -d $(LOCAL_TEMPLATE_DIR) || { echo "ERROR: faltan las plantillas locales en $(LOCAL_TEMPLATE_DIR). Copialas desde iso20022-local-templates (ver docs-intern/instalacion.md)."; exit 1; }
+	$(VENV)/bin/uvicorn pain001.api.app_local:app --host $(HOST) --port $(PORT) --reload
+
+up: ## Levanta el servicio en Docker en primer plano (crea .env si falta y hace build)
+	@command -v docker >/dev/null 2>&1 || { echo "ERROR: docker no esta instalado o no esta en el PATH."; exit 1; }
+	@$(MAKE) env
+	docker compose up --build
+
+start: ## Levanta el servicio en Docker en segundo plano (detached)
+	@command -v docker >/dev/null 2>&1 || { echo "ERROR: docker no esta instalado o no esta en el PATH."; exit 1; }
+	@$(MAKE) env
+	docker compose up --build -d
+	@echo "Servicio en segundo plano. Logs: make logs  |  Estado: make ps  |  Parar: make stop"
+
+logs: ## Muestra y sigue los logs del contenedor (Ctrl+C para salir)
+	docker compose logs -f
+
+ps: ## Muestra el estado del contenedor
+	docker compose ps
+
+stop: ## Detiene y elimina el contenedor y la red
+	docker compose down
+
+lint: ## Corre ruff sobre pain001/api, tests y scripts
+	@test -x $(VENV)/bin/ruff || { echo "ERROR: el entorno no esta instalado. Corre primero:  make setup"; exit 1; }
+	$(VENV)/bin/ruff check pain001/api tests scripts
+
+test: ## Corre la suite de tests
+	@test -x $(VENV)/bin/pytest || { echo "ERROR: el entorno no esta instalado. Corre primero:  make setup"; exit 1; }
+	$(VENV)/bin/pytest tests/ -v
+
+load: ## Sonda manual el rate limit contra el servicio corriendo (scripts/load-test.sh [N])
+	@test -x scripts/load-test.sh || { echo "ERROR: falta scripts/load-test.sh o no es ejecutable."; exit 1; }
+	PORT=$(PORT) scripts/load-test.sh $(N)
+
+graph: ## Actualiza el grafo de codigo del repo con graphify
+	graphify update .
+
+graph-label: ## Etiqueta el grafo de codigo usando el backend local de Ollama
+	OLLAMA_API_KEY=ollama graphify label . --backend ollama --model qwen2.5:3b
+
+clean: ## Borra artefactos generados y caches (graphify-out, __pycache__, .pytest_cache, etc.)
+	rm -rf graphify-out/ .pytest_cache/ build/ dist/ htmlcov/ .coverage .mypy_cache/ .benchmarks/ sbom.xml LICENSES_REPORT.md licenses.json
+	find . -type d -name "__pycache__" -exec rm -rf {} +
+	find . -type d -name "*.egg-info" -exec rm -rf {} +
+
+# ---------------------------------------------------------------------------
+# Targets heredados de CI (poetry) — no forman parte del flujo DX local de
+# arriba (que usa pip + $(VENV)); se mantienen porque .github/workflows/*.yml
+# los invoca directamente vía `poetry run make <target>`. `check` y `lint` ya
+# estaban tomados por el flujo DX de arriba, por eso quedan acá como
+# `quality` y `lint-poetry` (con su referencia actualizada en nightly.yml /
+# quality.yml).
+# ---------------------------------------------------------------------------
+
+pr: ## [CI] Gate rapido de PR: ruff check, ruff format --check, pytest (poetry)
 	@echo "$(YELLOW)Running fast PR gate...$(NC)"
 	@poetry run ruff check .
 	@poetry run ruff format --check .
 	@poetry run pytest --tb=short -q
 	@echo "$(GREEN)✓ PR gate passed$(NC)"
 
-# --- Full local gate (heavier) with SLO verification ---
-format:
+format: ## [CI] Autoformatea el codigo (ruff format, isort) (poetry)
 	@echo "$(YELLOW)Formatting code...$(NC)"
 	@poetry run ruff format .
 	@poetry run ruff check --select I --fix .
 	@echo "$(GREEN)✓ Code formatted$(NC)"
 
-lint:
+lint-poetry: ## [CI] ruff + flake8 + pylint con verificacion de SLO (poetry)
 	@echo "$(YELLOW)Running linters (SLO: < $(SLO_LINT)s)...$(NC)"
 	@time_start=$$(date +%s%N); \
 	(poetry run ruff check . && \
@@ -89,7 +173,7 @@ lint:
 		echo "$(GREEN)✓ Linting passed ($${elapsed}s < $(SLO_LINT)s)$(NC)"; \
 	fi
 
-type:
+type: ## [CI] mypy con verificacion de SLO (poetry)
 	@echo "$(YELLOW)Type checking (SLO: < $(SLO_TYPE)s)...$(NC)"
 	@time_start=$$(date +%s%N); \
 	poetry run mypy . ; \
@@ -107,7 +191,7 @@ type:
 		echo "$(GREEN)✓ Type check passed ($${elapsed}s < $(SLO_TYPE)s)$(NC)"; \
 	fi
 
-test:
+test-slo: ## [CI] pytest con cobertura y verificacion de SLO (poetry)
 	@echo "$(YELLOW)Running tests (SLO: < $(SLO_TEST)s, Coverage floor: 70%)...$(NC)"
 	@time_start=$$(date +%s); \
 	poetry run pytest --tb=short -v --cov=pain001 --cov-branch --cov-report=term-missing --cov-report=xml --cov-report=html --cov-fail-under=70;
@@ -123,32 +207,32 @@ test:
 	fi; \
 	echo "$(GREEN)✓ Tests passed ($${elapsed}s < $(SLO_TEST)s)$(NC)"
 
-cov:
+cov: ## [CI] Genera el reporte de cobertura (poetry)
 	@echo "$(YELLOW)Generating coverage report (floor: 70%)...$(NC)"
 	@poetry run pytest --cov=pain001 --cov-branch --cov-report=term-missing --cov-report=xml --cov-report=html --cov-fail-under=70
 	@echo "$(GREEN)✓ Coverage report generated in htmlcov/index.html$(NC)"
 
-sec:
+sec: ## [CI] bandit + safety check (poetry)
 	@echo "$(YELLOW)Running security checks...$(NC)"
 	@poetry run bandit -q -r pain001
 	@poetry run safety check
 	@echo "$(GREEN)✓ Security checks passed$(NC)"
 
-perf:
+perf: ## [CI] Benchmarks de generacion de XML (poetry)
 	@echo "$(YELLOW)Running performance benchmarks (XML gen SLO: < $(SLO_XML_GEN)s/1000tx)...$(NC)"
 	@poetry run pytest tests/test_integration.py -v --benchmark-only --benchmark-json=.benchmarks/results.json || true
 	@echo "$(YELLOW)Note: Review benchmark results for XML generation performance$(NC)"
 
-complex:
+complex: ## [CI] Analisis de complejidad de codigo con radon (poetry)
 	@echo "$(YELLOW)Analyzing code complexity...$(NC)"
 	@poetry run radon cc pain001 -a -s
 	@poetry run radon mi pain001
 
-mutate:
+mutate: ## [CI] Mutation testing completo (poetry)
 	@echo "$(YELLOW)Running mutation testing...$(NC)"
 	@poetry run mutmut run --paths-to-mutate=pain001 --tests-dir=tests --runner="python -m pytest -x --no-cov -q" --use-coverage
 
-mutate-fast:
+mutate-fast: ## [CI] Mutation testing solo sobre core/xml (poetry)
 	@echo "$(YELLOW)Running fast mutation testing (core modules only)...$(NC)"
 	@poetry run mutmut run \
 		--paths-to-mutate=pain001/core,pain001/xml \
@@ -156,20 +240,26 @@ mutate-fast:
 		--runner="python -m pytest -x --no-cov -q" \
 		--use-coverage
 
-docs:
+docs: ## [CI] Construye la documentacion Sphinx (poetry)
 	@echo "$(YELLOW)Building documentation...$(NC)"
 	@poetry install --with docs -q
 	@poetry run sphinx-build -b html docs docs/_build/html
 	@echo "$(GREEN)✓ Docs built to docs/_build/html$(NC)"
 
-clean:
-	@echo "$(YELLOW)Cleaning build artifacts...$(NC)"
-	@rm -rf build/ dist/ *.egg-info htmlcov/ .coverage .pytest_cache/ .mypy_cache/ .radon-rc sbom.xml LICENSES_REPORT.md licenses.json .benchmarks/
-	@echo "$(GREEN)✓ Cleaned$(NC)"
+xml-examples: ## [CI] Genera archivos XML de ejemplo para los tests de XSD (poetry)
+	@echo "$(YELLOW)Generating XML example files for XSD validation tests...$(NC)"
+	@poetry run python scripts/generate_xml_examples.py
+	@echo "$(GREEN)✓ XML examples generated$(NC)"
+
+slos: lint-poetry type test-slo perf ## [CI] Verifica todos los SLO antes de un commit importante (poetry)
+	@echo "$(GREEN)✓ All SLOs verified$(NC)"
+
+quality: lint-poetry cov sec ## [CI] Gate completo bloqueante: lint + cobertura + seguridad (poetry) — antes se llamaba "check"
+	@echo "$(GREEN)✓ Full quality gate passed$(NC)"
 
 # --- Advanced Production Tollgates (Enterprise Hardening) ---
 
-tollgate-deps:
+tollgate-deps: ## [CI] Gobernanza de dependencias (poetry)
 	@echo "$(YELLOW)Tollgate 1: Dependency Governance (Shadow IT Prevention)$(NC)"
 	@echo "Checking for new/modified dependencies in pyproject.toml..."
 	@poetry show --latest > /dev/null && echo "$(GREEN)✓ All dependencies checked$(NC)" || (echo "$(RED)✗ Dependency check failed$(NC)" && exit 1)
@@ -177,7 +267,7 @@ tollgate-deps:
 	@poetry run safety check --bare && echo "$(GREEN)✓ No known vulnerabilities$(NC)" || (echo "$(RED)✗ Vulnerabilities found$(NC)" && exit 1)
 	@echo "$(GREEN)✓ Dependency Governance tollgate PASSED$(NC)"
 
-tollgate-xsd:
+tollgate-xsd: ## [CI] Validacion de los XSD de pain.001 (poetry)
 	@echo "$(YELLOW)Tollgate 2: XSD Semantic Anchor (Schema Validation)$(NC)"
 	@echo "Validating XSD schemas for all pain.001 versions..."
 	@for version in 03 04 05 06 07 08 09 10 11; do \
@@ -190,7 +280,7 @@ tollgate-xsd:
 	done
 	@echo "$(GREEN)✓ XSD Semantic Anchor tollgate PASSED$(NC)"
 
-tollgate-idempotency:
+tollgate-idempotency: ## [CI] Verifica ausencia de estado global peligroso (poetry)
 	@echo "$(YELLOW)Tollgate 3: Idempotency & Statelessness (Deterministic Processing)$(NC)"
 	@echo "Verifying no dangerous global mutable state in core modules..."
 	@grep -r "^[A-Z_]* = " pain001/ --include="*.py" | grep -v "__all__\|^pain001/constants\|\.pyc" | grep -v "^#" > /tmp/globals.txt && \
@@ -203,7 +293,7 @@ tollgate-idempotency:
 	fi
 	@echo "$(GREEN)✓ Idempotency tollgate PASSED$(NC)"
 
-tollgate-envparity:
+tollgate-envparity: ## [CI] Chequea rutas hardcodeadas no portables (poetry)
 	@echo "$(YELLOW)Tollgate 4: Environmental Parity (Cross-Platform Compatibility)$(NC)"
 	@echo "Checking for hardcoded Unix paths..."
 	@! grep -r "/opt/\|/var/\|/usr/" pain001/ --include="*.py" | grep -v "example\|test\|#" | head -5 > /dev/null && \
@@ -217,20 +307,5 @@ tollgate-envparity:
 	@echo "  $(GREEN)✓$(NC) Cross-platform checks completed"
 	@echo "$(GREEN)✓ Environmental Parity tollgate PASSED$(NC)"
 
-tollgates: tollgate-deps tollgate-xsd tollgate-idempotency tollgate-envparity
+tollgates: tollgate-deps tollgate-xsd tollgate-idempotency tollgate-envparity ## [CI] Corre los 4 tollgates anteriores (poetry)
 	@echo "$(GREEN)✓ All 4 Advanced Production Tollgates PASSED$(NC)"
-
-# --- XML Example Generation ---
-xml-examples:
-	@echo "$(YELLOW)Generating XML example files for XSD validation tests...$(NC)"
-	@poetry run python scripts/generate_xml_examples.py
-	@echo "$(GREEN)✓ XML examples generated$(NC)"
-
-# --- SLO verification (recommended before commit) ---
-slos: lint type test perf
-	@echo "$(GREEN)✓ All SLOs verified$(NC)"
-
-# --- Full quality gate (blocking) ---
-check: lint cov sec
-	@echo "$(GREEN)✓ Full quality gate passed$(NC)"
-

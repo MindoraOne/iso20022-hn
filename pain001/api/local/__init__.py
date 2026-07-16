@@ -1,4 +1,2 @@
-# Copyright (C) 2023-2026 Sebastien Rousseau.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
+# iso20022-hn — Copyright (c) 2026 MindoraOne. All rights reserved.
+# This file is original work, not derived from pain001 (Sebastien Rousseau).

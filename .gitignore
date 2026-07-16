@@ -168,8 +168,15 @@ pain001/templates/local/
 graphify-out/
 sessions/
 
-# Fixtures reales (PII) para golden-file tests de la API local — ver
-# docs/pruebas-con-datos-reales.md. Se colocan manualmente en dev/CI privado,
-# nunca se commitean.
+# Fixtures reales
 tests/fixtures/real/*
 !tests/fixtures/real/.gitkeep
+
+# Coleccion Hoppscotch
+hoppscotch/
+
+# Documentacion interna
+docs-intern/
+
+# Config local de tooling MCP (graphify)
+.mcp.json
