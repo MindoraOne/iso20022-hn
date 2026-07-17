@@ -6,7 +6,7 @@ returns the internal CSV representation of a JSON payload instead of XML.
 
 Uses the local (bancatlan) sample CSVs under `LOCAL_TEMPLATE_ROOT/csv/` —
 these ship in the public repo (unlike the PII fixtures under
-`tests/fixtures/real/`), same as `test_generate_json_valid_returns_xml` in
+`tests/fixtures/`), same as `test_generate_json_valid_returns_xml` in
 `test_endpoints.py`.
 """
 

@@ -4,9 +4,9 @@
 """Fixtures and helpers shared by the golden-file test suite for the local API (HN).
 
 The reference XML/CSV files contain real PII and live outside version
-control (see docs/pruebas-con-datos-reales.md, at the repo root). This
+control (copied from the private repo iso20022-local-templates). This
 suite looks for them in REAL_FIXTURES_DIR (env var, default
-"tests/fixtures/real/") and does a `pytest.skip` when they are missing, so
+"tests/fixtures/") and does a `pytest.skip` when they are missing, so
 CI never fails because of their absence.
 """
 
@@ -24,7 +24,7 @@ from pain001.api.local.constants import XSD_PATH
 from pain001.data.loader import load_payment_data
 from pain001.xml.generate_xml import generate_xml_string
 
-REAL_FIXTURES_DIR = Path(os.environ.get("REAL_FIXTURES_DIR", "tests/fixtures/real"))
+REAL_FIXTURES_DIR = Path(os.environ.get("REAL_FIXTURES_DIR", "tests/fixtures"))
 EXPECTED_DIR = REAL_FIXTURES_DIR / "expected"
 INPUT_DIR = REAL_FIXTURES_DIR / "input"
 
@@ -53,7 +53,7 @@ def require_fixture(*paths: Path) -> None:
     missing = [p for p in paths if not p.exists()]
     if missing:
         pytest.skip(
-            "real fixtures not available: see docs/pruebas-con-datos-reales.md "
+            "real fixtures not available: copy them from iso20022-local-templates "
             f"(missing: {', '.join(str(p) for p in missing)})"
         )
 

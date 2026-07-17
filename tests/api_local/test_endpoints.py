@@ -2,7 +2,7 @@
 # This file is original work, not derived from pain001 (Sebastien Rousseau).
 
 """HTTP contract tests for the local API (HN) — do not depend on the
-real fixtures (PII) in tests/fixtures/real/, must always run.
+real fixtures (PII) in tests/fixtures/, must always run.
 
 The exception is `test_generate_json_valid_returns_xml`: it exercises
 `/local/hn/generate` end to end and therefore does need the real Jinja2
