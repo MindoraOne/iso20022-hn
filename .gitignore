@@ -168,9 +168,10 @@ pain001/templates/local/
 graphify-out/
 sessions/
 
-# Fixtures reales
-tests/fixtures/real/*
-!tests/fixtures/real/.gitkeep
+# Fixtures reales (PII) — se copian desde iso20022-local-templates; nunca se commitean
+tests/fixtures/input/
+tests/fixtures/expected/
+!tests/fixtures/.gitkeep
 
 # Coleccion Hoppscotch
 hoppscotch/
