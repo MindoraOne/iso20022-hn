@@ -4,10 +4,9 @@
 """Tests for `/local/hn/preview/csv`, the sibling of `/local/hn/generate` that
 returns the internal CSV representation of a JSON payload instead of XML.
 
-Uses the local (bancatlan) sample CSVs under `LOCAL_TEMPLATE_ROOT/csv/` —
-these ship in the public repo (unlike the PII fixtures under
-`tests/fixtures/`), same as `test_generate_json_valid_returns_xml` in
-`test_endpoints.py`.
+Uses a real input CSV under `tests/fixtures/input/` (PII, copied from the
+private repo iso20022-local-templates), skipped if absent — same pattern as
+`test_generate_json_valid_returns_xml` in `test_endpoints.py`.
 """
 
 from __future__ import annotations
@@ -18,10 +17,14 @@ import io
 from fastapi.testclient import TestClient
 
 from pain001.api.app_local import app
-from pain001.api.local.constants import LOCAL_TEMPLATE_ROOT
 from pain001.api.local.models import PaymentRow
 
-from .conftest import assert_xml_equivalent, read_csv_rows, require_fixture
+from .conftest import (
+    INPUT_DIR,
+    assert_xml_equivalent,
+    read_csv_rows,
+    require_fixture,
+)
 
 client = TestClient(app)
 
@@ -41,7 +44,7 @@ def _to_camel_case_rows(rows: list[dict]) -> list[dict]:
 
 
 def test_preview_csv_valid_json_returns_csv_with_one_row_per_transaction() -> None:
-    csv_path = LOCAL_TEMPLATE_ROOT / "csv" / "transferencia_ach_Lempiras.csv"
+    csv_path = INPUT_DIR / "transferencia_ach_Lempiras.csv"
     require_fixture(csv_path)
 
     payload = {"template": "ach", "data": _to_camel_case_rows(read_csv_rows(csv_path))}
@@ -71,7 +74,7 @@ def test_preview_csv_empty_data_returns_422_envelope() -> None:
 def test_preview_csv_round_trips_to_the_same_xml_as_generate() -> None:
     """Proves the two endpoints are siblings: JSON -> XML (via /generate)
     must equal JSON -> CSV (via /preview/csv) -> XML (via /generate/csv)."""
-    csv_path = LOCAL_TEMPLATE_ROOT / "csv" / "transferencia_ach_Lempiras.csv"
+    csv_path = INPUT_DIR / "transferencia_ach_Lempiras.csv"
     require_fixture(csv_path)
 
     payload = {"template": "ach", "data": _to_camel_case_rows(read_csv_rows(csv_path))}

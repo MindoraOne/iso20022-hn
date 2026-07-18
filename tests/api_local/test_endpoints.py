@@ -1,16 +1,14 @@
 # iso20022-hn — Copyright (c) 2026 MindoraOne. All rights reserved.
 # This file is original work, not derived from pain001 (Sebastien Rousseau).
 
-"""HTTP contract tests for the local API (HN) — do not depend on the
-real fixtures (PII) in tests/fixtures/, must always run.
+"""HTTP contract tests for the local API (HN). Most do not depend on the
+real fixtures (PII) in tests/fixtures/ and must always run.
 
-The exception is `test_generate_json_valid_returns_xml`: it exercises
-`/local/hn/generate` end to end and therefore does need the real Jinja2
-template (`pain001/templates/local/bancatlan/.../xml/*.xml`), which — just
-like the PII fixtures — lives outside the public repo (see
-pain001/templates/local/bancatlan/docs/DEVELOPMENT.md, section "Files that
-live only in this private repo") and is skipped if not present in the
-environment where pytest runs.
+The exceptions exercise `/local/hn/generate` end to end and therefore need
+the real Jinja2 template (`pain001/templates/local/bancatlan/.../xml/*.xml`)
+plus a real input CSV (`tests/fixtures/input/`). Both live outside the public
+repo — copied from the private repo iso20022-local-templates — and are skipped
+if not present in the environment where pytest runs.
 """
 
 from __future__ import annotations
@@ -22,7 +20,7 @@ from pain001.api.local.constants import LOCAL_TEMPLATE_ROOT
 from pain001.api.local.models import PaymentRow
 from pain001.api.local.responses import MESSAGE_CODES
 
-from .conftest import read_csv_rows, require_fixture
+from .conftest import INPUT_DIR, read_csv_rows, require_fixture
 
 client = TestClient(app)
 
@@ -71,7 +69,7 @@ def test_list_templates_returns_the_four_known_templates() -> None:
 
 def test_generate_json_valid_returns_xml() -> None:
     xml_path = LOCAL_TEMPLATE_ROOT / "xml" / "transferencia_ach_Lempiras.xml"
-    csv_path = LOCAL_TEMPLATE_ROOT / "csv" / "transferencia_ach_Lempiras.csv"
+    csv_path = INPUT_DIR / "transferencia_ach_Lempiras.csv"
     require_fixture(xml_path, csv_path)
 
     payload = {"template": "ach", "data": read_csv_rows(csv_path)}
@@ -91,7 +89,7 @@ def test_generate_json_camel_case_body_returns_xml() -> None:
     `test_generate_json_valid_returns_xml`, translated to camelCase, so a
     green run here proves the camelCase contract works end to end."""
     xml_path = LOCAL_TEMPLATE_ROOT / "xml" / "transferencia_ach_Lempiras.xml"
-    csv_path = LOCAL_TEMPLATE_ROOT / "csv" / "transferencia_ach_Lempiras.csv"
+    csv_path = INPUT_DIR / "transferencia_ach_Lempiras.csv"
     require_fixture(xml_path, csv_path)
 
     payload = {"template": "ach", "data": _to_camel_case_rows(read_csv_rows(csv_path))}
