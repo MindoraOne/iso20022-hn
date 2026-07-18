@@ -15,7 +15,6 @@ class LocalTemplateType(str, Enum):
       1. Add a new member here with a clean public value.
       2. Add its real filename (without .xml extension) to LOCAL_TEMPLATE_FILENAMES.
       3. Place the corresponding .xml file in LOCAL_TEMPLATE_ROOT/xml/.
-      4. Place the example .csv file in LOCAL_TEMPLATE_ROOT/csv/.
     """
 
     ach              = "ach"
@@ -25,7 +24,7 @@ class LocalTemplateType(str, Enum):
 
 
 # Internal mapping enum-value -> real file name (without extension) in
-# LOCAL_TEMPLATE_ROOT/{xml,csv}/. Keeps the API contract clean even though
+# LOCAL_TEMPLATE_ROOT/xml/. Keeps the API contract clean even though
 # the files on disk have Spanish names with the "_Lempiras" suffix.
 LOCAL_TEMPLATE_FILENAMES: dict[LocalTemplateType, str] = {
     LocalTemplateType.ach: "transferencia_ach_Lempiras",
