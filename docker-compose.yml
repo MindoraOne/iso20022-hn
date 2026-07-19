@@ -1,0 +1,19 @@
+services:
+  pain001-local:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    image: pain001-local:latest
+    # El puerto sale de PORT (del .env o del entorno); default 8000. Cambiarlo
+    # en un solo lugar (.env) reajusta el mapeo y el bind del contenedor.
+    ports:
+      - "${PORT:-8000}:${PORT:-8000}"
+    # .env es OPCIONAL: si no existe, el servicio usa los valores por defecto
+    # (definidos con pydantic-settings). Para personalizar: cp .env.example .env
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped

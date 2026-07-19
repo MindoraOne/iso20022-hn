@@ -1,141 +1,57 @@
-name: 🧪 CI Regression & Enterprise Release
+# Corre en cada push a la rama de trabajo y en cada PR hacia main: linta con
+# ruff (solo el código propio: capa API + tests + scripts), corre la suite de
+# pytest y escanea la imagen Docker con Trivy. Para que esto BLOQUEE el merge
+# hace falta activar la protección de rama marcando `test` y `security` como
+# checks obligatorios (ver docs/ci-y-seguridad.md).
+name: CI
 
 on:
-  pull_request:
-    branches: [main, "feat/*"]
   push:
-    branches: [main, "feat/*", "feature/**", "fix/**"]
-    tags:
-      - "v*" # ✅ Correct trigger for version tags
+    branches: [main, "feature/**"]
+  pull_request:
+    branches: [main]
 
-# Concurrency: Cancel stale PR builds, but protect Main and Release builds
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') && github.ref != 'refs/heads/main' }}
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  # 1. TRINITY SYNC (Fastest Fail - 0s Setup)
-  trinity-sync:
+  test:
+    name: Lint y tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: ❯ Verify Trinity Version Sync
-        run: |
-          # Extract versions without executing code (no dependencies required)
-          V_INIT=$(grep -E "^__version__" pain001/__init__.py | grep -oE "[0-9]+\.[0-9]+\.[0-9]+")
-          V_TOML=$(grep -E "^version = " pyproject.toml | grep -oE "[0-9]+\.[0-9]+\.[0-9]+")
-          V_CFG=$(grep -E "^version = " setup.cfg | grep -oE "[0-9]+\.[0-9]+\.[0-9]+")
-          
-          echo "🔍 Trinity Status:"
-          echo "   Init: $V_INIT"
-          echo "   Toml: $V_TOML"
-          echo "   Cfg:  $V_CFG"
+      - uses: actions/checkout@v7
 
-          if [ "$V_INIT" != "$V_TOML" ] || [ "$V_TOML" != "$V_CFG" ]; then
-            echo "❌ CRITICAL: Version Desync Detected!"
-            exit 1
-          fi
-          echo "✅ Trinity Sync Verified."
-          echo "✅ Trinity Sync Verified."
-
-  # 2. TOLLGATES (Blocking - Latest Python)
-  tollgates:
-    needs: trinity-sync
-    runs-on: ubuntu-latest
-    name: 🛡️ Production Tollgates
-    steps:
-      - uses: actions/checkout@v4
-      - name: ❯ Install Poetry
-        run: pipx install poetry
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-          cache: "poetry" # ✅ Native Caching (Faster/Cleaner)
+          cache: pip
 
-      - name: ❯ Install Dependencies
-        run: poetry install --no-interaction
-
-      - name: 🛡️ Run Enterprise Tollgates
-        run: poetry run make tollgates
-
-  # 3. QUALITY GATE MATRIX (Parallel Compatibility Check)
-  quality-gate:
-    needs: tollgates
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"] # ✅ Enterprise Matrix
-    name: 🧬 Quality Gate (Py ${{ matrix.python-version }})
-    steps:
-      - uses: actions/checkout@v4
-      - name: ❯ Install Poetry
-        run: pipx install poetry
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: "poetry"
-
-      - name: ❯ Install Dependencies
-        run: poetry install --no-interaction
-
-      - name: 🧪 Full Check
-        run: poetry run make check
-
-      # Upload coverage only once (from latest version)
-      - name: 📊 Upload Coverage
-        if: matrix.python-version == '3.12'
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage.xml
-          fail_ci_if_error: false
-
-  # 4. RELEASE & PUBLISH (Only on Tags)
-  publish:
-    needs: quality-gate
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    name: 📦 Publish Release
-    environment: pypi
-    permissions:
-      contents: write
-      id-token: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: ❯ Extract Release Notes
-        id: release_notes
+      - name: Instalar dependencias
         run: |
-          TAG_VERSION=${GITHUB_REF#refs/tags/v}
-          NOTE_PATH="releases/v${TAG_VERSION}.md"
-          if [ -f "$NOTE_PATH" ]; then
-            echo "path=$NOTE_PATH" >> $GITHUB_OUTPUT
-          else
-            echo "⚠️ Note missing, using fallback"
-            echo "path=README.md" >> $GITHUB_OUTPUT
-          fi
+          python -m pip install --upgrade pip
+          pip install -r requirements.dev.txt
+          pip install lxml
 
-      - name: ❯ Install Poetry
-        run: pipx install poetry
-      - uses: actions/setup-python@v5
+      - name: Lint (ruff)
+        run: ruff check pain001/api tests scripts
+
+      - name: Tests (pytest)
+        run: pytest tests/ -q
+
+  security:
+    name: Trivy (imagen Docker)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build de la imagen
+        run: docker build -t iso20022-hn:ci .
+
+      - name: Escaneo de vulnerabilidades con Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
-          python-version: "3.12"
-          cache: "poetry"
-      - run: poetry install --no-interaction
-
-      - name: ❯ Build & Metadata Check
-        run: |
-          poetry build
-          poetry run twine check dist/*
-
-      - name: ❯ Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          body_path: ${{ steps.release_notes.outputs.path }}
-          files: dist/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: ❯ Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+          image-ref: iso20022-hn:ci
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"

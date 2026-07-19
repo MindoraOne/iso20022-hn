@@ -1,0 +1,65 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(.env.example)",
+      "Read(**/.env.example)"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(.env.dev)",
+      "Read(.env.prod)",
+      "Read(.env.secrets)",
+      "Read(.env.local)",
+      "Read(.env.intern)",
+      "Read(**/.env)",
+      "Edit(.env)",
+      "Edit(.env.dev)",
+      "Edit(.env.prod)",
+      "Edit(.env.secrets)",
+      "Write(.env)",
+      "Write(.env.dev)",
+      "Write(.env.prod)",
+      "Write(.env.secrets)",
+      "Read(restricted/**)",
+      "Read(**/restricted/**)",
+      "Write(restricted/**)",
+      "Edit(restricted/**)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Read|Write|Edit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/scripts/guard-precheck.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/scripts/tok-capture.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/scripts/tok-capture.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

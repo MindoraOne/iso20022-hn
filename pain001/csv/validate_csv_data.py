@@ -12,6 +12,7 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# Modified by MindoraOne on 2026-07-07; changes: Add validate_csv_data_detailed() returning per-row/field error messages instead of only printing, and exempt HN-optional columns (creditor_account_IBAN, creditor_account_type) from required-column validation.
 
 # Validate the CSV data before processing it. The CSV data must contain
 # the following columns:
@@ -163,14 +164,22 @@ def _format_errors(
     return errors
 
 
-def validate_csv_data(data: list[dict[str, Any]]) -> bool:
-    """Validate the CSV data before processing it.
+def validate_csv_data_detailed(
+    data: list[dict[str, Any]],
+) -> tuple[bool, list[str]]:
+    """Validate the CSV data, returning the row/field detail of any failure.
+
+    Same validation rules as `validate_csv_data`, but returns the formatted
+    error messages instead of only printing them — callers that need the
+    actual row/field/rule that failed (e.g. `pain001.data.loader`, to surface
+    it in `PaymentValidationError` so it reaches the API's error envelope)
+    should use this function instead of `validate_csv_data`.
 
     Args:
-        data (list): A list of dictionaries containing the CSV data.
+        data: A list of dictionaries containing the CSV data.
 
     Returns:
-        bool: True if the data is valid, False otherwise.
+        tuple: (is_valid, error_messages) — error_messages is empty when valid.
     """
     required_columns = {
         "id": int,
@@ -197,26 +206,71 @@ def validate_csv_data(data: list[dict[str, Any]]) -> bool:
         "remittance_information": str,
     }
 
+    # [HN] columns required by the opensource schema but not emitted by the
+    # Banco Atlántida templates (either constant in the template, or nodes
+    # the bank simply doesn't ask for) — excluded from validation.
+    hn_optional_columns = {
+        "creditor_account_IBAN",
+        "creditor_account_type",
+        # nb_of_txs lo COMPUTA el servicio (siempre lo sobrescribe con el conteo
+        # real de filas), asi que exigirselo al caller es pedirle un dato que se
+        # tira: ver app_local.generate_xml_json.
+        "nb_of_txs",
+        "ctrl_sum",
+        "payment_method",
+        "batch_booking",
+        "service_level_code",
+        "debtor_agent_BIC",
+        "forwarding_agent_BIC",
+        "charge_bearer",
+        "payment_id",
+        "currency",
+        "creditor_agent_BIC",
+    }
+
+
     if not data:
-        print("Error: The CSV data is empty.")
-        return False
+        return False, ["Error: The CSV data is empty."]
 
     is_valid = True
     all_errors = []  # Batch error messages for better performance
 
-    for row in data:
-        missing_columns, invalid_columns = _validate_row(row, required_columns)
+    for row_index, row in enumerate(data):
+        # [HN] exclude optional columns from validation entirely
+        effective_required = {
+            col: dtype
+            for col, dtype in required_columns.items()
+            if col not in hn_optional_columns
+        }
+
+        missing_columns, invalid_columns = _validate_row(row, effective_required)
 
         if missing_columns or invalid_columns:
             is_valid = False
             all_errors.extend(
-                _format_errors(
-                    row, missing_columns, invalid_columns, required_columns
+                f"Row {row_index}: {message}"
+                for message in _format_errors(
+                    row, missing_columns, invalid_columns, effective_required
                 )
             )
 
-    # Single print operation for all errors
-    if all_errors:
-        print("\n".join(all_errors))
+    return is_valid, all_errors
 
+
+def validate_csv_data(data: list[dict[str, Any]]) -> bool:
+    """Validate the CSV data before processing it.
+
+    Kept for backward compatibility (existing callers only need the bool
+    result). Prefer `validate_csv_data_detailed` when the row/field detail of
+    a failure needs to reach the caller (e.g. an API error response).
+
+    Args:
+        data (list): A list of dictionaries containing the CSV data.
+
+    Returns:
+        bool: True if the data is valid, False otherwise.
+    """
+    is_valid, errors = validate_csv_data_detailed(data)
+    if errors:
+        print("\n".join(errors))
     return is_valid

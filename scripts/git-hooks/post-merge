@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# iso20022-hn — pain.001.001.05 generation for Honduran banks.
+
+# Runs `graphify update .` after every `git pull`/merge, to refresh the
+# graph with what was pulled. Must never abort the pull: any failure ends
+# in exit 0.
+{
+  if [ -n "${GRAPHIFY_SKIP_HOOK:-}" ]; then
+    exit 0
+  fi
+
+  if ! command -v graphify >/dev/null 2>&1; then
+    exit 0
+  fi
+
+  graphify update . || true
+} 2>&1
+
+exit 0

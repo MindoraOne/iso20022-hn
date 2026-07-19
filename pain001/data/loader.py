@@ -12,6 +12,7 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# Modified by MindoraOne on 2026-07-07; changes: Use validate_csv_data_detailed() so PaymentValidationError carries the specific row/field/rule that failed, instead of a generic message.
 
 """Universal data loader supporting multiple input sources."""
 
@@ -20,7 +21,10 @@ from typing import Any, Union
 
 # pylint: disable=duplicate-code
 from pain001.csv.load_csv_data import load_csv_data, load_csv_data_streaming
-from pain001.csv.validate_csv_data import validate_csv_data
+from pain001.csv.validate_csv_data import (
+    validate_csv_data,
+    validate_csv_data_detailed,
+)
 from pain001.db.load_db_data import load_db_data
 from pain001.db.load_db_data_streaming import load_db_data_streaming
 from pain001.db.validate_db_data import validate_db_data
@@ -35,6 +39,11 @@ from pain001.parquet.load_parquet_data import (
     load_parquet_data,
     load_parquet_data_streaming,
 )
+
+
+def _validation_detail(errors: list[str]) -> str:
+    """Flatten validate_csv_data_detailed's row/field messages into one string."""
+    return "; ".join(errors)
 
 
 def _get_file_loaders() -> dict[str, tuple[Any, Any, str]]:
@@ -181,7 +190,18 @@ def _load_from_file(file_path: str) -> list[dict[str, Any]]:
 
     loader_fn, validator_fn, format_name = entry
     data = loader_fn(safe_path)
-    if not validator_fn(data):
+    # validate_csv_data is shared by CSV/JSON/JSONL/Parquet — use the
+    # detailed variant there to surface the real row/field/rule that failed.
+    # validate_db_data (the only other validator in this table) keeps its
+    # own bool-only contract, untouched.
+    if validator_fn is validate_csv_data:
+        is_valid, errors = validate_csv_data_detailed(data)
+        if not is_valid:
+            raise PaymentValidationError(
+                f"{format_name} data validation failed for {file_path}: "
+                f"{_validation_detail(errors)}"
+            )
+    elif not validator_fn(data):
         raise PaymentValidationError(
             f"{format_name} data validation failed for {file_path}"
         )
@@ -204,8 +224,11 @@ def _load_from_list(data_list: list[dict[str, Any]]) -> list[dict[str, Any]]:
         )
 
     # Mandatory validation for data integrity
-    if not validate_csv_data(data_list):
-        raise PaymentValidationError("Data list validation failed")
+    is_valid, errors = validate_csv_data_detailed(data_list)
+    if not is_valid:
+        raise PaymentValidationError(
+            f"Data list validation failed: {_validation_detail(errors)}"
+        )
     return data_list
 
 
@@ -220,8 +243,11 @@ def _load_from_dict(data_dict: dict[str, Any]) -> list[dict[str, Any]]:
 
     # Wrap single dict in list and validate
     data_list = [data_dict]
-    if not validate_csv_data(data_list):
-        raise PaymentValidationError("Data dictionary validation failed")
+    is_valid, errors = validate_csv_data_detailed(data_list)
+    if not is_valid:
+        raise PaymentValidationError(
+            f"Data dictionary validation failed: {_validation_detail(errors)}"
+        )
     return data_list
 
 
@@ -311,7 +337,17 @@ def _load_from_file_streaming(
 
     stream_loader_fn, validator_fn, format_name = entry
     for chunk in stream_loader_fn(file_path, chunk_size):
-        if validate and not validator_fn(chunk):
+        if not validate:
+            yield chunk
+            continue
+        if validator_fn is validate_csv_data:
+            is_valid, errors = validate_csv_data_detailed(chunk)
+            if not is_valid:
+                raise PaymentValidationError(
+                    f"{format_name} data validation failed for chunk in {file_path}: "
+                    f"{_validation_detail(errors)}"
+                )
+        elif not validator_fn(chunk):
             raise PaymentValidationError(
                 f"{format_name} data validation failed for chunk in {file_path}"
             )
@@ -338,8 +374,11 @@ def _load_from_list_streaming(
     # Yield data in chunks
     for i in range(0, len(data_list), chunk_size):
         chunk = data_list[i : i + chunk_size]
-        if validate and not validate_csv_data(chunk):
-            raise PaymentValidationError(
-                f"Data validation failed for chunk starting at index {i}"
-            )
+        if validate:
+            is_valid, errors = validate_csv_data_detailed(chunk)
+            if not is_valid:
+                raise PaymentValidationError(
+                    f"Data validation failed for chunk starting at index {i}: "
+                    f"{_validation_detail(errors)}"
+                )
         yield chunk
