@@ -69,7 +69,7 @@ setup(
         "markdown-it-py==3.0.0",
         "markupsafe==2.1.5",
         "mdurl==0.1.2",
-        "pygments==2.18.0",
+        "pygments==2.20.0",
         "rich==13.7.1",
         "setuptools==78.1.1",
         "xmlschema==3.3.1",
