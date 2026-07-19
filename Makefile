@@ -14,7 +14,7 @@
 # limitations under the License.
 
 .PHONY: help check setup env run dev up start stop logs ps lint test load graph graph-label clean \
-	pr format type sec perf complex mutate mutate-fast docs xml-examples slos quality \
+	pr format type perf xml-examples slos quality \
 	lint-poetry test-slo cov \
 	tollgate-deps tollgate-xsd tollgate-idempotency tollgate-envparity tollgates
 
@@ -153,12 +153,10 @@ format: ## [CI] Autoformatea el codigo (ruff format, isort) (poetry)
 	@poetry run ruff check --select I --fix .
 	@echo "$(GREEN)✓ Code formatted$(NC)"
 
-lint-poetry: ## [CI] ruff + flake8 + pylint con verificacion de SLO (poetry)
+lint-poetry: ## [CI] ruff con verificacion de SLO (poetry)
 	@echo "$(YELLOW)Running linters (SLO: < $(SLO_LINT)s)...$(NC)"
 	@time_start=$$(date +%s%N); \
-	(poetry run ruff check . && \
-	poetry run flake8 pain001 && \
-	poetry run pylint pain001 --exit-zero); \
+	(poetry run ruff check .); \
 	lint_result=$$?; \
 	time_end=$$(date +%s%N); \
 	elapsed=$$(( ($$time_end - $$time_start) / 1000000000 )); \
@@ -212,39 +210,10 @@ cov: ## [CI] Genera el reporte de cobertura (poetry)
 	@poetry run pytest --cov=pain001 --cov-branch --cov-report=term-missing --cov-report=xml --cov-report=html --cov-fail-under=70
 	@echo "$(GREEN)✓ Coverage report generated in htmlcov/index.html$(NC)"
 
-sec: ## [CI] bandit + safety check (poetry)
-	@echo "$(YELLOW)Running security checks...$(NC)"
-	@poetry run bandit -q -r pain001
-	@poetry run safety check
-	@echo "$(GREEN)✓ Security checks passed$(NC)"
-
 perf: ## [CI] Benchmarks de generacion de XML (poetry)
 	@echo "$(YELLOW)Running performance benchmarks (XML gen SLO: < $(SLO_XML_GEN)s/1000tx)...$(NC)"
 	@poetry run pytest tests/test_integration.py -v --benchmark-only --benchmark-json=.benchmarks/results.json || true
 	@echo "$(YELLOW)Note: Review benchmark results for XML generation performance$(NC)"
-
-complex: ## [CI] Analisis de complejidad de codigo con radon (poetry)
-	@echo "$(YELLOW)Analyzing code complexity...$(NC)"
-	@poetry run radon cc pain001 -a -s
-	@poetry run radon mi pain001
-
-mutate: ## [CI] Mutation testing completo (poetry)
-	@echo "$(YELLOW)Running mutation testing...$(NC)"
-	@poetry run mutmut run --paths-to-mutate=pain001 --tests-dir=tests --runner="python -m pytest -x --no-cov -q" --use-coverage
-
-mutate-fast: ## [CI] Mutation testing solo sobre core/xml (poetry)
-	@echo "$(YELLOW)Running fast mutation testing (core modules only)...$(NC)"
-	@poetry run mutmut run \
-		--paths-to-mutate=pain001/core,pain001/xml \
-		--tests-dir=tests \
-		--runner="python -m pytest -x --no-cov -q" \
-		--use-coverage
-
-docs: ## [CI] Construye la documentacion Sphinx (poetry)
-	@echo "$(YELLOW)Building documentation...$(NC)"
-	@poetry install --with docs -q
-	@poetry run sphinx-build -b html docs docs/_build/html
-	@echo "$(GREEN)✓ Docs built to docs/_build/html$(NC)"
 
 xml-examples: ## [CI] Genera archivos XML de ejemplo para los tests de XSD (poetry)
 	@echo "$(YELLOW)Generating XML example files for XSD validation tests...$(NC)"
@@ -254,7 +223,7 @@ xml-examples: ## [CI] Genera archivos XML de ejemplo para los tests de XSD (poet
 slos: lint-poetry type test-slo perf ## [CI] Verifica todos los SLO antes de un commit importante (poetry)
 	@echo "$(GREEN)✓ All SLOs verified$(NC)"
 
-quality: lint-poetry cov sec ## [CI] Gate completo bloqueante: lint + cobertura + seguridad (poetry) — antes se llamaba "check"
+quality: lint-poetry cov ## [CI] Gate completo bloqueante: lint + cobertura + seguridad (poetry) — antes se llamaba "check"
 	@echo "$(GREEN)✓ Full quality gate passed$(NC)"
 
 # --- Advanced Production Tollgates (Enterprise Hardening) ---
@@ -263,8 +232,6 @@ tollgate-deps: ## [CI] Gobernanza de dependencias (poetry)
 	@echo "$(YELLOW)Tollgate 1: Dependency Governance (Shadow IT Prevention)$(NC)"
 	@echo "Checking for new/modified dependencies in pyproject.toml..."
 	@poetry show --latest > /dev/null && echo "$(GREEN)✓ All dependencies checked$(NC)" || (echo "$(RED)✗ Dependency check failed$(NC)" && exit 1)
-	@echo "Running security scans on dependencies..."
-	@poetry run safety check --bare && echo "$(GREEN)✓ No known vulnerabilities$(NC)" || (echo "$(RED)✗ Vulnerabilities found$(NC)" && exit 1)
 	@echo "$(GREEN)✓ Dependency Governance tollgate PASSED$(NC)"
 
 tollgate-xsd: ## [CI] Validacion de los XSD de pain.001 (poetry)

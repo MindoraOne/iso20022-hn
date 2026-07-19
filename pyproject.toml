@@ -44,58 +44,16 @@ python-multipart = ">=0.0.18,<1"
 pytest = "^8.0.0"
 pytest-cov = "^4.0.0"
 pytest-benchmark = "^4.0.0"
-pytest-xdist = "^3.0.0"
-black = "^24.0.0"
-flake8 = "^7.0.0"
-isort = "^5.13.0"
 mypy = "^1.11.0"
-pylint = "^3.0.0"
-bandit = "^1.7.0"
-safety = "^2.3.0"
 ruff = "^0.1.0"
 types-defusedxml = "^0.7.0"
-diff-cover = "^8.0.0"
 types-setuptools = "^65.0.0"
-radon = "^5.1.0"
-mutmut = "^2.4.0"
-hypothesis = "^6.0.0"
-memory-profiler = "^0.60.0"
-sphinx = "^7.0.0"
-sphinx-rtd-theme = "^1.0.0"
-sphinx-autodoc-typehints = "^1.0.0"
-pip-licenses = "^4.0.0"
-twine = "^6.2.0"
 types-jsonschema = "^4.26.0.20260109"
 pandas = "^2.3.3"
-
-[tool.poetry.group.docs]
-optional = true
-
-[tool.poetry.group.docs.dependencies]
-sphinx = "^7.0.0"
-pydata-sphinx-theme = "^0.15.0"
-sphinx-autodoc-typehints = "^1.0.0"
-sphinx-design = "^0.6.0"
-myst-parser = "^2.0.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.black]
-line-length = 79
-target-version = ['py39']
-
-[tool.isort]
-profile = "black"
-line_length = 79
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-combine_as_imports = true
-known_first_party = "pain001"
-known_third_party = "xmlschema"
-skip = ["tmp_env", ".venv", ".git", ".eggs"]
 
 [tool.pytest.ini_options]
 # Test discovery
