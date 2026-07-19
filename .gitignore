@@ -157,3 +157,27 @@ tests/data/valid_data_unique.csv
 tests/data/valid_data_unique.db
 tmp_env/
 pain001/tmp/
+
+# Local configuration files
+pain001/templates/local/
+
+# Markdownlint configuration
+.markdownlint.json
+
+# iso20022-hn
+graphify-out/
+sessions/
+
+# Fixtures reales (PII) — se copian desde iso20022-local-templates; nunca se commitean
+tests/fixtures/input/
+tests/fixtures/expected/
+!tests/fixtures/.gitkeep
+
+# Coleccion Hoppscotch
+hoppscotch/
+
+# Documentacion interna
+docs-intern/
+
+# Config local de tooling MCP (graphify)
+.mcp.json

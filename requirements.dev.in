@@ -1,0 +1,13 @@
+# Superseded: requirements.txt y requirements.dev.txt ahora se generan desde
+# poetry.lock (`poetry export`), no desde este archivo con pip-compile. Se
+# conserva sin borrar por convención del repo; no editar sin regenerar además
+# vía Poetry (pyproject.toml es la fuente de verdad de las dependencias).
+-r requirements.txt
+
+fastapi>=0.100.0
+uvicorn>=0.23.0
+python-multipart>=0.0.6
+jsonschema>=4.0.0
+slowapi>=0.1.9
+pydantic>=2.0.0
+pydantic-settings>=2.0.0

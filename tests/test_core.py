@@ -12,11 +12,11 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# Modified by MindoraOne on 2026-07-07; changes: Update test_single_column_csv_data to read the validation failure detail from the raised exception message instead of captured stdout.
 
 
 import os
 import unittest
-from io import StringIO
 from unittest.mock import patch
 
 import pytest
@@ -231,9 +231,11 @@ class TestProcessFiles(unittest.TestCase):
                 self.empty_csv_file_path,
             )
 
-    @patch("sys.stdout", new_callable=StringIO)
-    def test_single_column_csv_data(self, mock_stdout) -> None:
-        with self.assertRaises(PaymentValidationError):
+    def test_single_column_csv_data(self) -> None:
+        # [HN] the row/field detail now travels in the exception message
+        # (str(exc)) instead of being printed to stdout — see
+        # validate_csv_data_detailed / pain001.data.loader.
+        with self.assertRaises(PaymentValidationError) as ctx:
             process_files(
                 self.xml_message_type,
                 self.xml_template_file_path,
@@ -242,7 +244,7 @@ class TestProcessFiles(unittest.TestCase):
             )
         self.assertIn(
             "Error: Missing value(s) for column(s)",
-            mock_stdout.getvalue(),
+            str(ctx.exception),
         )
 
     def test_invalid_csv_data(self) -> None:
